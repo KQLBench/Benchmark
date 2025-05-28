@@ -1,0 +1,212 @@
+{
+    "technique_id": "T1112",
+    "question_id": "6e0d1131-2d7e-4905-8ca5-d6172f05d03d",
+    "context": "An attacker leveraged a command‐line utility to alter a system policy in the registry, disabling the shutdown button on Windows login—an approach observed in screenlocker ransomware.",
+    "objective": "Identify the specific registry value name that was added or modified to disable the shutdown button on Windows.",
+    "technical_details": {
+        "command_analysis": "The command uses reg.exe to add or update a DWORD value named shutdownwithoutlogon under HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\System and sets it to 0.",
+        "detection_approach": "Search DeviceRegistryEvents for a registry write action on the System policies key, then examine the RegistryValueName field to find which setting was changed."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Phrase the question to guide the analyst to use registry event logs on Windows to pinpoint which policy value under the System key was modified, then report that exact value name.",
+    "prompt": "On a Windows device, examine registry event logs for modifications under the System policies path. Determine which registry value name was altered to disable the shutdown button at login.",
+    "answer": [
+        "shutdownwithoutlogon"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceRegistryEvents\n| where ActionType == \"RegistryValueSet\"\n| where RegistryKey startswith \"HKEY_LOCAL_MACHINE\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Policies\\\\System\"\n| project TimeGenerated, DeviceName, InitiatingProcessFileName, InitiatingProcessCommandLine, RegistryValueName, RegistryValueData",
+    "KQL_validation_message": "KQL query validation successful: Upon examination of the results, specifically the row ['2025-05-07 16:45:39.688605+00:00', 'windows-vm', 'reg.exe', 'reg  add \"HKEY_LOCAL_MACHINE\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Policies\\\\System\" /v shutdownwithoutlogon /t REG_DWORD /d 0 /f', 'shutdownwithoutlogon', '0'], it is clear that the registry value 'shutdownwithoutlogon' was modified. This provides direct evidence relevant to the detection question.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessFileName",
+            "InitiatingProcessCommandLine",
+            "RegistryValueName",
+            "RegistryValueData"
+        ],
+        [
+            "2025-05-07 16:25:48.172669+00:00",
+            "windows-vm",
+            "reg.exe",
+            "reg.exe  ADD HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System /v EnableLUA /t REG_DWORD /d 0 /f",
+            "EnableLUA",
+            "0"
+        ],
+        [
+            "2025-05-07 16:25:55.816117+00:00",
+            "windows-vm",
+            "reg.exe",
+            "reg  add \"HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\" /v ConsentPromptBehaviorAdmin /t REG_DWORD /d 5 /f",
+            "ConsentPromptBehaviorAdmin",
+            "5"
+        ],
+        [
+            "2025-05-07 16:25:55.860270+00:00",
+            "windows-vm",
+            "reg.exe",
+            "reg.exe  ADD HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System /v EnableLUA /t REG_DWORD /d 1 /f",
+            "EnableLUA",
+            "1"
+        ],
+        [
+            "2025-05-07 16:26:02.851084+00:00",
+            "windows-vm",
+            "powershell.exe",
+            "\"powershell.exe\" & {Set-ItemProperty HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System -Name PromptOnSecureDesktop -Value 0 -Type Dword -Force}",
+            "PromptOnSecureDesktop",
+            "0"
+        ],
+        [
+            "2025-05-07 16:26:11.784303+00:00",
+            "windows-vm",
+            "powershell.exe",
+            "\"powershell.exe\" & {Set-ItemProperty HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System -Name PromptOnSecureDesktop -Value 1 -Type Dword -Force}",
+            "PromptOnSecureDesktop",
+            "1"
+        ],
+        [
+            "2025-05-07 16:26:18.288554+00:00",
+            "windows-vm",
+            "powershell.exe",
+            "\"powershell.exe\" & {$orgValue =(Get-ItemProperty HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System -Name ConsentPromptBehaviorAdmin).ConsentPromptBehaviorAdmin\nSet-ItemProperty HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System -Name ConsentPromptBehaviorAdmin -Value 0 -Type Dword -Force}",
+            "ConsentPromptBehaviorAdmin",
+            "0"
+        ],
+        [
+            "2025-05-07 16:36:29.206107+00:00",
+            "windows-vm",
+            "reg.exe",
+            "reg.exe  ADD HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System /v EnableLUA /t REG_DWORD /d 0 /f",
+            "EnableLUA",
+            "0"
+        ],
+        [
+            "2025-05-07 16:36:31.098608+00:00",
+            "windows-vm",
+            "reg.exe",
+            "reg  add \"HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\" /v ConsentPromptBehaviorAdmin /t REG_DWORD /d 5 /f",
+            "ConsentPromptBehaviorAdmin",
+            "5"
+        ],
+        [
+            "2025-05-07 16:36:36.107175+00:00",
+            "windows-vm",
+            "reg.exe",
+            "reg.exe  ADD HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System /v EnableLUA /t REG_DWORD /d 1 /f",
+            "EnableLUA",
+            "1"
+        ],
+        [
+            "2025-05-07 16:36:42.296988+00:00",
+            "windows-vm",
+            "powershell.exe",
+            "\"powershell.exe\" & {Set-ItemProperty HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System -Name PromptOnSecureDesktop -Value 0 -Type Dword -Force}",
+            "PromptOnSecureDesktop",
+            "0"
+        ],
+        [
+            "2025-05-07 16:36:51.296402+00:00",
+            "windows-vm",
+            "powershell.exe",
+            "\"powershell.exe\" & {Set-ItemProperty HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System -Name PromptOnSecureDesktop -Value 1 -Type Dword -Force}",
+            "PromptOnSecureDesktop",
+            "1"
+        ],
+        [
+            "2025-05-07 16:36:59.065007+00:00",
+            "windows-vm",
+            "powershell.exe",
+            "\"powershell.exe\" & {$orgValue =(Get-ItemProperty HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System -Name ConsentPromptBehaviorAdmin).ConsentPromptBehaviorAdmin\nSet-ItemProperty HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System -Name ConsentPromptBehaviorAdmin -Value 0 -Type Dword -Force}",
+            "ConsentPromptBehaviorAdmin",
+            "0"
+        ],
+        [
+            "2025-05-07 16:45:39.688605+00:00",
+            "windows-vm",
+            "reg.exe",
+            "reg  add \"HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\" /v shutdownwithoutlogon /t REG_DWORD /d 0 /f",
+            "shutdownwithoutlogon",
+            "0"
+        ],
+        [
+            "2025-05-07 16:45:47.309329+00:00",
+            "windows-vm",
+            "powershell.exe",
+            "\"powershell.exe\" & {New-ItemProperty \\\"\"HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\\\"\" -Name LocalAccountTokenFilterPolicy -PropertyType DWord -Value 1 -Force\nNew-ItemProperty \\\"\"HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\\\"\" -Name EnableLinkedConnections -PropertyType DWord -Value 1 -Force\nNew-ItemProperty \\\"\"HKLM:\\SYSTEM\\CurrentControlSet\\Control\\FileSystem\\\"\" -Name LongPathsEnabled -PropertyType DWord -Value 1 -Force}",
+            "EnableLinkedConnections",
+            "1"
+        ],
+        [
+            "2025-05-07 16:47:40.411537+00:00",
+            "windows-vm",
+            "reg.exe",
+            "reg  add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System /v LocalAccountTokenFilterPolicy /t REG_DWORD /d 1 /f ",
+            "LocalAccountTokenFilterPolicy",
+            "1"
+        ],
+        [
+            "2025-05-07 16:47:40.484994+00:00",
+            "windows-vm",
+            "reg.exe",
+            "reg  add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System /v EnableLinkedConnections /t REG_DWORD /d 1 /f ",
+            "EnableLinkedConnections",
+            "1"
+        ],
+        [
+            "2025-05-07 17:03:28.326865+00:00",
+            "windows-vm",
+            "powershell.exe",
+            "\"powershell.exe\" & {New-ItemProperty -Path \\\"\"HKLM:Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\\Audit\\\"\" -Name \\\"\"ProcessCreationIncludeCmdLine_Enabled\\\"\" -Value 0 -PropertyType DWORD -Force -ErrorAction Ignore}",
+            "ProcessCreationIncludeCmdLine_Enabled",
+            "0"
+        ],
+        [
+            "2025-05-07 17:03:32.480739+00:00",
+            "windows-vm",
+            "powershell.exe",
+            "\"powershell.exe\" & {New-ItemProperty -Path \\\"\"HKLM:Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\\Audit\\\"\" -Name \\\"\"ProcessCreationIncludeCmdLine_Enabled\\\"\" -Value 1 -PropertyType DWORD -Force -ErrorAction Ignore}",
+            "ProcessCreationIncludeCmdLine_Enabled",
+            "1"
+        ],
+        [
+            "2025-05-07 17:07:26.376645+00:00",
+            "windows-vm",
+            "svchost.exe",
+            "svchost.exe -k NetworkService -p -s WinRM",
+            "LocalAccountTokenFilterPolicy",
+            "1"
+        ],
+        [
+            "2025-05-07 17:27:20.878770+00:00",
+            "windows-vm",
+            "powershell.exe",
+            "\"powershell.exe\" & {$orgLegalNoticeCaption = (Get-ItemProperty HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System -Name LegalNoticeCaption).LegalNoticeCaption\n$orgLegalNoticeText = (Get-ItemProperty HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System -Name LegalNoticeText).LegalNoticeText\n$newLegalNoticeCaption = \\\"\"PYSA\\\"\"\n$newLegalNoticeText = \\\"\"Hi Company, every byte on any types of your devices was encrypted. Don't try to use backups because it were encrypted too. To get all your data contact us:xxxx@onionmail.org\\\"\"\nSet-ItemProperty HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System -Name LegalNoticeCaption -Value $newLegalNoticeCaption -Type String -Force\nSet-ItemProperty HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System -Name LegalNoticeText -Value $newLegalNoticeText -Type String -Force}",
+            "LegalNoticeCaption",
+            "PYSA"
+        ],
+        [
+            "2025-05-07 17:27:20.883972+00:00",
+            "windows-vm",
+            "powershell.exe",
+            "\"powershell.exe\" & {$orgLegalNoticeCaption = (Get-ItemProperty HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System -Name LegalNoticeCaption).LegalNoticeCaption\n$orgLegalNoticeText = (Get-ItemProperty HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System -Name LegalNoticeText).LegalNoticeText\n$newLegalNoticeCaption = \\\"\"PYSA\\\"\"\n$newLegalNoticeText = \\\"\"Hi Company, every byte on any types of your devices was encrypted. Don't try to use backups because it were encrypted too. To get all your data contact us:xxxx@onionmail.org\\\"\"\nSet-ItemProperty HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System -Name LegalNoticeCaption -Value $newLegalNoticeCaption -Type String -Force\nSet-ItemProperty HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System -Name LegalNoticeText -Value $newLegalNoticeText -Type String -Force}",
+            "LegalNoticeText",
+            "Hi Company, every byte on any types of your devices was encrypted. Don't try to use backups because it were encrypted too. To get all your data contact us:xxxx@onionmail.org"
+        ],
+        [
+            "2025-05-07 17:27:26.101297+00:00",
+            "windows-vm",
+            "powershell.exe",
+            "\"powershell.exe\" & {Set-ItemProperty HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System -Name LegalNoticeCaption -Value $orgLegalNoticeCaption -Type String -Force\nSet-ItemProperty HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System -Name LegalNoticeText -Value $orgLegalNoticeText -Type String -Force}",
+            "LegalNoticeCaption",
+            ""
+        ],
+        [
+            "2025-05-07 17:27:26.106667+00:00",
+            "windows-vm",
+            "powershell.exe",
+            "\"powershell.exe\" & {Set-ItemProperty HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System -Name LegalNoticeCaption -Value $orgLegalNoticeCaption -Type String -Force\nSet-ItemProperty HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System -Name LegalNoticeText -Value $orgLegalNoticeText -Type String -Force}",
+            "LegalNoticeText",
+            ""
+        ]
+    ]
+}

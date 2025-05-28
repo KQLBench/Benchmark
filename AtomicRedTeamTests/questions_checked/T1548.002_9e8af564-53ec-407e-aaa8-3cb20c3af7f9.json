@@ -1,0 +1,53 @@
+{
+    "technique_id": "T1548.002",
+    "question_id": "9e8af564-53ec-407e-aaa8-3cb20c3af7f9",
+    "context": "An adversary has attempted to disable User Account Control on a Windows endpoint by changing the EnableLUA registry setting.",
+    "objective": "Determine which utility was responsible for modifying the UAC registry value.",
+    "technical_details": {
+        "command_analysis": "The attack uses the built-in reg.exe command to add or update the HKLM...\\EnableLUA value from 1 to 0.",
+        "detection_approach": "Search DeviceRegistryEvents for RegistryValueName == 'EnableLUA' and RegistryValueData == '0', then inspect InitiatingProcessFileName."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Focus on identifying the registry modification that turns UAC off and ask for the name of the tool that performed the change.",
+    "prompt": "On a Windows system, a registry event shows the EnableLUA value under the System policies key was set to 0, effectively disabling UAC. Which utility carried out this change?",
+    "answer": [
+        "reg.exe"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "DeviceRegistryEvents\n| where RegistryValueName == \"EnableLUA\" and RegistryValueData == \"0\"\n| where RegistryKey startswith \"HKEY_LOCAL_MACHINE\\\\SOFTWARE\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Policies\\\\System\"\n| project TimeGenerated, DeviceName, RegistryKey, InitiatingProcessFileName, InitiatingProcessCommandLine, InitiatingProcessFolderPath, InitiatingProcessAccountName, InitiatingProcessAccountDomain, InitiatingProcessId\n| order by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: The results contain a column 'InitiatingProcessFileName' with the value 'reg.exe' for both events, which directly matches the expected answer. The additional contextual information (registry key modified, command line, time, account) further supports detection. Thus, the results answer the detection question as expected.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "RegistryKey",
+            "InitiatingProcessFileName",
+            "InitiatingProcessCommandLine",
+            "InitiatingProcessFolderPath",
+            "InitiatingProcessAccountName",
+            "InitiatingProcessAccountDomain",
+            "InitiatingProcessId"
+        ],
+        [
+            "2025-05-07 16:36:29.206107+00:00",
+            "windows-vm",
+            "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+            "reg.exe",
+            "reg.exe  ADD HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System /v EnableLUA /t REG_DWORD /d 0 /f",
+            "c:\\windows\\system32\\reg.exe",
+            "wipro",
+            "windows-vm",
+            9188
+        ],
+        [
+            "2025-05-07 16:25:48.172669+00:00",
+            "windows-vm",
+            "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+            "reg.exe",
+            "reg.exe  ADD HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System /v EnableLUA /t REG_DWORD /d 0 /f",
+            "c:\\windows\\system32\\reg.exe",
+            "wipro",
+            "windows-vm",
+            1316
+        ]
+    ]
+}

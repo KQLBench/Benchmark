@@ -1,0 +1,41 @@
+{
+    "technique_id": "T1559",
+    "question_id": "8dbfc15c-527b-4ab0-a272-019f469d367f",
+    "context": "During a simulated post-exploitation scenario on a Windows host, an adversary may use custom executables to establish inter-process communication via named pipes.",
+    "objective": "Identify which named pipe tool was executed on the Windows system.",
+    "technical_details": {
+        "command_analysis": "Look for process creation events where the command line references a named pipe executor executable with a pipe identifier.",
+        "detection_approach": "Query process events for executions of external payloads related to named pipes, focusing on the executable name invoked by the command interpreter."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Phrase the detection question to steer the analyst toward identifying the exact executable name used, not assumptions about the technique.",
+    "prompt": "Investigating a Windows device, you suspect a non-standard executable was launched to set up a named pipe for client-server messaging. Determine the name of the executable that was run.",
+    "answer": [
+        "namedpipes_executor.exe"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where TimeGenerated >= ago(7d)\n| where FileName == \"namedpipes_executor.exe\" or ProcessCommandLine has \"namedpipes_executor.exe\"\n| where ProcessCommandLine has \"-pipe\"\n| project TimeGenerated, DeviceName, FileName, ProcessCommandLine, ProcessId",
+    "KQL_validation_message": "KQL query validation successful: The query results include two records. The second record specifically has 'namedpipes_executor.exe' in the 'FileName' column, matching the expected answer. Additionally, the first record's 'ProcessCommandLine' also references 'namedpipes_executor.exe', indicating activity related to this executable. The evidence in these results is sufficient to detect the referenced process.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "FileName",
+            "ProcessCommandLine",
+            "ProcessId"
+        ],
+        [
+            "2025-05-07 17:02:44.869304+00:00",
+            "windows-vm",
+            "cmd.exe",
+            "\"cmd.exe\" /c \"C:\\AtomicRedTeam\\atomics\\..\\ExternalPayloads\\build\\namedpipes_executor.exe\" --pipe 5",
+            13580
+        ],
+        [
+            "2025-05-07 17:02:45.040359+00:00",
+            "windows-vm",
+            "namedpipes_executor.exe",
+            "namedpipes_executor.exe  --pipe 5",
+            10464
+        ]
+    ]
+}

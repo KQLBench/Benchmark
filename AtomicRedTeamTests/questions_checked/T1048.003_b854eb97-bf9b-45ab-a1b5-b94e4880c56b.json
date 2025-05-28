@@ -1,0 +1,32 @@
+{
+    "technique_id": "T1048.003",
+    "question_id": "b854eb97-bf9b-45ab-a1b5-b94e4880c56b",
+    "context": "Process creation logs on a Windows host reveal PowerShell activity that appears to copy a zip archive to a remote FTP server.",
+    "objective": "Determine which executable carried out the FTP-based data transfer.",
+    "technical_details": {
+        "command_analysis": "Inspect ProcessCommandLine entries for commands invoking a binary to upload data over FTP, noting parameters like “copy”, “ftpserver”, and credentials.",
+        "detection_approach": "Use DeviceProcessEvents to filter on ProcessCommandLine containing hints of FTP upload (e.g., “rclone”, “ftpserver”) and inspect the FileName field to pinpoint the tool used."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Pose the question to ask explicitly for the executable name responsible for the FTP exfiltration, and expect the exact file name as the answer.",
+    "prompt": "Windows process creation logs show a PowerShell-driven file transfer to an FTP service. Which executable was leveraged to perform this exfiltration?",
+    "answer": [
+        "rclone.exe"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where TimeGenerated >= ago(7d)\n  and (\n    ProcessCommandLine has \"rclone\" \n    or (ProcessCommandLine has \"copy\" and ProcessCommandLine has \"ftpserver\")\n  )\n| summarize InvocationCount = count() by FileName\n| order by InvocationCount desc",
+    "KQL_validation_message": "KQL query validation successful: The query results include a row where the 'FileName' is 'rclone.exe' and provide its invocation count, matching the expected answer. This shows that the detection activity for 'rclone.exe' is present in the results, directly fulfilling the requirement to identify this binary's activity.",
+    "KQL_query_results": [
+        [
+            "FileName",
+            "InvocationCount"
+        ],
+        [
+            "powershell.exe",
+            2
+        ],
+        [
+            "rclone.exe",
+            2
+        ]
+    ]
+}

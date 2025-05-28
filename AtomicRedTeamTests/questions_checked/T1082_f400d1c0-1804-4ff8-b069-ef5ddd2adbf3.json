@@ -1,0 +1,100 @@
+{
+    "technique_id": "T1082",
+    "question_id": "f400d1c0-1804-4ff8-b069-ef5ddd2adbf3",
+    "context": "On a Windows host, an adversary process is suspected of enumerating system environment variables to gather path and configuration details.",
+    "objective": "Detect when a built-in Windows command was invoked to list environment variables.",
+    "technical_details": {
+        "command_analysis": "The attacker used the native ‘set’ instruction in a Windows command prompt to dump all environment variables.",
+        "detection_approach": "Search the DeviceProcessEvents table for cmd.exe invocations whose command line includes the ‘set’ keyword, indicating environment enumeration."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Ask directly which command was executed by reviewing process creation records; the answer must match the exact command as logged.",
+    "prompt": "A Windows system shows a cmd.exe process spawn that appears to have been used for environment discovery. Review the process creation records to identify the exact command the adversary ran to enumerate environment variables.",
+    "answer": [
+        "set"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "DeviceProcessEvents\n| where TimeGenerated >= ago(24h)\n| where FileName =~ \"cmd.exe\"\n| where ProcessCommandLine has \"set\"\n| project TimeGenerated, DeviceName, AccountDomain, AccountName, ProcessId, ProcessCommandLine",
+    "KQL_validation_message": "KQL query validation successful: The detection question expected answers related to the usage of the 'set' command, which is evident from the 'ProcessCommandLine' column. Examples include commands such as 'cmd.exe /c set \"SYSTEMROOT=C:\\Windows\\Temp\" ...', 'cmd.exe /c set comspec=%windir%\\System32\\calc.exe ...', and more. There are multiple rows in the results where the 'set' command appears, either alone or as part of a command chain. Thus, these results do provide the information required to answer the detection question, specifically identifying uses of the 'set' command.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "AccountDomain",
+            "AccountName",
+            "ProcessId",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 16:25:32.594169+00:00",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            11840,
+            "\"cmd.exe\" /c bcdedit /set testsigning on"
+        ],
+        [
+            "2025-05-07 16:25:37.078826+00:00",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            13912,
+            "\"cmd.exe\" /c bcdedit /set testsigning off"
+        ],
+        [
+            "2025-05-07 16:36:15.251522+00:00",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            9832,
+            "\"cmd.exe\" /c bcdedit /set testsigning on"
+        ],
+        [
+            "2025-05-07 16:36:19.913860+00:00",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            1064,
+            "\"cmd.exe\" /c bcdedit /set testsigning off"
+        ],
+        [
+            "2025-05-07 16:50:10.181590+00:00",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            10808,
+            "\"cmd.exe\" /c set \"SYSTEMROOT=C:\\Windows\\Temp\" && cmd /c desktopimgdownldr.exe /lockscreenurl:https://raw.githubusercontent.com/redcanaryco/atomic-red-team/master/atomics/T1197/T1197.md /eventName:desktopimgdownldr"
+        ],
+        [
+            "2025-05-07 16:52:14.290679+00:00",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            2808,
+            "\"cmd.exe\" /c set comspec=%windir%\\System32\\calc.exe & cscript %windir%\\System32\\manage-bde.wsf"
+        ],
+        [
+            "2025-05-07 16:52:18.034085+00:00",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            9380,
+            "\"cmd.exe\" /c set comspec=%windir%\\System32\\cmd.exe"
+        ],
+        [
+            "2025-05-07 17:05:46.594782+00:00",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            4060,
+            "\"cmd.exe\" /c del /s /f /q c:\\*.VHD c:\\*.bac c:\\*.bak c:\\*.wbcat c:\\*.bkf c:\\Backup*.* c:\\backup*.* c:\\*.set c:\\*.win c:\\*.dsk"
+        ],
+        [
+            "2025-05-07 17:09:03.371370+00:00",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            12924,
+            "\"cmd.exe\" /c bcdedit /set safeboot network"
+        ]
+    ]
+}

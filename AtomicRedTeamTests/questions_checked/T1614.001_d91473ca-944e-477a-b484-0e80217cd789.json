@@ -1,0 +1,32 @@
+{
+    "technique_id": "T1614.001",
+    "question_id": "d91473ca-944e-477a-b484-0e80217cd789",
+    "context": "A Windows system operator used the command prompt to query the system’s locale configuration.",
+    "objective": "Detect when the built-in code page lookup utility is invoked and identify the exact command used.",
+    "technical_details": {
+        "command_analysis": "The utility 'chcp' is executed under cmd.exe and appears in process creation logs with 'chcp' in the ProcessCommandLine field.",
+        "detection_approach": "Search DeviceProcessEvents for process launches where FileName equals 'cmd.exe' (or similar) and the ProcessCommandLine contains 'chcp', then extract the invoked command."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question to ask which command was run to discover the language settings and require the exact command as the answer.",
+    "prompt": "Windows process creation logs show a cmd.exe launch that retrieved the system’s locale code page. Which exact command was executed to discover the system language?",
+    "answer": [
+        "chcp"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "DeviceProcessEvents\n| where FileName == \"cmd.exe\"\n| where ProcessCommandLine contains \"chcp\"\n| project TimeGenerated, DeviceName, AccountName, ProcessCommandLine",
+    "KQL_validation_message": "KQL query validation successful: The 'ProcessCommandLine' column in the query results contains the string 'chcp' as part of the command invoked ('\"cmd.exe\" /c chcp'). The row provides all relevant context—timestamp, device, user, and exact command line—needed to confirm that 'chcp' was executed. This directly answers and supports detection of the expected activity.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "AccountName",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 17:03:51.533198+00:00",
+            "windows-vm",
+            "wipro",
+            "\"cmd.exe\" /c chcp"
+        ]
+    ]
+}

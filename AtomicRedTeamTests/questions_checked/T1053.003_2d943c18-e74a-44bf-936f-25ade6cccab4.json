@@ -1,0 +1,76 @@
+{
+    "technique_id": "T1053.003",
+    "question_id": "2d943c18-e74a-44bf-936f-25ade6cccab4",
+    "context": "On Linux servers, attackers often gain persistence by dropping scripts into system cron directories. In particular, a malicious actor might append a new file under /var/spool/cron/crontabs to schedule tasks.",
+    "objective": "Identify when a new script file is created in the /var/spool/cron/crontabs folder on Linux endpoints.",
+    "technical_details": {
+        "command_analysis": "A bash command running with elevated privileges appends content into /var/spool/cron/crontabs/<script_name>, creating or modifying that file.",
+        "detection_approach": "Search file creation or modification events (e.g., Syslog or DeviceFileEvents) for actions targeting the /var/spool/cron/crontabs folder and inspect the file name involved."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Ask directly for the name of the script file that appeared in the crontabs directory, yielding a single-word answer.",
+    "prompt": "Linux hosts may log events when new files are added to /var/spool/cron/crontabs. Query those logs for a creation or write action in that directory and determine the file name that was added.",
+    "answer": [
+        "persistevil"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "let CronPath = \"/var/spool/cron/crontabs\";\n\n// Detect file creation or modification in the cron directory\nlet FileEvents = DeviceFileEvents\n  | where FolderPath startswith CronPath\n    and ActionType in (\"FileCreated\",\"FileModified\")\n  | project TimeGenerated, DeviceName, Account = InitiatingProcessAccountName, CommandLine = InitiatingProcessCommandLine, ActionType, FilePath = strcat(FolderPath, \"/\", FileName);\n\n// Detect processes appending to cron files via bash, sh or tee\nlet ProcessEvents = DeviceProcessEvents\n  | where ProcessCommandLine contains CronPath\n    and FileName in (\"bash\",\"sh\",\"tee\")\n  | project TimeGenerated = ProcessCreationTime, DeviceName, Account = InitiatingProcessAccountName, CommandLine = ProcessCommandLine, ActionType = \"ProcessCronAppend\";\n\n// Combine and sort by time\nFileEvents\n| union ProcessEvents\n| sort by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: The query results contain multiple records, and at least two of them explicitly reference 'persistevil' in paths such as '/var/spool/cron/crontabs/persistevil/persistevil' and command lines that mention 'persistevil'. This matches the expected answer, indicating persistence activity involving the 'persistevil' identity/artifact. The structure and content provide a 1:1 match with the expected answer.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "Account",
+            "CommandLine",
+            "ActionType",
+            "FilePath"
+        ],
+        [
+            "2025-05-07 17:04:44.311219+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c 'echo \"echo 'Hello from Atomic Red Team' > /tmp/atomic.log\" >> /var/spool/cron/crontabs/persistevil'",
+            "FileCreated",
+            "/var/spool/cron/crontabs/persistevil/persistevil"
+        ],
+        [
+            "2025-05-07 17:04:43.986110+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c 'echo \"echo 'Hello from Atomic Red Team' > /tmp/atomic.log\" >> /var/spool/cron/crontabs/persistevil'",
+            "ProcessCronAppend",
+            ""
+        ],
+        [
+            "2025-05-07 17:04:40.229785+00:00",
+            "wirpo-test",
+            "root",
+            "crontab /tmp/notevil",
+            "FileCreated",
+            "/var/spool/cron/crontabs/root/root"
+        ],
+        [
+            "2025-05-07 17:04:40.229410+00:00",
+            "wirpo-test",
+            "root",
+            "crontab /tmp/notevil",
+            "FileCreated",
+            "/var/spool/cron/crontabs/tmp.OZG1pE/tmp.OZG1pE"
+        ],
+        [
+            "2025-05-07 17:04:37.830313+00:00",
+            "wirpo-test",
+            "root",
+            "crontab /tmp/persistevil",
+            "FileCreated",
+            "/var/spool/cron/crontabs/root/root"
+        ],
+        [
+            "2025-05-07 17:04:37.829794+00:00",
+            "wirpo-test",
+            "root",
+            "crontab /tmp/persistevil",
+            "FileCreated",
+            "/var/spool/cron/crontabs/tmp.ClL8QP/tmp.ClL8QP"
+        ]
+    ]
+}

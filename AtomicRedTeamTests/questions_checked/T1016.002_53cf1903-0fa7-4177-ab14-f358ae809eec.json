@@ -1,0 +1,32 @@
+{
+    "technique_id": "T1016.002",
+    "question_id": "53cf1903-0fa7-4177-ab14-f358ae809eec",
+    "context": "An adversary may leverage Windows’ native network shell utility to extract stored wireless network profiles along with their clear-text keys.",
+    "objective": "Identify when the built-in tool was used to enumerate Wi-Fi profiles and display passwords in plain text.",
+    "technical_details": {
+        "command_analysis": "The process creation event will show netsh.exe invoked with wlan show profile parameters and key=clear to dump Wi-Fi credentials.",
+        "detection_approach": "Query process creation logs (e.g., DeviceProcessEvents) for instances of netsh.exe where the command line includes indicators of wireless profile enumeration and clear-text keys."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Ask for the precise command line used during the suspicious process execution.",
+    "prompt": "On a Windows host, someone appears to have run a built-in network shell utility to list saved wireless network profiles and their passwords in clear text. Review the process creation logs to discover the exact command that was executed.",
+    "answer": [
+        "netsh wlan show profile * key=clear"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where TimeGenerated >= ago(1d)\n| where FileName =~ \"netsh.exe\"\n| where ProcessCommandLine has \"wlan show profile\" and ProcessCommandLine has \"key=clear\"\n| project TimeGenerated, DeviceName, AccountName, ProcessCommandLine",
+    "KQL_validation_message": "KQL query validation successful: The query results include a row where the 'ProcessCommandLine' contains 'netsh  wlan show profile * key=clear', which matches exactly with the expected answer. All relevant fields are present, and the output structure is correct for detecting the activity.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "AccountName",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 17:12:31.501036+00:00",
+            "windows-vm",
+            "wipro",
+            "netsh  wlan show profile * key=clear"
+        ]
+    ]
+}

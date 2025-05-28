@@ -1,0 +1,44 @@
+{
+    "technique_id": "T1505.005",
+    "question_id": "18136e38-0530-49b2-b309-eed173787471",
+    "context": "On a Windows endpoint, an adversary seeks persistence by altering the Terminal Services DLL path in the registry at HKLM:\\System\\CurrentControlSet\\services\\TermService\\Parameters.",
+    "objective": "Detect unauthorized modifications of the ServiceDll value for Terminal Services and identify the malicious DLL introduced.",
+    "technical_details": {
+        "command_analysis": "The attacker copied the original termsrv.dll to a user directory under a new name and then updated the ServiceDll registry value to point to that copy.",
+        "detection_approach": "Query DeviceRegistryEvents for Set-ItemProperty actions where RegistryKey matches the TermService Parameters path and RegistryValueName equals 'ServiceDll'. Inspect RegistryValueData for unexpected file names."
+    },
+    "thinking_how_to_phrase_question_and_answer": "We want to ask for the specific DLL filename that was registered as the new ServiceDll. The answer should be exactly the file name as it appears in the logs.",
+    "prompt": "A suspicious registry change was made on a Windows system modifying the Terminal Services DLL path. Investigate registry events to find out which DLL file name was set as the ServiceDll value under TermService. What was the file name?",
+    "answer": [
+        "AtomicTest.dll"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceRegistryEvents\n| where ActionType == \"RegistryValueSet\"\n| where tolower(RegistryKey) contains \"termservice\\\\parameters\"\n| where tolower(RegistryValueName) == \"servicedll\"\n| where isnotempty(PreviousRegistryValueData) and PreviousRegistryValueData != RegistryValueData\n| where tolower(RegistryValueData) endswith \".dll\" and not(tolower(RegistryValueData) endswith \"termsrv.dll\")\n| extend MaliciousDLL = tostring(split(RegistryValueData, \"\\\\\")[-1])\n| project TimeGenerated,\n          DeviceName,\n          InitiatingProcessAccountName,\n          InitiatingProcessFileName,\n          InitiatingProcessCommandLine,\n          RegistryKey,\n          RegistryValueName,\n          MaliciousDLL,\n          PreviousRegistryValueData,\n          RegistryValueData",
+    "KQL_validation_message": "KQL query validation successful: The expected answer is 'AtomicTest.dll'. The query results include a row with the 'MaliciousDLL' column populated with the value 'AtomicTest.dll', confirming the presence of the expected information. The other columns provide additional context, but the field directly matching the expected value is present. Therefore, the results contain the necessary evidence to identify the specified activity.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "InitiatingProcessFileName",
+            "InitiatingProcessCommandLine",
+            "RegistryKey",
+            "RegistryValueName",
+            "MaliciousDLL",
+            "PreviousRegistryValueData",
+            "RegistryValueData"
+        ],
+        [
+            "2025-05-07 17:05:47.412175+00:00",
+            "windows-vm",
+            "wipro",
+            "powershell.exe",
+            "\"powershell.exe\" & {$termsrvDll = \\\"\"C:\\Windows\\System32\\termsrv.dll\\\"\"\n\n$ACL = Get-Acl $termsrvDll\n$permission = \\\"\"Administrators\\\"\",\\\"\"FullControl\\\"\",\\\"\"Allow\\\"\"\n$accessRule = New-Object System.Security.AccessControl.FileSystemAccessRule $permission\n$ACL.SetAccessRule($accessRule)\nSet-Acl -Path $termsrvDll -AclObject $ACL\n\nCopy-Item -Path $termsrvDll -Destination \\\"\"$HOME\\AtomicTest.dll\\\"\"\n\n$newServiceDll = \\\"\"$HOME\\AtomicTest.dll\\\"\"\n\n$registryPath = \\\"\"HKLM:\\System\\CurrentControlSet\\services\\TermService\\Parameters\\\"\"\n\n# Check if the registry key exists\nif (Test-Path -Path $registryPath) {\n    # Modify the ServiceDll value in the registry\n    Set-ItemProperty -Path $registryPath -Name \\\"\"ServiceDll\\\"\" -Value $newServiceDll\n    Write-Host \\\"\"ServiceDll value in the registry has been updated to: $newServiceDll\\\"\"\n} else {\n    Write-Host \\\"\"Registry key not found. Make sure the 'TermService\\Parameters' key exists.\\\"\"\n}}",
+            "HKEY_LOCAL_MACHINE\\SYSTEM\\ControlSet001\\Services\\TermService\\Parameters",
+            "ServiceDll",
+            "AtomicTest.dll",
+            "C:\\Windows\\System32\\termsrv.dll",
+            "C:\\Users\\wipro\\AtomicTest.dll"
+        ]
+    ]
+}

@@ -1,0 +1,48 @@
+{
+    "technique_id": "T1112",
+    "question_id": "7e7b62e9-5f83-477d-8935-48600f38a3c6",
+    "context": "A Windows system may exhibit signs of tampering when registry settings for Remote Desktop Protocol (RDP) are modified to weaken security.",
+    "objective": "Detect when an attacker overrides the RDP authentication level by adding or changing a registry value under the current user hive.",
+    "technical_details": {
+        "command_analysis": "The adversary runs a reg add command against HKCU\\Software\\Microsoft\\Terminal Server Client to set a REG_DWORD named AuthenticationLevelOverride to 0.",
+        "detection_approach": "Query DeviceRegistryEvents for modifications where RegistryKey includes 'Terminal Server Client' and RegistryValueName matches the overridden authentication setting."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question to ask specifically which registry value was set to override RDP authentication; the answer should match the exact value name.",
+    "prompt": "On Windows, identify the registry value name that was created or modified to override the RDP authentication level under the current user’s Terminal Server Client settings.",
+    "answer": [
+        "AuthenticationLevelOverride"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "let registryMods = DeviceRegistryEvents\n| where RegistryKey contains \"Terminal Server Client\"\n| where RegistryValueName == \"AuthenticationLevelOverride\"\n| where RegistryValueType == \"REG_DWORD\"\n| where ActionType in (\"RegistryValueCreated\", \"RegistryValueSet\");\nlet regCommands = DeviceProcessEvents\n| where FileName =~ \"reg.exe\"\n| where ProcessCommandLine has \"add\"\n| where ProcessCommandLine contains \"Terminal Server Client\"\n| where ProcessCommandLine has \"AuthenticationLevelOverride\";\nunion registryMods, regCommands\n| sort by TimeGenerated desc\n| project TimeGenerated, DeviceName, DeviceId, InitiatingProcessAccountDomain, InitiatingProcessAccountName, InitiatingProcessFileName, InitiatingProcessCommandLine, RegistryKey, RegistryValueName, RegistryValueType, RegistryValueData, ActionType",
+    "KQL_validation_message": "KQL query validation successful: The query results include a command line: 'reg add \"HKCU\\Software\\Microsoft\\Terminal Server Client\" /v AuthenticationLevelOverride ...', which explicitly references the expected value 'AuthenticationLevelOverride'. This evidence is sufficient to detect activities involving modifications to the AuthenticationLevelOverride registry setting, as referenced in the expected answers.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "DeviceId",
+            "InitiatingProcessAccountDomain",
+            "InitiatingProcessAccountName",
+            "InitiatingProcessFileName",
+            "InitiatingProcessCommandLine",
+            "RegistryKey",
+            "RegistryValueName",
+            "RegistryValueType",
+            "RegistryValueData",
+            "ActionType"
+        ],
+        [
+            "2025-05-07 16:39:42.139085+00:00",
+            "windows-vm",
+            "51a5c6755c43d60b18a177bfa334701b37f9171e",
+            "windows-vm",
+            "wipro",
+            "cmd.exe",
+            "\"cmd.exe\" /c reg add \"HKCU\\Software\\Microsoft\\Terminal Server Client\" /v AuthenticationLevelOverride /t REG_DWORD /d 0 /f",
+            "",
+            "",
+            "",
+            "",
+            "ProcessCreated"
+        ]
+    ]
+}

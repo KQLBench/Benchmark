@@ -1,0 +1,32 @@
+{
+    "technique_id": "T1018",
+    "question_id": "6c2da894-0b57-43cb-87af-46ea3b501388",
+    "context": "On a Linux host, an adversary ran a native networking utility to inspect cached TCP performance entries while explicitly excluding loopback addresses.",
+    "objective": "Determine which network utility was invoked to enumerate TCP metric cache entries with loopback addresses filtered out.",
+    "technical_details": {
+        "command_analysis": "The command invokes the 'ip' tool with 'tcp_metrics show' and pipes the output through grep to remove entries beginning with 127.",
+        "detection_approach": "Query process execution logs (e.g., DeviceProcessEvents) for instances where the 'ip' command is executed with 'tcp_metrics show' and grep filters applied."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Focus on how to build a KQL query against process logs to isolate execution of 'ip' with specific arguments, then ask for the tool name.",
+    "prompt": "Review Linux process execution records for any commands that list TCP metric cache entries and filter out loopback interfaces. Which utility was used?",
+    "answer": [
+        "ip"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where FileName == \"ip\" and ProcessCommandLine has_all (\"tcp_metrics\",\"show\")\n| project TimeGenerated, DeviceName, FileName, ProcessCommandLine",
+    "KQL_validation_message": "KQL query validation successful: The expected answer was to identify occurrences of 'ip'. In the query result, under the FileName column, the value 'ip' is present, which matches the expected answer. All provided data corresponds correctly to the query columns, and the single result row directly lists 'ip' as involved in process activity. Therefore, the information needed to answer the detection question is present in the results.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "FileName",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 16:49:36.474727+00:00",
+            "wirpo-test",
+            "ip",
+            "ip tcp_metrics show"
+        ]
+    ]
+}

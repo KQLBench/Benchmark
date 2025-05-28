@@ -1,0 +1,36 @@
+{
+    "technique_id": "T1218.010",
+    "question_id": "1ae5ea1f-0a4e-4e54-b2f5-4ac328a7f421",
+    "context": "Windows environment where a malicious document leveraged regsvr32.exe to register a file that isn’t a true DLL",
+    "objective": "Detect instances where regsvr32.exe is used to register a file with an unconventional extension instead of a .dll",
+    "technical_details": {
+        "command_analysis": "Review process creation logs for regsvr32.exe commands and parse the target file name from the command line",
+        "detection_approach": "Query process events to find executions of regsvr32.exe where the referenced file does not end in .dll"
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question to prompt the analyst to search process execution records for regsvr32 usage and extract the offending file name",
+    "prompt": "An attacker has attempted to sideload code by invoking regsvr32.exe in a Windows host against a file that does not use the standard .dll extension. Investigate the process event logs to determine the name of the file that was registered.",
+    "answer": [
+        "shell32.jpg"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where FileName == \"regsvr32.exe\"\n| where isnotempty(ProcessCommandLine)\n| extend TargetFile = extract('(?i)regsvr32\\\\.exe\\\\s+\"?([^\"\\\\s]+)\"?', 1, ProcessCommandLine)\n| where isnotempty(TargetFile) and tolower(TargetFile) !endswith \".dll\"\n| project TimeGenerated, DeviceName, InitiatingProcessAccountDomain, InitiatingProcessAccountName, ProcessCommandLine, TargetFile",
+    "KQL_validation_message": "KQL query validation successful: The query results include a 'ProcessCommandLine' field with the value 'regsvr32.exe /s C:\\Users\\wipro\\AppData\\Local\\Temp\\shell32.jpg'. This shows that 'shell32.jpg' was indeed referenced, matching the expected answer exactly. Therefore, the evidence required is present in the query output.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountDomain",
+            "InitiatingProcessAccountName",
+            "ProcessCommandLine",
+            "TargetFile"
+        ],
+        [
+            "2025-05-07 16:16:19.225830+00:00",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            "regsvr32.exe  /s C:\\Users\\wipro\\AppData\\Local\\Temp\\shell32.jpg",
+            "/s"
+        ]
+    ]
+}

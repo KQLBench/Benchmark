@@ -1,0 +1,3754 @@
+[
+  {
+    "name": "DeviceEvents_CL",
+    "columns": [
+      {
+        "name": "AccountDomain",
+        "type": "string",
+        "displayName": "AccountDomain",
+        "description": "Domain of the account.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "AccountName",
+        "type": "string",
+        "displayName": "AccountName",
+        "description": "User name of the account.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "AccountSid",
+        "type": "string",
+        "displayName": "AccountSid",
+        "description": "Security identifier (SID) of the account.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "ActionType",
+        "type": "string",
+        "displayName": "ActionType",
+        "description": "Type of activity that triggered the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "AdditionalFields",
+        "type": "dynamic",
+        "displayName": "AdditionalFields",
+        "description": "Additional information about the entity or event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "AppGuardContainerId",
+        "type": "string",
+        "displayName": "AppGuardContainerId",
+        "description": "Identifier for the virtualized container used by Application Guard to isolate browser activity.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "DeviceId",
+        "type": "string",
+        "displayName": "DeviceId",
+        "description": "Unique identifier for the device in the service.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "DeviceName",
+        "type": "string",
+        "displayName": "DeviceName",
+        "description": "Fully qualified domain name (FQDN) of the device.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "FileName",
+        "type": "string",
+        "displayName": "FileName",
+        "description": "Domain of the account.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "FileOriginIP",
+        "type": "string",
+        "displayName": "FileOriginIP",
+        "description": "IP address where the file was downloaded from.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "FileOriginUrl",
+        "type": "string",
+        "displayName": "FileOriginUrl",
+        "description": "URL where the file was downloaded from.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "FolderPath",
+        "type": "string",
+        "displayName": "FolderPath",
+        "description": "Domain of the account.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessAccountDomain",
+        "type": "string",
+        "displayName": "InitiatingProcessAccountDomain",
+        "description": "Domain of the account that ran the process responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessAccountName",
+        "type": "string",
+        "displayName": "InitiatingProcessAccountName",
+        "description": "User name of the account that ran the process responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessAccountObjectId",
+        "type": "string",
+        "displayName": "InitiatingProcessAccountObjectId",
+        "description": "Azure AD object ID of the user account that ran the process responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessAccountSid",
+        "type": "string",
+        "displayName": "InitiatingProcessAccountSid",
+        "description": "Security Identifier (SID) of the account that ran the process responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessAccountUpn",
+        "type": "string",
+        "displayName": "InitiatingProcessAccountUpn",
+        "description": "User principal name (UPN) of the account that ran the process responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessCommandLine",
+        "type": "string",
+        "displayName": "InitiatingProcessCommandLine",
+        "description": "Command line used to run the process that initiated the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessFileName",
+        "type": "string",
+        "displayName": "InitiatingProcessFileName",
+        "description": "Name of the process that initiated the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessFolderPath",
+        "type": "string",
+        "displayName": "InitiatingProcessFolderPath",
+        "description": "Folder containing the process (image file) that initiated the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessId",
+        "type": "long",
+        "displayName": "InitiatingProcessId",
+        "description": "Process ID (PID) of the process that initiated the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessLogonId",
+        "type": "long",
+        "displayName": "InitiatingProcessLogonId",
+        "description": "Identifier for a logon session of the process that initiated the event. This identifier is unique on the same machine only between restarts.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessMD5",
+        "type": "string",
+        "displayName": "InitiatingProcessMD5",
+        "description": "MD5 hash of the process (image file) that initiated the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessParentFileName",
+        "type": "string",
+        "displayName": "InitiatingProcessParentFileName",
+        "description": "Name of the parent process that spawned the process responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessParentId",
+        "type": "long",
+        "displayName": "InitiatingProcessParentId",
+        "description": "Process ID (PID) of the parent process that spawned the process responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessSHA1",
+        "type": "string",
+        "displayName": "InitiatingProcessSHA1",
+        "description": "SHA-1 hash of the process (image file) that initiated the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessSHA256",
+        "type": "string",
+        "displayName": "InitiatingProcessSHA256",
+        "description": "SHA-256 hash of the process (image file) that initiated the event. This field is usually not populated - use the SHA1 column when available.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "LocalIP",
+        "type": "string",
+        "displayName": "LocalIP",
+        "description": "IP address assigned to the local machine used during communication.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "LocalPort",
+        "type": "int",
+        "displayName": "LocalPort",
+        "description": "TCP port on the local machine used during communication.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "LogonId",
+        "type": "long",
+        "displayName": "LogonId",
+        "description": "Identifier for a logon session. This identifier is unique on the same machine only between restarts.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "MD5",
+        "type": "string",
+        "displayName": "MD5",
+        "description": "MD5 hash of the file that the recorded action was applied to.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "MachineGroup",
+        "type": "string",
+        "displayName": "MachineGroup",
+        "description": "Machine group of the machine. This group is used by role-based access control to determine access to the machine.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "ProcessCommandLine",
+        "type": "string",
+        "displayName": "ProcessCommandLine",
+        "description": "Command line used to create the new process.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "ProcessId",
+        "type": "long",
+        "displayName": "ProcessId",
+        "description": "Process ID (PID) of the newly created process.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "ProcessTokenElevation",
+        "type": "string",
+        "displayName": "ProcessTokenElevation",
+        "description": "Token type indicating the presence or absence of User Access Control (UAC) privilege elevation applied to the newly created process.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "RegistryKey",
+        "type": "string",
+        "displayName": "RegistryKey",
+        "description": "Registry key that the recorded action was applied to.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "RegistryValueData",
+        "type": "string",
+        "displayName": "RegistryValueData",
+        "description": "Data of the registry value that the recorded action was applied to.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "RegistryValueName",
+        "type": "string",
+        "displayName": "RegistryValueName",
+        "description": "Name of the registry value that the recorded action was applied to.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "RemoteDeviceName",
+        "type": "string",
+        "displayName": "RemoteDeviceName",
+        "description": "Name of the device that performed a remote operation on the affected machine. Depending on the event being reported, this name could be a fully-qualified domain name (FQDN), a NetBIOS name, or a host name without domain information..",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "RemoteIP",
+        "type": "string",
+        "displayName": "RemoteIP",
+        "description": "IP address that was being connected to.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "RemotePort",
+        "type": "int",
+        "displayName": "RemotePort",
+        "description": "TCP port on the remote device that was being connected to.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "RemoteUrl",
+        "type": "string",
+        "displayName": "RemoteUrl",
+        "description": "URL or fully qualified domain name (FQDN) that was being connected to.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "ReportId",
+        "type": "long",
+        "displayName": "ReportId",
+        "description": "Event identifier based on a repeating counter. To identify unique events, this column must be used in conjunction with the ComputerName and EventTime columns.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "SHA1",
+        "type": "string",
+        "displayName": "SHA1",
+        "description": "SHA-1 hash of the file that the recorded action was applied to.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "SHA256",
+        "type": "string",
+        "displayName": "SHA256",
+        "description": "SHA-256 of the file that the recorded action was applied to.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "Timestamp",
+        "type": "datetime",
+        "displayName": "Timestamp",
+        "description": "Date and time the event was recorded by the MDE agent on the endpoint. This is identical to TimeGenerated and added for query portability from MDATP Advanced Hunting.",
+        "isDefaultDisplay": true,
+        "isHidden": true
+      },
+      {
+        "name": "TimeGenerated",
+        "type": "datetime",
+        "displayName": "TimeGenerated",
+        "description": "Date and time the event was recorded by the MDE agent on the endpoint.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "FileSize",
+        "type": "long",
+        "displayName": "FileSize",
+        "description": "Size of the file in bytes.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessCreationTime",
+        "type": "datetime",
+        "displayName": "InitiatingProcessCreationTime",
+        "description": "Date and time when the process that initiated the event was started.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessFileSize",
+        "type": "long",
+        "displayName": "InitiatingProcessFileSize",
+        "description": "Size in bytes of the file that ran the process responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessParentCreationTime",
+        "type": "datetime",
+        "displayName": "InitiatingProcessParentCreationTime",
+        "description": "Date and time when the parent of the process responsible for the event was started.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessVersionInfoCompanyName",
+        "type": "string",
+        "displayName": "InitiatingProcessVersionInfoCompanyName",
+        "description": "Company name from the version information of the process (image file) responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessVersionInfoFileDescription",
+        "type": "string",
+        "displayName": "InitiatingProcessVersionInfoFileDescription",
+        "description": "Description from the version information of the process (image file) responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessVersionInfoInternalFileName",
+        "type": "string",
+        "displayName": "InitiatingProcessVersionInfoInternalFileName",
+        "description": "Internal file name from the version information of the process (image file) responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessVersionInfoOriginalFileName",
+        "type": "string",
+        "displayName": "InitiatingProcessVersionInfoOriginalFileName",
+        "description": "Original file name from the version information of the process (image file) responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessVersionInfoProductName",
+        "type": "string",
+        "displayName": "InitiatingProcessVersionInfoProductName",
+        "description": "Product name from the version information of the process (image file) responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessVersionInfoProductVersion",
+        "type": "string",
+        "displayName": "InitiatingProcessVersionInfoProductVersion",
+        "description": "Product version from the version information of the process (image file) responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "ProcessCreationTime",
+        "type": "datetime",
+        "displayName": "ProcessCreationTime",
+        "description": "Date and time the process was created.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "CreatedProcessSessionId",
+        "type": "long",
+        "displayName": "CreatedProcessSessionId",
+        "description": "Windows session ID of the created process.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "IsProcessRemoteSession",
+        "type": "boolean",
+        "displayName": "IsProcessRemoteSession",
+        "description": "Indicates whether the created process was run under a remote desktop protocol (RDP) session (true) or locally (false).",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "ProcessRemoteSessionDeviceName",
+        "type": "string",
+        "displayName": "ProcessRemoteSessionDeviceName",
+        "description": "Device name of the remote device from which the created process\u2019s RDP session was initiated.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "ProcessRemoteSessionIP",
+        "type": "string",
+        "displayName": "ProcessRemoteSessionIP",
+        "description": "IP address of the remote device from which the created process\u2019s RDP session was initiated.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessSessionId",
+        "type": "long",
+        "displayName": "InitiatingProcessSessionId",
+        "description": "Windows session ID of the initiating process.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "IsInitiatingProcessRemoteSession",
+        "type": "boolean",
+        "displayName": "IsInitiatingProcessRemoteSession",
+        "description": "Indicates whether the initiating process was run under a remote desktop protocol (RDP) session (true) or locally (false).",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessRemoteSessionDeviceName",
+        "type": "string",
+        "displayName": "InitiatingProcessRemoteSessionDeviceName",
+        "description": "Device name of the remote device from which the initiating process\u2019s RDP session was initiated.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessRemoteSessionIP",
+        "type": "string",
+        "displayName": "InitiatingProcessRemoteSessionIP",
+        "description": "IP address of the remote device from which the initiating process\u2019s RDP session was initiated.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "SourceSystem",
+        "type": "string",
+        "displayName": "SourceSystem",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      }
+    ]
+  },
+  {
+    "name": "DeviceFileCertificateInfo_CL",
+    "columns": [
+      {
+        "name": "CertificateSerialNumber",
+        "type": "string",
+        "displayName": "CertificateSerialNumber",
+        "description": "Identifier for the certificate that is unique to the issuing certificate authority (CA).",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "CrlDistributionPointUrls",
+        "type": "string",
+        "displayName": "CrlDistributionPointUrls",
+        "description": "A list of network shares URLs that contains certificates and certificate revocation (CRLs).",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "DeviceId",
+        "type": "string",
+        "displayName": "DeviceId",
+        "description": "Unique identifier for the device in the service.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "DeviceName",
+        "type": "string",
+        "displayName": "DeviceName",
+        "description": "Fully qualified domain name (FQDN) of the device.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "IsRootSignerMicrosoft",
+        "type": "boolean",
+        "displayName": "IsRootSignerMicrosoft",
+        "description": "Indicates whether the signer of the root certificate is Microsoft.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "IsSigned",
+        "type": "boolean",
+        "displayName": "IsSigned",
+        "description": "Indicates whether the file is signed.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "IsTrusted",
+        "type": "boolean",
+        "displayName": "IsTrusted",
+        "description": "Indicates whether the file is trusted based on the results of the WinVerifyTrust function, which checks for unknown root certificate information, invalid signatures, revoked certificates, and other questionable attributes.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "Issuer",
+        "type": "string",
+        "displayName": "Issuer",
+        "description": "Information about the issuing certificate authority (CA).",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "IssuerHash",
+        "type": "string",
+        "displayName": "IssuerHash",
+        "description": "Unique hash value identifying issuing certificate authority (CA).",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "MachineGroup",
+        "type": "string",
+        "displayName": "MachineGroup",
+        "description": "Machine group of the machine. This group is used by role-based access control to determine access to the machine.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "ReportId",
+        "type": "long",
+        "displayName": "ReportId",
+        "description": "Unique identifier for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "SHA1",
+        "type": "string",
+        "displayName": "SHA1",
+        "description": "SHA-1 hash of the file that the recorded action was applied to.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "SignatureType",
+        "type": "string",
+        "displayName": "SignatureType",
+        "description": "Indicates whether signature information was read as embedded content in the file itself or read from an external catalog file.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "Signer",
+        "type": "string",
+        "displayName": "Signer",
+        "description": "Information about the signer of the file.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "SignerHash",
+        "type": "string",
+        "displayName": "SignerHash",
+        "description": "Unique hash value identifying the signer.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "Timestamp",
+        "type": "datetime",
+        "displayName": "Timestamp",
+        "description": "Date and time the event was recorded by the MDE agent on the endpoint. This is identical to TimeGenerated and added for query portability from MDATP Advanced Hunting.",
+        "isDefaultDisplay": true,
+        "isHidden": true
+      },
+      {
+        "name": "TimeGenerated",
+        "type": "datetime",
+        "displayName": "TimeGenerated",
+        "description": "Date and time the event was recorded by the MDE agent on the endpoint.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "CertificateCountersignatureTime",
+        "type": "datetime",
+        "displayName": "CertificateCountersignatureTime",
+        "description": "Date and time (UTC) the certificate was countersigned.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "CertificateCreationTime",
+        "type": "datetime",
+        "displayName": "CertificateCreationTime",
+        "description": "Date and time (UTC) the certificate was created.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "CertificateExpirationTime",
+        "type": "datetime",
+        "displayName": "CertificateExpirationTime",
+        "description": "Certificate expiry date and time (UTC).",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "SourceSystem",
+        "type": "string",
+        "displayName": "SourceSystem",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      }
+    ]
+  },
+  {
+    "name": "DeviceFileEvents_CL",
+    "columns": [
+      {
+        "name": "ActionType",
+        "type": "string",
+        "displayName": "ActionType",
+        "description": "Type of activity that triggered the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "AdditionalFields",
+        "type": "dynamic",
+        "displayName": "AdditionalFields",
+        "description": "Additional information about the entity or event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "AppGuardContainerId",
+        "type": "string",
+        "displayName": "AppGuardContainerId",
+        "description": "Identifier for the virtualized container used by Application Guard to isolate browser activity.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "DeviceId",
+        "type": "string",
+        "displayName": "DeviceId",
+        "description": "Unique identifier for the device in the service.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "DeviceName",
+        "type": "string",
+        "displayName": "DeviceName",
+        "description": "Fully qualified domain name (FQDN) of the device.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "FileName",
+        "type": "string",
+        "displayName": "FileName",
+        "description": "Name of the file that the recorded action was applied to.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "FileOriginIP",
+        "type": "string",
+        "displayName": "FileOriginIP",
+        "description": "IP address where the file was downloaded from.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "FileOriginReferrerUrl",
+        "type": "string",
+        "displayName": "FileOriginReferrerUrl",
+        "description": "URL of the web page that links to the downloaded file.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "FileOriginUrl",
+        "type": "string",
+        "displayName": "FileOriginUrl",
+        "description": "URL where the file was downloaded from.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "FileSize",
+        "type": "long",
+        "displayName": "FileSize",
+        "description": "Size of the file in bytes.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "FolderPath",
+        "type": "string",
+        "displayName": "FolderPath",
+        "description": "Folder containing the file that the recorded action was applied to.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessAccountDomain",
+        "type": "string",
+        "displayName": "InitiatingProcessAccountDomain",
+        "description": "Domain of the account that ran the process responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessAccountName",
+        "type": "string",
+        "displayName": "InitiatingProcessAccountName",
+        "description": "User name of the account that ran the process responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessAccountObjectId",
+        "type": "string",
+        "displayName": "InitiatingProcessAccountObjectId",
+        "description": "Azure AD object ID of the user account that ran the process responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessAccountSid",
+        "type": "string",
+        "displayName": "InitiatingProcessAccountSid",
+        "description": "Security Identifier (SID) of the account that ran the process responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessAccountUpn",
+        "type": "string",
+        "displayName": "InitiatingProcessAccountUpn",
+        "description": "User principal name (UPN) of the account that ran the process responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessCommandLine",
+        "type": "string",
+        "displayName": "InitiatingProcessCommandLine",
+        "description": "Command line used to run the process that initiated the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessFileName",
+        "type": "string",
+        "displayName": "InitiatingProcessFileName",
+        "description": "Name of the process that initiated the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessFolderPath",
+        "type": "string",
+        "displayName": "InitiatingProcessFolderPath",
+        "description": "Folder containing the process (image file) that initiated the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessId",
+        "type": "long",
+        "displayName": "InitiatingProcessId",
+        "description": "Process ID (PID) of the process that initiated the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessIntegrityLevel",
+        "type": "string",
+        "displayName": "InitiatingProcessIntegrityLevel",
+        "description": "Integrity level of the process that initiated the event. Windows assigns integrity levels to processes based on certain characteristics, such as if they were launched from an internet download. These integrity levels influence permissions to resources.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessMD5",
+        "type": "string",
+        "displayName": "InitiatingProcessMD5",
+        "description": "MD5 hash of the process (image file) that initiated the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessParentFileName",
+        "type": "string",
+        "displayName": "InitiatingProcessParentFileName",
+        "description": "Name of the parent process that spawned the process responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessParentId",
+        "type": "long",
+        "displayName": "InitiatingProcessParentId",
+        "description": "Process ID (PID) of the parent process that spawned the process responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessSHA1",
+        "type": "string",
+        "displayName": "InitiatingProcessSHA1",
+        "description": "SHA-1 hash of the process (image file) that initiated the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessSHA256",
+        "type": "string",
+        "displayName": "InitiatingProcessSHA256",
+        "description": "SHA-256 hash of the process (image file) that initiated the event. This field is usually not populated - use the SHA1 column when available.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessTokenElevation",
+        "type": "string",
+        "displayName": "InitiatingProcessTokenElevation",
+        "description": "Token type indicating the presence or absence of User Access Control (UAC) privilege elevation applied to the process that initiated the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "IsAzureInfoProtectionApplied",
+        "type": "boolean",
+        "displayName": "IsAzureInfoProtectionApplied",
+        "description": "Indicates whether the file is encrypted by Azure Information Protection.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "MD5",
+        "type": "string",
+        "displayName": "MD5",
+        "description": "MD5 hash of the file that the recorded action was applied to.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "MachineGroup",
+        "type": "string",
+        "displayName": "MachineGroup",
+        "description": "Machine group of the machine. This group is used by role-based access control to determine access to the machine.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "PreviousFileName",
+        "type": "string",
+        "displayName": "PreviousFileName",
+        "description": "Original name of the file that was renamed as a result of the action.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "PreviousFolderPath",
+        "type": "string",
+        "displayName": "PreviousFolderPath",
+        "description": "Original folder containing the file before the recorded action was applied.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "ReportId",
+        "type": "long",
+        "displayName": "ReportId",
+        "description": "Event identifier based on a repeating counter. To identify unique events, this column must be used in conjunction with the ComputerName and EventTime columns.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "RequestAccountDomain",
+        "type": "string",
+        "displayName": "RequestAccountDomain",
+        "description": "Domain of the account used to remotely initiate the activity.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "RequestAccountName",
+        "type": "string",
+        "displayName": "RequestAccountName",
+        "description": "User name of account used to remotely initiate the activity.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "RequestAccountSid",
+        "type": "string",
+        "displayName": "RequestAccountSid",
+        "description": "Security Identifier (SID) of the account used to remotely initiate the activity.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "RequestProtocol",
+        "type": "string",
+        "displayName": "RequestProtocol",
+        "description": "Network protocol, if applicable, used to initiate the activity: Unknown, Local, SMB, or NFS.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "RequestSourceIP",
+        "type": "string",
+        "displayName": "RequestSourceIP",
+        "description": "IPv4 or IPv6 address of the remote device that initiated the activity.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "RequestSourcePort",
+        "type": "int",
+        "displayName": "RequestSourcePort",
+        "description": "Source port on the remote device that initiated the activity.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "SHA1",
+        "type": "string",
+        "displayName": "SHA1",
+        "description": "SHA-1 hash of the file that the recorded action was applied to.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "SHA256",
+        "type": "string",
+        "displayName": "SHA256",
+        "description": "SHA-256 of the file that the recorded action was applied to.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "SensitivityLabel",
+        "type": "string",
+        "displayName": "SensitivityLabel",
+        "description": "Label applied to an email, file, or other content to classify it for information protection.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "SensitivitySubLabel",
+        "type": "string",
+        "displayName": "SensitivitySubLabel",
+        "description": "Sublabel applied to an email, file, or other content to classify it for information protection; sensitivity sublabels are grouped under sensitivity labels but are treated independently.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "ShareName",
+        "type": "string",
+        "displayName": "ShareName",
+        "description": "Name of shared folder containing the file.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "Timestamp",
+        "type": "datetime",
+        "displayName": "Timestamp",
+        "description": "Date and time the event was recorded by the MDE agent on the endpoint. This is identical to TimeGenerated and added for query portability from MDATP Advanced Hunting.",
+        "isDefaultDisplay": true,
+        "isHidden": true
+      },
+      {
+        "name": "TimeGenerated",
+        "type": "datetime",
+        "displayName": "TimeGenerated",
+        "description": "Date and time the event was recorded by the MDE agent on the endpoint.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessParentCreationTime",
+        "type": "datetime",
+        "displayName": "InitiatingProcessParentCreationTime",
+        "description": "Date and time when the parent of the process responsible for the event was started.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessCreationTime",
+        "type": "datetime",
+        "displayName": "InitiatingProcessCreationTime",
+        "description": "Date and time when the process that initiated the event was started.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessFileSize",
+        "type": "long",
+        "displayName": "InitiatingProcessFileSize",
+        "description": "Size in bytes of the process (image file) that initiated the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessVersionInfoCompanyName",
+        "type": "string",
+        "displayName": "InitiatingProcessVersionInfoCompanyName",
+        "description": "Company name from the version information of the process (image file) responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessVersionInfoFileDescription",
+        "type": "string",
+        "displayName": "InitiatingProcessVersionInfoFileDescription",
+        "description": "Description from the version information of the process (image file) responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessVersionInfoInternalFileName",
+        "type": "string",
+        "displayName": "InitiatingProcessVersionInfoInternalFileName",
+        "description": "Internal file name from the version information of the process (image file) responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessVersionInfoOriginalFileName",
+        "type": "string",
+        "displayName": "InitiatingProcessVersionInfoOriginalFileName",
+        "description": "Original file name from the version information of the process (image file) responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessVersionInfoProductName",
+        "type": "string",
+        "displayName": "InitiatingProcessVersionInfoProductName",
+        "description": "Product name from the version information of the process (image file) responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessVersionInfoProductVersion",
+        "type": "string",
+        "displayName": "InitiatingProcessVersionInfoProductVersion",
+        "description": "Product version from the version information of the process (image file) responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessSessionId",
+        "type": "long",
+        "displayName": "InitiatingProcessSessionId",
+        "description": "Windows session ID of the initiating process.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "IsInitiatingProcessRemoteSession",
+        "type": "boolean",
+        "displayName": "IsInitiatingProcessRemoteSession",
+        "description": "Indicates whether the initiating process was run under a remote desktop protocol (RDP) session (true) or locally (false).",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessRemoteSessionDeviceName",
+        "type": "string",
+        "displayName": "InitiatingProcessRemoteSessionDeviceName",
+        "description": "Device name of the remote device from which the initiating process\u2019s RDP session was initiated.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessRemoteSessionIP",
+        "type": "string",
+        "displayName": "InitiatingProcessRemoteSessionIP",
+        "description": "IP address of the remote device from which the initiating process\u2019s RDP session was initiated.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "SourceSystem",
+        "type": "string",
+        "displayName": "SourceSystem",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      }
+    ]
+  },
+  {
+    "name": "DeviceImageLoadEvents_CL",
+    "columns": [
+      {
+        "name": "ActionType",
+        "type": "string",
+        "displayName": "ActionType",
+        "description": "Type of activity that triggered the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "AppGuardContainerId",
+        "type": "string",
+        "displayName": "AppGuardContainerId",
+        "description": "Identifier for the virtualized container used by Application Guard to isolate browser activity.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "DeviceId",
+        "type": "string",
+        "displayName": "DeviceId",
+        "description": "Unique identifier for the device in the service.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "DeviceName",
+        "type": "string",
+        "displayName": "DeviceName",
+        "description": "Fully qualified domain name (FQDN) of the device.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "FileName",
+        "type": "string",
+        "displayName": "FileName",
+        "description": "Domain of the account.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "FolderPath",
+        "type": "string",
+        "displayName": "FolderPath",
+        "description": "Domain of the account.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessAccountDomain",
+        "type": "string",
+        "displayName": "InitiatingProcessAccountDomain",
+        "description": "Domain of the account that ran the process responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessAccountName",
+        "type": "string",
+        "displayName": "InitiatingProcessAccountName",
+        "description": "User name of the account that ran the process responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessAccountObjectId",
+        "type": "string",
+        "displayName": "InitiatingProcessAccountObjectId",
+        "description": "Azure AD object ID of the user account that ran the process responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessAccountSid",
+        "type": "string",
+        "displayName": "InitiatingProcessAccountSid",
+        "description": "Security Identifier (SID) of the account that ran the process responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessAccountUpn",
+        "type": "string",
+        "displayName": "InitiatingProcessAccountUpn",
+        "description": "User principal name (UPN) of the account that ran the process responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessCommandLine",
+        "type": "string",
+        "displayName": "InitiatingProcessCommandLine",
+        "description": "Command line used to run the process that initiated the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessFileName",
+        "type": "string",
+        "displayName": "InitiatingProcessFileName",
+        "description": "Name of the process that initiated the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessFolderPath",
+        "type": "string",
+        "displayName": "InitiatingProcessFolderPath",
+        "description": "Folder containing the process (image file) that initiated the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessId",
+        "type": "long",
+        "displayName": "InitiatingProcessId",
+        "description": "Process ID (PID) of the process that initiated the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessIntegrityLevel",
+        "type": "string",
+        "displayName": "InitiatingProcessIntegrityLevel",
+        "description": "Integrity level of the process that initiated the event. Windows assigns integrity levels to processes based on certain characteristics, such as if they were launched from an internet download. These integrity levels influence permissions to resources.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessMD5",
+        "type": "string",
+        "displayName": "InitiatingProcessMD5",
+        "description": "MD5 hash of the process (image file) that initiated the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessParentFileName",
+        "type": "string",
+        "displayName": "InitiatingProcessParentFileName",
+        "description": "Name of the parent process that spawned the process responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessParentId",
+        "type": "long",
+        "displayName": "InitiatingProcessParentId",
+        "description": "Process ID (PID) of the parent process that spawned the process responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessSHA1",
+        "type": "string",
+        "displayName": "InitiatingProcessSHA1",
+        "description": "SHA-1 hash of the process (image file) that initiated the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessSHA256",
+        "type": "string",
+        "displayName": "InitiatingProcessSHA256",
+        "description": "SHA-256 hash of the process (image file) that initiated the event. This field is usually not populated - use the SHA1 column when available.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessTokenElevation",
+        "type": "string",
+        "displayName": "InitiatingProcessTokenElevation",
+        "description": "Token type indicating the presence or absence of User Access Control (UAC) privilege elevation applied to the process that initiated the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "MD5",
+        "type": "string",
+        "displayName": "MD5",
+        "description": "MD5 hash of the file that the recorded action was applied to.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "MachineGroup",
+        "type": "string",
+        "displayName": "MachineGroup",
+        "description": "Machine group of the machine. This group is used by role-based access control to determine access to the machine.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "ReportId",
+        "type": "long",
+        "displayName": "ReportId",
+        "description": "Event identifier based on a repeating counter. To identify unique events, this column must be used in conjunction with the ComputerName and EventTime columns.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "SHA1",
+        "type": "string",
+        "displayName": "SHA1",
+        "description": "SHA-1 hash of the file that the recorded action was applied to.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "SHA256",
+        "type": "string",
+        "displayName": "SHA256",
+        "description": "SHA-256 of the file that the recorded action was applied to.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "Timestamp",
+        "type": "datetime",
+        "displayName": "Timestamp",
+        "description": "Date and time the event was recorded by the MDE agent on the endpoint. This is identical to TimeGenerated and added for query portability from MDATP Advanced Hunting.",
+        "isDefaultDisplay": true,
+        "isHidden": true
+      },
+      {
+        "name": "TimeGenerated",
+        "type": "datetime",
+        "displayName": "TimeGenerated",
+        "description": "Date and time the event was recorded by the MDE agent on the endpoint.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessParentCreationTime",
+        "type": "datetime",
+        "displayName": "InitiatingProcessParentCreationTime",
+        "description": "Date and time when the parent of the process responsible for the event was started.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessCreationTime",
+        "type": "datetime",
+        "displayName": "InitiatingProcessCreationTime",
+        "description": "Date and time when the process that initiated the event was started.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessFileSize",
+        "type": "long",
+        "displayName": "InitiatingProcessFileSize",
+        "description": "Size in bytes of the process (image file) that initiated the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessVersionInfoCompanyName",
+        "type": "string",
+        "displayName": "InitiatingProcessVersionInfoCompanyName",
+        "description": "Company name from the version information of the process (image file) responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessVersionInfoFileDescription",
+        "type": "string",
+        "displayName": "InitiatingProcessVersionInfoFileDescription",
+        "description": "Description from the version information of the process (image file) responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessVersionInfoInternalFileName",
+        "type": "string",
+        "displayName": "InitiatingProcessVersionInfoInternalFileName",
+        "description": "Internal file name from the version information of the process (image file) responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessVersionInfoOriginalFileName",
+        "type": "string",
+        "displayName": "InitiatingProcessVersionInfoOriginalFileName",
+        "description": "Original file name from the version information of the process (image file) responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessVersionInfoProductName",
+        "type": "string",
+        "displayName": "InitiatingProcessVersionInfoProductName",
+        "description": "Product name from the version information of the process (image file) responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessVersionInfoProductVersion",
+        "type": "string",
+        "displayName": "InitiatingProcessVersionInfoProductVersion",
+        "description": "Product version from the version information of the process (image file) responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "FileSize",
+        "type": "long",
+        "displayName": "FileSize",
+        "description": "Size of the file in bytes.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessSessionId",
+        "type": "long",
+        "displayName": "InitiatingProcessSessionId",
+        "description": "Windows session ID of the initiating process.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "IsInitiatingProcessRemoteSession",
+        "type": "boolean",
+        "displayName": "IsInitiatingProcessRemoteSession",
+        "description": "Indicates whether the initiating process was run under a remote desktop protocol (RDP) session (true) or locally (false).",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessRemoteSessionDeviceName",
+        "type": "string",
+        "displayName": "InitiatingProcessRemoteSessionDeviceName",
+        "description": "Device name of the remote device from which the initiating process\u2019s RDP session was initiated.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessRemoteSessionIP",
+        "type": "string",
+        "displayName": "InitiatingProcessRemoteSessionIP",
+        "description": "IP address of the remote device from which the initiating process\u2019s RDP session was initiated.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "SourceSystem",
+        "type": "string",
+        "displayName": "SourceSystem",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      }
+    ]
+  },
+  {
+    "name": "DeviceInfo_CL",
+    "columns": [
+      {
+        "name": "AdditionalFields",
+        "type": "dynamic",
+        "displayName": "AdditionalFields",
+        "description": "Additional information about the entity or event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "ClientVersion",
+        "type": "string",
+        "displayName": "ClientVersion",
+        "description": "Version of the endpoint agent or sensor running on the machine.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "DeviceId",
+        "type": "string",
+        "displayName": "DeviceId",
+        "description": "Unique identifier for the device in the service.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "DeviceName",
+        "type": "string",
+        "displayName": "DeviceName",
+        "description": "Fully qualified domain name (FQDN) of the device.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "DeviceObjectId",
+        "type": "string",
+        "displayName": "DeviceObjectId",
+        "description": "Unique identifier for the device in Azure AD.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "IsAzureADJoined",
+        "type": "boolean",
+        "displayName": "IsAzureADJoined",
+        "description": "Boolean indicator of whether machine is joined to the Azure Active Directory.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "LoggedOnUsers",
+        "type": "dynamic",
+        "displayName": "LoggedOnUsers",
+        "description": "List of all users that are logged on the machine at the time of the event in JSON array format.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "MachineGroup",
+        "type": "string",
+        "displayName": "MachineGroup",
+        "description": "Machine group used to determine access to the machine and apply group-specific settings.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "OSArchitecture",
+        "type": "string",
+        "displayName": "OSArchitecture",
+        "description": "Architecture of the operating system running on the machine.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "OSBuild",
+        "type": "long",
+        "displayName": "OSBuild",
+        "description": "Build version of the operating system running on the machine.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "OSPlatform",
+        "type": "string",
+        "displayName": "OSPlatform",
+        "description": "Platform of the operating system running on the machine. This indicates specific operating systems, including variations within the same family, such as Windows 10 and Windows 7.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "OSVersion",
+        "type": "string",
+        "displayName": "OSVersion",
+        "description": "Version of the operating system running on the machine.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "PublicIP",
+        "type": "string",
+        "displayName": "PublicIP",
+        "description": "Public IP address used by the onboarded machine to connect to the Windows Defender ATP service. This could be the IP address of the machine itself, a NAT device, or a proxy.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "RegistryDeviceTag",
+        "type": "string",
+        "displayName": "RegistryDeviceTag",
+        "description": "Device tag added through the registry.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "ReportId",
+        "type": "long",
+        "displayName": "ReportId",
+        "description": "Event identifier based on a repeating counter. To identify unique events, this column must be used in conjunction with the ComputerName and EventTime columns..",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "TimeGenerated",
+        "type": "datetime",
+        "displayName": "TimeGenerated",
+        "description": "Date and time the event was recorded by the MDE agent on the endpoint.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "Timestamp",
+        "type": "datetime",
+        "displayName": "Timestamp",
+        "description": "Date and time the event was recorded by the MDE agent on the endpoint. This is identical to TimeGenerated and added for query portability from MDATP Advanced Hunting.",
+        "isDefaultDisplay": true,
+        "isHidden": true
+      },
+      {
+        "name": "AadDeviceId",
+        "type": "string",
+        "displayName": "AadDeviceId",
+        "description": "Unique identifier for the device in Azure Active Directory.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "DeviceCategory",
+        "type": "string",
+        "displayName": "DeviceCategory",
+        "description": "Broader classification that groups certain device types under the following categories: Endpoint, Network device, IoT, Unknown.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "DeviceSubtype",
+        "type": "string",
+        "displayName": "DeviceSubtype",
+        "description": "Additional modifier for certain types of devices, for example, a mobile device can be a tablet or a smartphone; only available if device discovery finds enough information about this attribute.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "DeviceType",
+        "type": "string",
+        "displayName": "DeviceType",
+        "description": "Type of device based on purpose and functionality, such as network device, workstation, server, mobile, gaming console, or printer.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "JoinType",
+        "type": "string",
+        "displayName": "JoinType",
+        "description": "The device's Azure Active Directory join type.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "MergedDeviceIds",
+        "type": "string",
+        "displayName": "MergedDeviceIds",
+        "description": "Previous device IDs that have been assigned to the same device.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "MergedToDeviceId",
+        "type": "string",
+        "displayName": "MergedToDeviceId",
+        "description": "The most recent device ID assigned to a device.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "Model",
+        "type": "string",
+        "displayName": "Model",
+        "description": "Model name or number of the product from the vendor or manufacturer, only available if device discovery finds enough information about this attribute.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "OnboardingStatus",
+        "type": "string",
+        "displayName": "OnboardingStatus",
+        "description": "Indicates whether the device is currently onboarded or not to Microsoft Defender for Endpoint or if the device is not supported.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "OSDistribution",
+        "type": "string",
+        "displayName": "OSDistribution",
+        "description": "Distribution of the OS platform, such as Ubuntu or RedHat for Linux platforms.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "OSVersionInfo",
+        "type": "string",
+        "displayName": "OSVersionInfo",
+        "description": "Additional information about the OS version, such as the popular name, code name, or version number.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "Vendor",
+        "type": "string",
+        "displayName": "Vendor",
+        "description": "Name of the product vendor or manufacturer, only available if device discovery finds enough information about this attribute.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "SensorHealthState",
+        "type": "string",
+        "displayName": "SensorHealthState",
+        "description": "Indicates health of the device\u2019s EDR sensor, if onboarded to Microsoft Defender For Endpoint.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "IsExcluded",
+        "type": "boolean",
+        "displayName": "IsExcluded",
+        "description": "Determines if the device is currently excluded from Microsoft Defender for Vulnerability Management experiences.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "ExclusionReason",
+        "type": "string",
+        "displayName": "ExclusionReason",
+        "description": "Indicates the reason for device exclusion.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "AssetValue",
+        "type": "string",
+        "displayName": "AssetValue",
+        "description": "Indicates the value of a device as assigned by the user.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "ExposureLevel",
+        "type": "string",
+        "displayName": "ExposureLevel",
+        "description": "Indicates the exposure level of a device.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "IsInternetFacing",
+        "type": "boolean",
+        "displayName": "IsInternetFacing",
+        "description": "Indicates whether the device is internet-facing.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "DeviceManualTags",
+        "type": "string",
+        "displayName": "DeviceManualTags",
+        "description": "Device tags created manually using the portal UI or public API.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "DeviceDynamicTags",
+        "type": "string",
+        "displayName": "DeviceDynamicTags",
+        "description": "Device tags added and removed dynamically based on dynamic rules.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "AzureResourceId",
+        "type": "string",
+        "displayName": "AzureResourceId",
+        "description": "Unique identifier of the Azure resource associated with the device.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "AwsResourceName",
+        "type": "string",
+        "displayName": "AwsResourceName",
+        "description": "Unique identifier of the AWS resource associated with the device.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "GcpFullResourceName",
+        "type": "string",
+        "displayName": "GcpFullResourceName",
+        "description": "Unique identifier of the AWS resource associated with the device.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "SourceSystem",
+        "type": "string",
+        "displayName": "SourceSystem",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      }
+    ]
+  },
+  {
+    "name": "DeviceLogonEvents_CL",
+    "columns": [
+      {
+        "name": "AccountDomain",
+        "type": "string",
+        "displayName": "AccountDomain",
+        "description": "Domain of the account.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "AccountName",
+        "type": "string",
+        "displayName": "AccountName",
+        "description": "User name of the account.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "AccountSid",
+        "type": "string",
+        "displayName": "AccountSid",
+        "description": "Security identifier (SID) of the account.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "ActionType",
+        "type": "string",
+        "displayName": "ActionType",
+        "description": "Type of activity that triggered the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "AdditionalFields",
+        "type": "dynamic",
+        "displayName": "AdditionalFields",
+        "description": "Additional information about the entity or event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "AppGuardContainerId",
+        "type": "string",
+        "displayName": "AppGuardContainerId",
+        "description": "Identifier for the virtualized container used by Application Guard to isolate browser activity.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "DeviceId",
+        "type": "string",
+        "displayName": "DeviceId",
+        "description": "Unique identifier for the device in the service.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "DeviceName",
+        "type": "string",
+        "displayName": "DeviceName",
+        "description": "Fully qualified domain name (FQDN) of the device.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "FailureReason",
+        "type": "string",
+        "displayName": "FailureReason",
+        "description": "Information explaining why the recorded action failed.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessAccountDomain",
+        "type": "string",
+        "displayName": "InitiatingProcessAccountDomain",
+        "description": "Domain of the account that ran the process responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessAccountName",
+        "type": "string",
+        "displayName": "InitiatingProcessAccountName",
+        "description": "User name of the account that ran the process responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessAccountObjectId",
+        "type": "string",
+        "displayName": "InitiatingProcessAccountObjectId",
+        "description": "Azure AD object ID of the user account that ran the process responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessAccountSid",
+        "type": "string",
+        "displayName": "InitiatingProcessAccountSid",
+        "description": "Security Identifier (SID) of the account that ran the process responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessAccountUpn",
+        "type": "string",
+        "displayName": "InitiatingProcessAccountUpn",
+        "description": "User principal name (UPN) of the account that ran the process responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessCommandLine",
+        "type": "string",
+        "displayName": "InitiatingProcessCommandLine",
+        "description": "Command line used to run the process that initiated the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessFileName",
+        "type": "string",
+        "displayName": "InitiatingProcessFileName",
+        "description": "Name of the process that initiated the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessFolderPath",
+        "type": "string",
+        "displayName": "InitiatingProcessFolderPath",
+        "description": "Folder containing the process (image file) that initiated the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessId",
+        "type": "long",
+        "displayName": "InitiatingProcessId",
+        "description": "Process ID (PID) of the process that initiated the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessIntegrityLevel",
+        "type": "string",
+        "displayName": "InitiatingProcessIntegrityLevel",
+        "description": "Integrity level of the process that initiated the event. Windows assigns integrity levels to processes based on certain characteristics, such as if they were launched from an internet download. These integrity levels influence permissions to resources.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessMD5",
+        "type": "string",
+        "displayName": "InitiatingProcessMD5",
+        "description": "MD5 hash of the process (image file) that initiated the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessParentFileName",
+        "type": "string",
+        "displayName": "InitiatingProcessParentFileName",
+        "description": "Name of the parent process that spawned the process responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessParentId",
+        "type": "long",
+        "displayName": "InitiatingProcessParentId",
+        "description": "Process ID (PID) of the parent process that spawned the process responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessSHA1",
+        "type": "string",
+        "displayName": "InitiatingProcessSHA1",
+        "description": "SHA-1 hash of the process (image file) that initiated the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessSHA256",
+        "type": "string",
+        "displayName": "InitiatingProcessSHA256",
+        "description": "SHA-256 hash of the process (image file) that initiated the event. This field is usually not populated - use the SHA1 column when available.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessTokenElevation",
+        "type": "string",
+        "displayName": "InitiatingProcessTokenElevation",
+        "description": "Token type indicating the presence or absence of User Access Control (UAC) privilege elevation applied to the process that initiated the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "IsLocalAdmin",
+        "type": "boolean",
+        "displayName": "IsLocalAdmin",
+        "description": "Boolean indicator of whether the user is a local administrator on the machine.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "LogonId",
+        "type": "long",
+        "displayName": "LogonId",
+        "description": "Identifier for a logon session. This identifier is unique on the same machine only between restarts.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "LogonType",
+        "type": "string",
+        "displayName": "LogonType",
+        "description": "Type of logon session, specifically interactive, remote interactive (RDP), network, batch, and service.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "MachineGroup",
+        "type": "string",
+        "displayName": "MachineGroup",
+        "description": "Machine group of the machine. This group is used by role-based access control to determine access to the machine.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "Protocol",
+        "type": "string",
+        "displayName": "Protocol",
+        "description": "Protocol used during the communication.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "RemoteDeviceName",
+        "type": "string",
+        "displayName": "RemoteDeviceName",
+        "description": "Name of the device that performed a remote operation on the affected machine. Depending on the event being reported, this name could be a fully-qualified domain name (FQDN), a NetBIOS name, or a host name without domain information.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "RemoteIP",
+        "type": "string",
+        "displayName": "RemoteIP",
+        "description": "IP address that was being connected to.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "RemoteIPType",
+        "type": "string",
+        "displayName": "RemoteIPType",
+        "description": "Type of IP address, for example Public, Private, Reserved, Loopback, Teredo, FourToSixMapping, and Broadcast.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "RemotePort",
+        "type": "int",
+        "displayName": "RemotePort",
+        "description": "TCP port on the remote device that was being connected to.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "ReportId",
+        "type": "long",
+        "displayName": "ReportId",
+        "description": "Event identifier based on a repeating counter. To identify unique events, this column must be used in conjunction with the ComputerName and EventTime columns.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "Timestamp",
+        "type": "datetime",
+        "displayName": "Timestamp",
+        "description": "Date and time the event was recorded by the MDE agent on the endpoint. This is identical to TimeGenerated and added for query portability from MDATP Advanced Hunting.",
+        "isDefaultDisplay": true,
+        "isHidden": true
+      },
+      {
+        "name": "TimeGenerated",
+        "type": "datetime",
+        "displayName": "TimeGenerated",
+        "description": "Date and time the event was recorded by the MDE agent on the endpoint.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessParentCreationTime",
+        "type": "datetime",
+        "displayName": "InitiatingProcessParentCreationTime",
+        "description": "Date and time when the parent of the process responsible for the event was started.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessCreationTime",
+        "type": "datetime",
+        "displayName": "InitiatingProcessCreationTime",
+        "description": "Date and time when the process that initiated the event was started.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessFileSize",
+        "type": "long",
+        "displayName": "InitiatingProcessFileSize",
+        "description": "Size in bytes of the process (image file) that initiated the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessVersionInfoCompanyName",
+        "type": "string",
+        "displayName": "InitiatingProcessVersionInfoCompanyName",
+        "description": "Company name from the version information of the process (image file) responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessVersionInfoFileDescription",
+        "type": "string",
+        "displayName": "InitiatingProcessVersionInfoFileDescription",
+        "description": "Description from the version information of the process (image file) responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessVersionInfoInternalFileName",
+        "type": "string",
+        "displayName": "InitiatingProcessVersionInfoInternalFileName",
+        "description": "Internal file name from the version information of the process (image file) responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessVersionInfoOriginalFileName",
+        "type": "string",
+        "displayName": "InitiatingProcessVersionInfoOriginalFileName",
+        "description": "Original file name from the version information of the process (image file) responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessVersionInfoProductName",
+        "type": "string",
+        "displayName": "InitiatingProcessVersionInfoProductName",
+        "description": "Product name from the version information of the process (image file) responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessVersionInfoProductVersion",
+        "type": "string",
+        "displayName": "InitiatingProcessVersionInfoProductVersion",
+        "description": "Product version from the version information of the process (image file) responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessSessionId",
+        "type": "long",
+        "displayName": "InitiatingProcessSessionId",
+        "description": "Windows session ID of the initiating process.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "IsInitiatingProcessRemoteSession",
+        "type": "boolean",
+        "displayName": "IsInitiatingProcessRemoteSession",
+        "description": "Indicates whether the initiating process was run under a remote desktop protocol (RDP) session (true) or locally (false).",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessRemoteSessionDeviceName",
+        "type": "string",
+        "displayName": "InitiatingProcessRemoteSessionDeviceName",
+        "description": "Device name of the remote device from which the initiating process\u2019s RDP session was initiated.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessRemoteSessionIP",
+        "type": "string",
+        "displayName": "InitiatingProcessRemoteSessionIP",
+        "description": "IP address of the remote device from which the initiating process\u2019s RDP session was initiated.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "SourceSystem",
+        "type": "string",
+        "displayName": "SourceSystem",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      }
+    ]
+  },
+  {
+    "name": "DeviceNetworkEvents_CL",
+    "columns": [
+      {
+        "name": "ActionType",
+        "type": "string",
+        "displayName": "ActionType",
+        "description": "Type of activity that triggered the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "AdditionalFields",
+        "type": "dynamic",
+        "displayName": "AdditionalFields",
+        "description": "Additional information about the entity or event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "AppGuardContainerId",
+        "type": "string",
+        "displayName": "AppGuardContainerId",
+        "description": "Identifier for the virtualized container used by Application Guard to isolate browser activity.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "DeviceId",
+        "type": "string",
+        "displayName": "DeviceId",
+        "description": "Unique identifier for the device in the service.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "DeviceName",
+        "type": "string",
+        "displayName": "DeviceName",
+        "description": "Fully qualified domain name (FQDN) of the device.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessAccountDomain",
+        "type": "string",
+        "displayName": "InitiatingProcessAccountDomain",
+        "description": "Domain of the account that ran the initiating process.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessAccountName",
+        "type": "string",
+        "displayName": "InitiatingProcessAccountName",
+        "description": "User name of the account that ran the initiating process.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessAccountObjectId",
+        "type": "string",
+        "displayName": "InitiatingProcessAccountObjectId",
+        "description": "Azure AD object ID of the user account that ran the initiating process.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessAccountSid",
+        "type": "string",
+        "displayName": "InitiatingProcessAccountSid",
+        "description": "Security Identifier (SID) of the account that ran the initiating process.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessAccountUpn",
+        "type": "string",
+        "displayName": "InitiatingProcessAccountUpn",
+        "description": "User principal name (UPN) of the account that ran the initiating process.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessCommandLine",
+        "type": "string",
+        "displayName": "InitiatingProcessCommandLine",
+        "description": "Command line used to run the initiating process.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessFileName",
+        "type": "string",
+        "displayName": "InitiatingProcessFileName",
+        "description": "Name of the initiating process.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessFolderPath",
+        "type": "string",
+        "displayName": "InitiatingProcessFolderPath",
+        "description": "Folder containing the initiating process (image file).",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessId",
+        "type": "long",
+        "displayName": "InitiatingProcessId",
+        "description": "Process ID (PID) of the initiating process.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessIntegrityLevel",
+        "type": "string",
+        "displayName": "InitiatingProcessIntegrityLevel",
+        "description": "Integrity level of the initiating process. Windows assigns integrity levels to processes based on certain characteristics, such as if they were launched from an internet download. These integrity levels influence permissions to resources..",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessMD5",
+        "type": "string",
+        "displayName": "InitiatingProcessMD5",
+        "description": "MD5 hash of the initiating process (image file).",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessParentFileName",
+        "type": "string",
+        "displayName": "InitiatingProcessParentFileName",
+        "description": "Name of the parent process that spawned the initiating process.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessParentId",
+        "type": "long",
+        "displayName": "InitiatingProcessParentId",
+        "description": "Process ID (PID) of the parent process that spawned the initiating process.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessSHA1",
+        "type": "string",
+        "displayName": "InitiatingProcessSHA1",
+        "description": "SHA-1 hash of the initiating process (image file).",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessSHA256",
+        "type": "string",
+        "displayName": "InitiatingProcessSHA256",
+        "description": "SHA-256 hash of the initiating process (image file). In some cases this column may not be populated - please use the InitiatingProcessSHA1 column instead.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessTokenElevation",
+        "type": "string",
+        "displayName": "InitiatingProcessTokenElevation",
+        "description": "Token type indicating the presence or absence of User Access Control (UAC) privilege elevation applied to the initiating process.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessFileSize",
+        "type": "long",
+        "displayName": "InitiatingProcessFileSize",
+        "description": "Size of the file (bytes) that ran the process responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessVersionInfoCompanyName",
+        "type": "string",
+        "displayName": "InitiatingProcessVersionInfoCompanyName",
+        "description": "The company name in version information (image file) responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessVersionInfoProductName",
+        "type": "string",
+        "displayName": "InitiatingProcessVersionInfoProductName",
+        "description": "The product name in version information (image file) responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessVersionInfoProductVersion",
+        "type": "string",
+        "displayName": "InitiatingProcessVersionInfoProductVersion",
+        "description": "The product version in version information (image file) responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessVersionInfoInternalFileName",
+        "type": "string",
+        "displayName": "InitiatingProcessVersionInfoInternalFileName",
+        "description": "The internal file name in version information (image file) responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessVersionInfoOriginalFileName",
+        "type": "string",
+        "displayName": "InitiatingProcessVersionInfoOriginalFileName",
+        "description": "The original file name in version information (image file) responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessVersionInfoFileDescription",
+        "type": "string",
+        "displayName": "InitiatingProcessVersionInfoFileDescription",
+        "description": "The description in version information (image file) responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "LocalIP",
+        "type": "string",
+        "displayName": "LocalIP",
+        "description": "IP address assigned to the local machine used during communication.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "LocalIPType",
+        "type": "string",
+        "displayName": "LocalIPType",
+        "description": "Type of IP address, for example Public, Private, Reserved, Loopback, Teredo, FourToSixMapping, and Broadcast.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "LocalPort",
+        "type": "int",
+        "displayName": "LocalPort",
+        "description": "TCP port on the local machine used during communication.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "MachineGroup",
+        "type": "string",
+        "displayName": "MachineGroup",
+        "description": "Machine group of the machine. This group is used by role-based access control to determine access to the machine.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "Protocol",
+        "type": "string",
+        "displayName": "Protocol",
+        "description": "IP protocol used, whether TCP or UDP.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "RemoteIP",
+        "type": "string",
+        "displayName": "RemoteIP",
+        "description": "IP address that was being connected to.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "RemoteIPType",
+        "type": "string",
+        "displayName": "RemoteIPType",
+        "description": "Type of IP address, for example Public, Private, Reserved, Loopback, Teredo, FourToSixMapping, and Broadcast.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "RemotePort",
+        "type": "int",
+        "displayName": "RemotePort",
+        "description": "TCP port on the remote device that was being connected to.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "RemoteUrl",
+        "type": "string",
+        "displayName": "RemoteUrl",
+        "description": "URL or fully qualified domain name (FQDN) that was being connected to.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "ReportId",
+        "type": "long",
+        "displayName": "ReportId",
+        "description": "Event identifier based on a repeating counter. To identify unique events, this column must be used in conjunction with the ComputerName and EventTime columns..",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "TimeGenerated",
+        "type": "datetime",
+        "displayName": "TimeGenerated",
+        "description": "Date and time the event was recorded by the MDE agent on the endpoint.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "Timestamp",
+        "type": "datetime",
+        "displayName": "Timestamp",
+        "description": "Date and time the event was recorded by the MDE agent on the endpoint. This is identical to TimeGenerated and added for query portability from MDE Advanced Hunting.",
+        "isDefaultDisplay": true,
+        "isHidden": true
+      },
+      {
+        "name": "InitiatingProcessParentCreationTime",
+        "type": "datetime",
+        "displayName": "InitiatingProcessParentCreationTime",
+        "description": "Date and time when the parent of the process responsible for the event was started.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessCreationTime",
+        "type": "datetime",
+        "displayName": "InitiatingProcessCreationTime",
+        "description": "Date and time when the process that initiated the event was started.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessSessionId",
+        "type": "long",
+        "displayName": "InitiatingProcessSessionId",
+        "description": "Windows session ID of the initiating process.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "IsInitiatingProcessRemoteSession",
+        "type": "boolean",
+        "displayName": "IsInitiatingProcessRemoteSession",
+        "description": "Indicates whether the initiating process was run under a remote desktop protocol (RDP) session (true) or locally (false).",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessRemoteSessionDeviceName",
+        "type": "string",
+        "displayName": "InitiatingProcessRemoteSessionDeviceName",
+        "description": "Device name of the remote device from which the initiating process\u2019s RDP session was initiated.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessRemoteSessionIP",
+        "type": "string",
+        "displayName": "InitiatingProcessRemoteSessionIP",
+        "description": "IP address of the remote device from which the initiating process\u2019s RDP session was initiated.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "SourceSystem",
+        "type": "string",
+        "displayName": "SourceSystem",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      }
+    ]
+  },
+  {
+    "name": "DeviceNetworkInfo_CL",
+    "columns": [
+      {
+        "name": "ConnectedNetworks",
+        "type": "dynamic",
+        "displayName": "ConnectedNetworks",
+        "description": "Networks that the adapter is connected to. Each JSON element in the array contains the network name, category (public, private or domain), a description, and a flag indicating if it is connected publicly to the internet.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "DefaultGateways",
+        "type": "dynamic",
+        "displayName": "DefaultGateways",
+        "description": "Default gateway addresses in JSON array format.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "DeviceId",
+        "type": "string",
+        "displayName": "DeviceId",
+        "description": "Unique identifier for the device in the service.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "DeviceName",
+        "type": "string",
+        "displayName": "DeviceName",
+        "description": "Fully qualified domain name (FQDN) of the device.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "DnsAddresses",
+        "type": "dynamic",
+        "displayName": "DnsAddresses",
+        "description": "DNS server addresses in JSON array format.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "IPAddresses",
+        "type": "dynamic",
+        "displayName": "IPAddresses",
+        "description": "JSON array containing all the IP addresses assigned to the adapter, along with their respective subnet prefix and the IP class (RFC 1918 & RFC 4291).",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "IPv4Dhcp",
+        "type": "string",
+        "displayName": "IPv4Dhcp",
+        "description": "IPv4 address of the configured DHCP server.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "IPv6Dhcp",
+        "type": "string",
+        "displayName": "IPv6Dhcp",
+        "description": "IPv6 address of the configured DHCP server.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "MacAddress",
+        "type": "string",
+        "displayName": "MacAddress",
+        "description": "MAC address of the network adapter.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "MachineGroup",
+        "type": "string",
+        "displayName": "MachineGroup",
+        "description": "The machine-group which this machine is associated to. This group is used by role-based access control to determine access to the machine.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "NetworkAdapterName",
+        "type": "string",
+        "displayName": "NetworkAdapterName",
+        "description": "Name of the network adapter.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "NetworkAdapterStatus",
+        "type": "string",
+        "displayName": "NetworkAdapterStatus",
+        "description": "Operational status of the network adapter.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "NetworkAdapterType",
+        "type": "string",
+        "displayName": "NetworkAdapterType",
+        "description": "Network adapter type.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "ReportId",
+        "type": "long",
+        "displayName": "ReportId",
+        "description": "Event identifier based on a repeating counter. To identify unique events, this column must be used in conjunction with the DeviceName and/or Timestamp columns.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "TimeGenerated",
+        "type": "datetime",
+        "displayName": "TimeGenerated",
+        "description": "Date and time the event was recorded by the MDE agent on the endpoint.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "Timestamp",
+        "type": "datetime",
+        "displayName": "Timestamp",
+        "description": "Date and time the event was recorded by the MDE agent on the endpoint. This is identical to TimeGenerated and added for query portability from MDE Advanced Hunting.",
+        "isDefaultDisplay": true,
+        "isHidden": true
+      },
+      {
+        "name": "TunnelType",
+        "type": "string",
+        "displayName": "TunnelType",
+        "description": "Tunneling protocol, when the interface is used for this purpose, for example 6to4, Teredo, ISATAP, PPTP, SSTP, and SSH.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "NetworkAdapterVendor",
+        "type": "string",
+        "displayName": "NetworkAdapterVendor",
+        "description": "Name of the manufacturer or vendor of the network adapter.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "SourceSystem",
+        "type": "string",
+        "displayName": "SourceSystem",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      }
+    ]
+  },
+  {
+    "name": "DeviceProcessEvents_CL",
+    "columns": [
+      {
+        "name": "AccountDomain",
+        "type": "string",
+        "displayName": "AccountDomain",
+        "description": "Domain of the account.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "AccountName",
+        "type": "string",
+        "displayName": "AccountName",
+        "description": "User name of the account.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "AccountObjectId",
+        "type": "string",
+        "displayName": "AccountObjectId",
+        "description": "Unique identifier for the account in Azure AD.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "AccountSid",
+        "type": "string",
+        "displayName": "AccountSid",
+        "description": "Security Identifier (SID) of the account.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "AccountUpn",
+        "type": "string",
+        "displayName": "AccountUpn",
+        "description": "User principal name (UPN) of the account.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "ActionType",
+        "type": "string",
+        "displayName": "ActionType",
+        "description": "Type of activity that triggered the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "AdditionalFields",
+        "type": "dynamic",
+        "displayName": "AdditionalFields",
+        "description": "Additional information about the entity or event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "AppGuardContainerId",
+        "type": "string",
+        "displayName": "AppGuardContainerId",
+        "description": "Identifier for the virtualized container used by Application Guard to isolate browser activity.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "DeviceId",
+        "type": "string",
+        "displayName": "DeviceId",
+        "description": "Unique identifier for the device in the service.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "DeviceName",
+        "type": "string",
+        "displayName": "DeviceName",
+        "description": "Fully qualified domain name (FQDN) of the device.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "FileName",
+        "type": "string",
+        "displayName": "FileName",
+        "description": "Name of the file that the recorded action was applied to.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "FolderPath",
+        "type": "string",
+        "displayName": "FolderPath",
+        "description": "Folder containing the file that the recorded action was applied to.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "FileSize",
+        "type": "long",
+        "displayName": "FileSize",
+        "description": "Size of the file in bytes.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessAccountDomain",
+        "type": "string",
+        "displayName": "InitiatingProcessAccountDomain",
+        "description": "Domain of the account that ran the process responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessAccountName",
+        "type": "string",
+        "displayName": "InitiatingProcessAccountName",
+        "description": "User name of the account that ran the process responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessAccountObjectId",
+        "type": "string",
+        "displayName": "InitiatingProcessAccountObjectId",
+        "description": "Azure AD object ID of the user account that ran the process responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessAccountSid",
+        "type": "string",
+        "displayName": "InitiatingProcessAccountSid",
+        "description": "Security Identifier (SID) of the account that ran the process responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessAccountUpn",
+        "type": "string",
+        "displayName": "InitiatingProcessAccountUpn",
+        "description": "User principal name (UPN) of the account that ran the process responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessCommandLine",
+        "type": "string",
+        "displayName": "InitiatingProcessCommandLine",
+        "description": "Command line used to run the process that initiated the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessFileName",
+        "type": "string",
+        "displayName": "InitiatingProcessFileName",
+        "description": "Name of the process that initiated the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessFolderPath",
+        "type": "string",
+        "displayName": "InitiatingProcessFolderPath",
+        "description": "Folder containing the process (image file) that initiated the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessId",
+        "type": "long",
+        "displayName": "InitiatingProcessId",
+        "description": "Process ID (PID) of the process that initiated the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessIntegrityLevel",
+        "type": "string",
+        "displayName": "InitiatingProcessIntegrityLevel",
+        "description": "Integrity level of the process that initiated the event. Windows assigns integrity levels to processes based on certain characteristics, such as if they were launched from an internet download. These integrity levels influence permissions to resources..",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessLogonId",
+        "type": "long",
+        "displayName": "InitiatingProcessLogonId",
+        "description": "Identifier for a logon session of the process that initiated the event. This identifier is unique on the same machine only between restarts..",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessMD5",
+        "type": "string",
+        "displayName": "InitiatingProcessMD5",
+        "description": "MD5 hash of the process (image file) that initiated the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessParentFileName",
+        "type": "string",
+        "displayName": "InitiatingProcessParentFileName",
+        "description": "Name of the parent process that spawned the process responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessParentId",
+        "type": "long",
+        "displayName": "InitiatingProcessParentId",
+        "description": "Process ID (PID) of the parent process that spawned the process responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessSHA1",
+        "type": "string",
+        "displayName": "InitiatingProcessSHA1",
+        "description": "SHA-1 hash of the process (image file) that initiated the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessSHA256",
+        "type": "string",
+        "displayName": "InitiatingProcessSHA256",
+        "description": "SHA-256 hash of the process (image file) that initiated the event. In some cases this column may not be populated - please use the InitiatingProcessSHA1 column instead.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessTokenElevation",
+        "type": "string",
+        "displayName": "InitiatingProcessTokenElevation",
+        "description": "Token type indicating the presence or absence of User Access Control (UAC) privilege elevation applied to the process that initiated the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessFileSize",
+        "type": "long",
+        "displayName": "InitiatingProcessFileSize",
+        "description": "The size of the file (bytes) that ran the process responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessVersionInfoCompanyName",
+        "type": "string",
+        "displayName": "InitiatingProcessVersionInfoCompanyName",
+        "description": "The company name in version information (image file) responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessVersionInfoProductName",
+        "type": "string",
+        "displayName": "InitiatingProcessVersionInfoProductName",
+        "description": "The product name in version information (image file) responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessVersionInfoProductVersion",
+        "type": "string",
+        "displayName": "InitiatingProcessVersionInfoProductVersion",
+        "description": "The product version in version information (image file) responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessVersionInfoInternalFileName",
+        "type": "string",
+        "displayName": "InitiatingProcessVersionInfoInternalFileName",
+        "description": "The internal file name in version information (image file) responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessVersionInfoOriginalFileName",
+        "type": "string",
+        "displayName": "InitiatingProcessVersionInfoOriginalFileName",
+        "description": "The original file name in version information (image file) responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessVersionInfoFileDescription",
+        "type": "string",
+        "displayName": "InitiatingProcessVersionInfoFileDescription",
+        "description": "The description in version information (image file) responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "LogonId",
+        "type": "long",
+        "displayName": "LogonId",
+        "description": "Identifier for a logon session. This identifier is unique on the same machine only between restarts.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "MD5",
+        "type": "string",
+        "displayName": "MD5",
+        "description": "MD5 hash of the file that the recorded action was applied to.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "MachineGroup",
+        "type": "string",
+        "displayName": "MachineGroup",
+        "description": "Machine group of the machine. This group is used by role-based access control to determine access to the machine.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "ProcessCommandLine",
+        "type": "string",
+        "displayName": "ProcessCommandLine",
+        "description": "Command line used to create the new process.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "ProcessCreationTime",
+        "type": "datetime",
+        "displayName": "ProcessCreationTime",
+        "description": "Date and time the process was created.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "ProcessId",
+        "type": "long",
+        "displayName": "ProcessId",
+        "description": "Process ID (PID) of the newly created process.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "ProcessIntegrityLevel",
+        "type": "string",
+        "displayName": "ProcessIntegrityLevel",
+        "description": "Integrity level of the newly created process. Windows assigns integrity levels to processes based on certain characteristics, such as if they were launched from an internet downloaded. These integrity levels influence permissions to resources..",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "ProcessTokenElevation",
+        "type": "string",
+        "displayName": "ProcessTokenElevation",
+        "description": "Token type indicating the presence or absence of User Access Control (UAC) privilege elevation applied to the newly created process.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "ProcessVersionInfoCompanyName",
+        "type": "string",
+        "displayName": "ProcessVersionInfoCompanyName",
+        "description": "Company name from the version information of the newly created process.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "ProcessVersionInfoProductName",
+        "type": "string",
+        "displayName": "ProcessVersionInfoProductName",
+        "description": "Product name from the version information of the newly created process.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "ProcessVersionInfoProductVersion",
+        "type": "string",
+        "displayName": "ProcessVersionInfoProductVersion",
+        "description": "Product version from the version information of the newly created process.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "ProcessVersionInfoInternalFileName",
+        "type": "string",
+        "displayName": "ProcessVersionInfoInternalFileName",
+        "description": "Internal file name from the version information of the newly created process.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "ProcessVersionInfoOriginalFileName",
+        "type": "string",
+        "displayName": "ProcessVersionInfoOriginalFileName",
+        "description": "Original file name from the version information of the newly created process.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "ProcessVersionInfoFileDescription",
+        "type": "string",
+        "displayName": "ProcessVersionInfoFileDescription",
+        "description": "Description from the version information of the newly created process.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessSignerType",
+        "type": "string",
+        "displayName": "InitiatingProcessSignerType",
+        "description": "Type of file signer of the process (image file) that initiated the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessSignatureStatus",
+        "type": "string",
+        "displayName": "InitiatingProcessSignatureStatus",
+        "description": "Information about the signature status of the process (image file) that initiated the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "ReportId",
+        "type": "long",
+        "displayName": "ReportId",
+        "description": "Event identifier based on a repeating counter. To identify unique events, this column must be used in conjunction with the ComputerName and EventTime columns..",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "SHA1",
+        "type": "string",
+        "displayName": "SHA1",
+        "description": "SHA-1 hash of the file that the recorded action was applied to.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "SHA256",
+        "type": "string",
+        "displayName": "SHA256",
+        "description": "SHA-256 of the file that the recorded action was applied to.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "TimeGenerated",
+        "type": "datetime",
+        "displayName": "TimeGenerated",
+        "description": "Date and time the event was recorded by the MDE agent on the endpoint.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "Timestamp",
+        "type": "datetime",
+        "displayName": "Timestamp",
+        "description": "Date and time the event was recorded by the MDE agent on the endpoint. This is identical to TimeGenerated and added for query portability from MDATP Advanced Hunting.",
+        "isDefaultDisplay": true,
+        "isHidden": true
+      },
+      {
+        "name": "InitiatingProcessParentCreationTime",
+        "type": "datetime",
+        "displayName": "InitiatingProcessParentCreationTime",
+        "description": "Date and time when the parent of the process responsible for the event was started.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessCreationTime",
+        "type": "datetime",
+        "displayName": "InitiatingProcessCreationTime",
+        "description": "Date and time when the process that initiated the event was started.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "CreatedProcessSessionId",
+        "type": "long",
+        "displayName": "CreatedProcessSessionId",
+        "description": "Windows session ID of the created process.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "IsProcessRemoteSession",
+        "type": "boolean",
+        "displayName": "IsProcessRemoteSession",
+        "description": "Indicates whether the created process was run under a remote desktop protocol (RDP) session (true) or locally (false).",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "ProcessRemoteSessionDeviceName",
+        "type": "string",
+        "displayName": "ProcessRemoteSessionDeviceName",
+        "description": "Device name of the remote device from which the created process\u2019s RDP session was initiated.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "ProcessRemoteSessionIP",
+        "type": "string",
+        "displayName": "ProcessRemoteSessionIP",
+        "description": "IP address of the remote device from which the created process\u2019s RDP session was initiated.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessSessionId",
+        "type": "long",
+        "displayName": "InitiatingProcessSessionId",
+        "description": "Windows session ID of the initiating process.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "IsInitiatingProcessRemoteSession",
+        "type": "boolean",
+        "displayName": "IsInitiatingProcessRemoteSession",
+        "description": "Indicates whether the initiating process was run under a remote desktop protocol (RDP) session (true) or locally (false).",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessRemoteSessionDeviceName",
+        "type": "string",
+        "displayName": "InitiatingProcessRemoteSessionDeviceName",
+        "description": "Device name of the remote device from which the initiating process\u2019s RDP session was initiated.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessRemoteSessionIP",
+        "type": "string",
+        "displayName": "InitiatingProcessRemoteSessionIP",
+        "description": "IP address of the remote device from which the initiating process\u2019s RDP session was initiated.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "SourceSystem",
+        "type": "string",
+        "displayName": "SourceSystem",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      }
+    ]
+  },
+  {
+    "name": "DeviceRegistryEvents_CL",
+    "columns": [
+      {
+        "name": "ActionType",
+        "type": "string",
+        "displayName": "ActionType",
+        "description": "Type of activity that triggered the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "AppGuardContainerId",
+        "type": "string",
+        "displayName": "AppGuardContainerId",
+        "description": "Identifier for the virtualized container used by Application Guard to isolate browser activity.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "DeviceId",
+        "type": "string",
+        "displayName": "DeviceId",
+        "description": "Unique identifier for the device in the service.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "DeviceName",
+        "type": "string",
+        "displayName": "DeviceName",
+        "description": "Fully qualified domain name (FQDN) of the device.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessAccountDomain",
+        "type": "string",
+        "displayName": "InitiatingProcessAccountDomain",
+        "description": "Domain of the account that ran the initiating process.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessAccountName",
+        "type": "string",
+        "displayName": "InitiatingProcessAccountName",
+        "description": "User name of the account that ran the initiating process.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessAccountObjectId",
+        "type": "string",
+        "displayName": "InitiatingProcessAccountObjectId",
+        "description": "Azure AD object ID of the user account that ran the initiating process.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessAccountSid",
+        "type": "string",
+        "displayName": "InitiatingProcessAccountSid",
+        "description": "Security Identifier (SID) of the account that ran the initiating process.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessAccountUpn",
+        "type": "string",
+        "displayName": "InitiatingProcessAccountUpn",
+        "description": "User principal name (UPN) of the account that ran the initiating process.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessCommandLine",
+        "type": "string",
+        "displayName": "InitiatingProcessCommandLine",
+        "description": "Command line used to run the initiating process.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessFileName",
+        "type": "string",
+        "displayName": "InitiatingProcessFileName",
+        "description": "Name of the initiating process.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessFolderPath",
+        "type": "string",
+        "displayName": "InitiatingProcessFolderPath",
+        "description": "Folder containing the initiating process (image file).",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessId",
+        "type": "long",
+        "displayName": "InitiatingProcessId",
+        "description": "Process ID (PID) of the initiating process.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessIntegrityLevel",
+        "type": "string",
+        "displayName": "InitiatingProcessIntegrityLevel",
+        "description": "Integrity level of the initiating process. Windows assigns integrity levels to processes based on certain characteristics, such as if they were launched from an internet download. These integrity levels influence permissions to resources..",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessMD5",
+        "type": "string",
+        "displayName": "InitiatingProcessMD5",
+        "description": "MD5 hash of the initiating process (image file).",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessParentFileName",
+        "type": "string",
+        "displayName": "InitiatingProcessParentFileName",
+        "description": "Name of the parent process that spawned the initiating process.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessParentId",
+        "type": "long",
+        "displayName": "InitiatingProcessParentId",
+        "description": "Process ID (PID) of the parent process that spawned the initiating process.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessSHA1",
+        "type": "string",
+        "displayName": "InitiatingProcessSHA1",
+        "description": "SHA-1 hash of the initiating process (image file).",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessSHA256",
+        "type": "string",
+        "displayName": "InitiatingProcessSHA256",
+        "description": "SHA-256 hash of the initiating process (image file). In some cases this column may not be populated - please use the InitiatingProcessSHA1 column instead.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessTokenElevation",
+        "type": "string",
+        "displayName": "InitiatingProcessTokenElevation",
+        "description": "Token type indicating the presence or absence of User Access Control (UAC) privilege elevation applied to the initiating process.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessFileSize",
+        "type": "long",
+        "displayName": "InitiatingProcessFileSize",
+        "description": "The size of the file (bytes) that ran the process responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessVersionInfoCompanyName",
+        "type": "string",
+        "displayName": "InitiatingProcessVersionInfoCompanyName",
+        "description": "The company name in version information (image file) responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessVersionInfoProductName",
+        "type": "string",
+        "displayName": "InitiatingProcessVersionInfoProductName",
+        "description": "The product name in version information (image file) responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessVersionInfoProductVersion",
+        "type": "string",
+        "displayName": "InitiatingProcessVersionInfoProductVersion",
+        "description": "The product version in version information (image file) responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessVersionInfoInternalFileName",
+        "type": "string",
+        "displayName": "InitiatingProcessVersionInfoInternalFileName",
+        "description": "The internal file name in version information (image file) responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessVersionInfoOriginalFileName",
+        "type": "string",
+        "displayName": "InitiatingProcessVersionInfoOriginalFileName",
+        "description": "The original file name in version information (image file) responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessVersionInfoFileDescription",
+        "type": "string",
+        "displayName": "InitiatingProcessVersionInfoFileDescription",
+        "description": "The description in version information (image file) responsible for the event.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "MachineGroup",
+        "type": "string",
+        "displayName": "MachineGroup",
+        "description": "Machine group of the machine. This group is used by role-based access control to determine access to the machine.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "PreviousRegistryKey",
+        "type": "string",
+        "displayName": "PreviousRegistryKey",
+        "description": "Original registry key before it was modified.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "PreviousRegistryValueData",
+        "type": "string",
+        "displayName": "PreviousRegistryValueData",
+        "description": "Original data of the registry value before it was modified.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "PreviousRegistryValueName",
+        "type": "string",
+        "displayName": "PreviousRegistryValueName",
+        "description": "Original name of the registry value before it was modified.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "RegistryKey",
+        "type": "string",
+        "displayName": "RegistryKey",
+        "description": "Registry key that the recorded action was applied to.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "RegistryValueData",
+        "type": "string",
+        "displayName": "RegistryValueData",
+        "description": "Data of the registry value that the recorded action was applied to.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "RegistryValueName",
+        "type": "string",
+        "displayName": "RegistryValueName",
+        "description": "Name of the registry value that the recorded action was applied to.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "RegistryValueType",
+        "type": "string",
+        "displayName": "RegistryValueType",
+        "description": "Data type, such as binary or string, of the registry value that the recorded action was applied to.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "ReportId",
+        "type": "long",
+        "displayName": "ReportId",
+        "description": "Event identifier based on a repeating counter. To identify unique events, this column must be used in conjunction with the ComputerName and EventTime columns..",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "TimeGenerated",
+        "type": "datetime",
+        "displayName": "TimeGenerated",
+        "description": "Date and time the event was recorded by the MDE agent on the endpoint.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "Timestamp",
+        "type": "datetime",
+        "displayName": "Timestamp",
+        "description": "Date and time the event was recorded by the MDE agent on the endpoint. This is identical to TimeGenerated and added for query portability from MDATP Advanced Hunting.",
+        "isDefaultDisplay": true,
+        "isHidden": true
+      },
+      {
+        "name": "InitiatingProcessParentCreationTime",
+        "type": "datetime",
+        "displayName": "InitiatingProcessParentCreationTime",
+        "description": "Date and time when the parent of the process responsible for the event was started.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessCreationTime",
+        "type": "datetime",
+        "displayName": "InitiatingProcessCreationTime",
+        "description": "Date and time when the process that initiated the event was started.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessSessionId",
+        "type": "long",
+        "displayName": "InitiatingProcessSessionId",
+        "description": "Windows session ID of the initiating process.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "IsInitiatingProcessRemoteSession",
+        "type": "boolean",
+        "displayName": "IsInitiatingProcessRemoteSession",
+        "description": "Indicates whether the initiating process was run under a remote desktop protocol (RDP) session (true) or locally (false).",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessRemoteSessionDeviceName",
+        "type": "string",
+        "displayName": "InitiatingProcessRemoteSessionDeviceName",
+        "description": "Device name of the remote device from which the initiating process\u2019s RDP session was initiated.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "InitiatingProcessRemoteSessionIP",
+        "type": "string",
+        "displayName": "InitiatingProcessRemoteSessionIP",
+        "description": "IP address of the remote device from which the initiating process\u2019s RDP session was initiated.",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      },
+      {
+        "name": "SourceSystem",
+        "type": "string",
+        "displayName": "SourceSystem",
+        "isDefaultDisplay": true,
+        "isHidden": false
+      }
+    ]
+  }
+]

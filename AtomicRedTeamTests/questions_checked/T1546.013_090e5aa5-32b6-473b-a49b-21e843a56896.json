@@ -1,0 +1,34 @@
+{
+    "technique_id": "T1546.013",
+    "question_id": "090e5aa5-32b6-473b-a49b-21e843a56896",
+    "context": "A Windows host has recorded file modification events where the current user’s PowerShell profile was altered. An adversary appended content to that profile to launch a program automatically when PowerShell starts.",
+    "objective": "Determine exactly which command was appended to the PowerShell profile to launch the malicious executable.",
+    "technical_details": {
+        "command_analysis": "The attack uses PowerShell’s Add-Content cmdlet to insert a Start-Process invocation into the user profile, then exits PowerShell.",
+        "detection_approach": "Query file or content-append events (e.g., DeviceFileEvents) targeting paths matching the PowerShell profile and extract the appended line containing Start-Process."
+    },
+    "thinking_how_to_phrase_question_and_answer": "The question should steer the analyst toward examining profile modifications and isolating the newly added process launch statement; the answer is the appended Start-Process command.",
+    "prompt": "On a Windows endpoint, review any events showing content being appended to a user’s PowerShell profile that introduce new process launches. What exact command line was added?",
+    "answer": [
+        "Start-Process calc.exe"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where FileName in ('powershell.exe','pwsh.exe')\n  and ProcessCommandLine has 'Add-Content'\n  and ProcessCommandLine has '$profile'\n| extend appendedCommand = extract('(Start-Process [^; ]+)', 1, ProcessCommandLine)\n| where isnotempty(appendedCommand)\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, appendedCommand, ProcessCommandLine",
+    "KQL_validation_message": "KQL query validation successful: The 'appendedCommand' field in the provided query results includes the string 'Start-Process calc.exe', which matches the expected answer exactly. This shows that the PowerShell command to start calc.exe was present in the activity captured by the query. The evidence directly supports detection of the use of 'Start-Process calc.exe' as described.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "appendedCommand",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 16:53:15.351378+00:00",
+            "windows-vm",
+            "wipro",
+            "Start-Process calc.exe\\\"\"\npowershell",
+            "\"powershell.exe\" & {Add-Content $profile -Value \\\"\"\\\"\"\nAdd-Content $profile -Value \\\"\"Start-Process calc.exe\\\"\"\npowershell -Command exit}"
+        ]
+    ]
+}

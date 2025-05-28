@@ -1,0 +1,34 @@
+{
+    "technique_id": "T1049",
+    "question_id": "0940a971-809a-48f1-9c4d-b1d785e96ee5",
+    "context": "On a Windows endpoint, a command prompt was used to run a series of built-in networking utilities to enumerate connections, shares, and active sessions.",
+    "objective": "Determine which built-in Windows tool was executed to list active network connections.",
+    "technical_details": {
+        "command_analysis": "The atomic test runs three commands in order: netstat, net use, and net sessions. We need to pinpoint the specific call that returned the list of current network connections.",
+        "detection_approach": "Query DeviceProcessEvents for records where the initiating process is cmd.exe (command_prompt) and inspect ProcessCommandLine for the executed network discovery utilities."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Phrase the question to ask explicitly which utility listed active connections, ensuring the answer matches the exact command name as seen in logs.",
+    "prompt": "A user launched a Windows command prompt and executed a built-in utility to enumerate all active network connections. Using process creation logs, identify the exact tool that produced the list of current connections.",
+    "answer": [
+        "netstat"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "DeviceProcessEvents\n| where tolower(InitiatingProcessFileName) == 'cmd.exe'\n| where tolower(FileName) == 'netstat.exe'\n| where ProcessCommandLine has 'netstat'\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, FileName, ProcessCommandLine\n| order by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: The results contain an entry for 'FileName' as 'NETSTAT.EXE' and the 'ProcessCommandLine' includes 'netstat'. This aligns exactly with the expected answer of finding evidence related to 'netstat' usage, thus they provide the information needed to answer the detection question.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "FileName",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 17:04:52.463264+00:00",
+            "windows-vm",
+            "wipro",
+            "NETSTAT.EXE",
+            "netstat  "
+        ]
+    ]
+}

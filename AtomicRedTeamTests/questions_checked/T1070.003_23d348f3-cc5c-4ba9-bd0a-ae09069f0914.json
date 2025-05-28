@@ -1,0 +1,36 @@
+{
+    "technique_id": "T1070.003",
+    "question_id": "23d348f3-cc5c-4ba9-bd0a-ae09069f0914",
+    "context": "On a Linux host, an attacker attempted to cover their tracks by redirecting the bash history file to a black hole.",
+    "objective": "Detect processes that linked a user’s bash history to /dev/null to erase their command records.",
+    "technical_details": {
+        "command_analysis": "The adversary used the ln utility with force (-f) and symbolic (-s) flags to create a symlink from the history file to /dev/null.",
+        "detection_approach": "Search process creation logs for ln invocations referencing /dev/null and a history file path (e.g., .bash_history)."
+    },
+    "thinking_how_to_phrase_question_and_answer": "We need to ask about the specific tool used without naming the exact query fields, prompting the analyst to inspect process events where ln is executed against /dev/null.",
+    "prompt": "On a Linux system, you suspect someone erased their command history by linking the history file to /dev/null. Investigate process events and determine which utility was executed to achieve this.",
+    "answer": [
+        "ln"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "DeviceProcessEvents\n| where FileName == \"ln\"\n| where ProcessCommandLine contains \".bash_history\" and ProcessCommandLine contains \"/dev/null\"\n| where ProcessCommandLine has_any (\"-sf\", \"-fs\") or (ProcessCommandLine has \"-s\" and ProcessCommandLine has \"-f\")\n| project TimeGenerated, DeviceName, AccountName, FolderPath, ProcessCommandLine, ProcessId",
+    "KQL_validation_message": "KQL query validation successful: The results include detailed process execution data, including a command line 'ln -sf /dev/null /root/.bash_history' in the 'ProcessCommandLine' field, with '/usr/bin/ln' in the 'FolderPath'. The presence of the 'ln' binary and the actual command executed confirms that the query results provide the evidence required to identify 'ln' activity as expected.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "AccountName",
+            "FolderPath",
+            "ProcessCommandLine",
+            "ProcessId"
+        ],
+        [
+            "2025-05-07 17:05:48.991869+00:00",
+            "wirpo-test",
+            "root",
+            "/usr/bin/ln",
+            "ln -sf /dev/null /root/.bash_history",
+            21519
+        ]
+    ]
+}

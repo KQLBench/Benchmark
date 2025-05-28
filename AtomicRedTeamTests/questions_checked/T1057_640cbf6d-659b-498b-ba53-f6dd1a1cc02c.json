@@ -1,0 +1,36 @@
+{
+    "technique_id": "T1057",
+    "question_id": "640cbf6d-659b-498b-ba53-f6dd1a1cc02c",
+    "context": "During triage of Windows hosts, analysts suspect that an attacker may have used a WMI-based command-line tool to enumerate running processes. Process creation events are captured in the DeviceProcessEvents table.",
+    "objective": "Detect the use of WMIC for process discovery on Windows systems.",
+    "technical_details": {
+        "command_analysis": "Look for instances where wmic.exe appears in process creation logs, especially when invoked with process enumeration switches.",
+        "detection_approach": "Query DeviceProcessEvents for records where FileName matches the WMIC executable and examine associated command lines."
+    },
+    "thinking_how_to_phrase_question_and_answer": "We want to pinpoint the exact utility name recorded in the process creation logs.",
+    "prompt": "A malicious actor may attempt to list running processes on a Windows machine using a WMI-based command. Review the process creation events to find out which utility was invoked to perform this enumeration.",
+    "answer": [
+        "wmic.exe"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "DeviceProcessEvents\n| where (FileName == \"wmic.exe\" or tolower(ProcessCommandLine) contains \"wmic\")\n    and tolower(ProcessCommandLine) contains \"process\"\n    and (\n        tolower(ProcessCommandLine) contains \"list\"\n        or tolower(ProcessCommandLine) contains \"get\"\n        or tolower(ProcessCommandLine) contains \"/node\"\n        or tolower(ProcessCommandLine) contains \"/namespace\"\n    )\n| project TimeGenerated, DeviceName, AccountDomain, AccountName, FileName, ProcessCommandLine",
+    "KQL_validation_message": "KQL query validation successful: Although 'FileName' is 'cmd.exe', the 'ProcessCommandLine' field contains 'wmic process get /format:list', demonstrating that 'wmic.exe' was executed via the command line. This provides the evidence needed to identify the activity described by the expected answer of ['wmic.exe'].",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "AccountDomain",
+            "AccountName",
+            "FileName",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 16:33:32.598937+00:00",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            "cmd.exe",
+            "\"cmd.exe\" /c wmic process get /format:list"
+        ]
+    ]
+}

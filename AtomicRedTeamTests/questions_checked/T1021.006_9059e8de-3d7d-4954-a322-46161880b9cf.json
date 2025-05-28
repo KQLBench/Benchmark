@@ -1,0 +1,56 @@
+{
+    "technique_id": "T1021.006",
+    "question_id": "9059e8de-3d7d-4954-a322-46161880b9cf",
+    "context": "A threat actor executed a PowerShell command to enable remote management on a Windows endpoint.",
+    "objective": "Detect when and how PSRemoting was enabled by identifying the exact command used.",
+    "technical_details": {
+        "command_analysis": "The operation uses an elevated PowerShell session to run the Enable-PSRemoting cmdlet with force, which should appear in process creation or PowerShell event logs.",
+        "detection_approach": "Search Windows process or PowerShell logs for executions of PowerShell where the command line contains the Enable-PSRemoting parameter and correlate with elevated sessions."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question to ask for the exact cmdlet invocation, expecting the full command string as the answer.",
+    "prompt": "On Windows hosts, look through recent PowerShell execution records to find any elevated session where remote management was turned on. What exact command was run to enable PSRemoting?",
+    "answer": [
+        "Enable-PSRemoting -Force"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "// Detect PowerShell remoting enabled via Enable-PSRemoting -Force\nlet PSRemotingEvents = union DeviceProcessEvents, DeviceEvents\n| where FileName in~ (\"powershell.exe\", \"pwsh.exe\")\n| where ProcessCommandLine has \"Enable-PSRemoting\" and ProcessCommandLine has \"-Force\"\n// only elevated sessions\n| where ProcessTokenElevation == \"Elevated\" or InitiatingProcessTokenElevation == \"Elevated\" or ProcessIntegrityLevel == \"High\" or InitiatingProcessIntegrityLevel == \"High\"\n| project TimeGenerated,\n         DeviceName,\n         AccountName,\n         ProcessCommandLine,\n         FileName,\n         ProcessId,\n         InitiatingProcessAccountName,\n         InitiatingProcessCommandLine,\n         ProcessTokenElevation,\n         InitiatingProcessTokenElevation;\nPSRemotingEvents\n| order by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: Inspection of the 'ProcessCommandLine' field in both returned results shows that 'Enable-PSRemoting -Force' was executed, either as a standalone command or together with another command. This matches exactly with the expected activity and provides evidence for its occurrence, ensuring a 1:1 match with the expected answer.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "AccountName",
+            "ProcessCommandLine",
+            "FileName",
+            "ProcessId",
+            "InitiatingProcessAccountName",
+            "InitiatingProcessCommandLine",
+            "ProcessTokenElevation",
+            "InitiatingProcessTokenElevation"
+        ],
+        [
+            "2025-05-07 17:07:43.594473+00:00",
+            "windows-vm",
+            "wipro",
+            "\"powershell.exe\" & {Enable-PSRemoting -Force}",
+            "powershell.exe",
+            6432,
+            "wipro",
+            "powershell  -Command \"Invoke-AtomicTest T1021.006 -TestGuids 9059e8de-3d7d-4954-a322-46161880b9cf  -TimeoutSeconds 120 \"",
+            "TokenElevationTypeDefault",
+            "TokenElevationTypeDefault"
+        ],
+        [
+            "2025-05-07 17:07:23.288288+00:00",
+            "windows-vm",
+            "wipro",
+            "\"powershell.exe\" & {Enable-PSRemoting -Force\nInvoke-Command -ComputerName $env:COMPUTERNAME -ScriptBlock {whoami}}",
+            "powershell.exe",
+            10292,
+            "wipro",
+            "powershell  -Command \"Invoke-AtomicTest T1021.006 -TestGuids 5295bd61-bd7e-4744-9d52-85962a4cf2d6  -TimeoutSeconds 120 \"",
+            "TokenElevationTypeDefault",
+            "TokenElevationTypeDefault"
+        ]
+    ]
+}

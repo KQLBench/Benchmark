@@ -1,0 +1,170 @@
+{
+    "technique_id": "T1018",
+    "question_id": "2d5a61f5-0447-4be4-944a-1f8530ed6574",
+    "context": "An adversary on a Windows host wants to enumerate local network systems by dumping the ARP cache.",
+    "objective": "Detect when a Windows device executes a command to list ARP entries for remote system discovery.",
+    "technical_details": {
+        "command_analysis": "Look for process creation events where a command shell invokes the ARP utility with the '-a' option to enumerate the ARP cache.",
+        "detection_approach": "Query DeviceProcessEvents for instances of cmd.exe or arp.exe launching with arguments that include 'arp -a'."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question to ask which specific command was run to dump the ARP cache, with the expected answer matching the exact command string.",
+    "prompt": "On a Windows endpoint, review process creation logs to uncover when a built-in utility was used to reveal ARP entries. What exact command was used to list the ARP cache?",
+    "answer": [
+        "arp -a"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "DeviceProcessEvents\n| where ProcessCommandLine contains \"arp -a\"\n| project TimeGenerated, DeviceName, DeviceId, FileName, ProcessCommandLine, InitiatingProcessFileName, AccountName, AccountDomain",
+    "KQL_validation_message": "KQL query validation successful: Within the query results, there are rows where the 'FileName' is 'arp' and the 'ProcessCommandLine' is precisely 'arp -a'. This directly matches the expected answer and provides concrete evidence that the 'arp -a' command was run on the device. The presence of the command as both a process and as part of a larger shell execution confirms the activity described in the detection question.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "DeviceId",
+            "FileName",
+            "ProcessCommandLine",
+            "InitiatingProcessFileName",
+            "AccountName",
+            "AccountDomain"
+        ],
+        [
+            "2025-05-07 16:20:16.772932+00:00",
+            "wirpo-test",
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd",
+            "dash",
+            "sh -c 'if [ \"$(uname)\" = 'FreeBSD' ]; then cmd=\"netstat -Sp tcp\"; else cmd=\"netstat -ant\"; fi;\nif [ -x \"$(command -v arp)\" ]; then arp -a; else echo \"arp is missing from the machine. skipping...\"; fi;\nif [ -x \"$(command -v ifconfig)\" ]; then ifconfig; else echo \"ifconfig is missing from the machine. skipping...\"; fi;\nif [ -x \"$(command -v ip)\" ]; then ip addr; else echo \"ip is missing from the machine. skipping...\"; fi;\nif [ -x \"$(command -v netstat)\" ]; then $cmd | awk '{print $NF}' | grep -v '[[:lower:]]' | sort | uniq -c; else echo \"netstat is missing from the machine. skipping...\"; fi;'",
+            "pwsh",
+            "root",
+            "wirpo-test"
+        ],
+        [
+            "2025-05-07 16:20:16.775686+00:00",
+            "wirpo-test",
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd",
+            "dash",
+            "sh -c 'if [ \"$(uname)\" = 'FreeBSD' ]; then cmd=\"netstat -Sp tcp\"; else cmd=\"netstat -ant\"; fi;\nif [ -x \"$(command -v arp)\" ]; then arp -a; else echo \"arp is missing from the machine. skipping...\"; fi;\nif [ -x \"$(command -v ifconfig)\" ]; then ifconfig; else echo \"ifconfig is missing from the machine. skipping...\"; fi;\nif [ -x \"$(command -v ip)\" ]; then ip addr; else echo \"ip is missing from the machine. skipping...\"; fi;\nif [ -x \"$(command -v netstat)\" ]; then $cmd | awk '{print $NF}' | grep -v '[[:lower:]]' | sort | uniq -c; else echo \"netstat is missing from the machine. skipping...\"; fi;'",
+            "dash",
+            "root",
+            "wirpo-test"
+        ],
+        [
+            "2025-05-07 16:20:16.778844+00:00",
+            "wirpo-test",
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd",
+            "dash",
+            "sh -c 'if [ \"$(uname)\" = 'FreeBSD' ]; then cmd=\"netstat -Sp tcp\"; else cmd=\"netstat -ant\"; fi;\nif [ -x \"$(command -v arp)\" ]; then arp -a; else echo \"arp is missing from the machine. skipping...\"; fi;\nif [ -x \"$(command -v ifconfig)\" ]; then ifconfig; else echo \"ifconfig is missing from the machine. skipping...\"; fi;\nif [ -x \"$(command -v ip)\" ]; then ip addr; else echo \"ip is missing from the machine. skipping...\"; fi;\nif [ -x \"$(command -v netstat)\" ]; then $cmd | awk '{print $NF}' | grep -v '[[:lower:]]' | sort | uniq -c; else echo \"netstat is missing from the machine. skipping...\"; fi;'",
+            "dash",
+            "root",
+            "wirpo-test"
+        ],
+        [
+            "2025-05-07 16:20:16.779486+00:00",
+            "wirpo-test",
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd",
+            "dash",
+            "sh -c 'if [ \"$(uname)\" = 'FreeBSD' ]; then cmd=\"netstat -Sp tcp\"; else cmd=\"netstat -ant\"; fi;\nif [ -x \"$(command -v arp)\" ]; then arp -a; else echo \"arp is missing from the machine. skipping...\"; fi;\nif [ -x \"$(command -v ifconfig)\" ]; then ifconfig; else echo \"ifconfig is missing from the machine. skipping...\"; fi;\nif [ -x \"$(command -v ip)\" ]; then ip addr; else echo \"ip is missing from the machine. skipping...\"; fi;\nif [ -x \"$(command -v netstat)\" ]; then $cmd | awk '{print $NF}' | grep -v '[[:lower:]]' | sort | uniq -c; else echo \"netstat is missing from the machine. skipping...\"; fi;'",
+            "dash",
+            "root",
+            "wirpo-test"
+        ],
+        [
+            "2025-05-07 16:20:16.786954+00:00",
+            "wirpo-test",
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd",
+            "arp",
+            "arp -a",
+            "dash",
+            "root",
+            "wirpo-test"
+        ],
+        [
+            "2025-05-07 16:20:16.791169+00:00",
+            "wirpo-test",
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd",
+            "dash",
+            "sh -c 'if [ \"$(uname)\" = 'FreeBSD' ]; then cmd=\"netstat -Sp tcp\"; else cmd=\"netstat -ant\"; fi;\nif [ -x \"$(command -v arp)\" ]; then arp -a; else echo \"arp is missing from the machine. skipping...\"; fi;\nif [ -x \"$(command -v ifconfig)\" ]; then ifconfig; else echo \"ifconfig is missing from the machine. skipping...\"; fi;\nif [ -x \"$(command -v ip)\" ]; then ip addr; else echo \"ip is missing from the machine. skipping...\"; fi;\nif [ -x \"$(command -v netstat)\" ]; then $cmd | awk '{print $NF}' | grep -v '[[:lower:]]' | sort | uniq -c; else echo \"netstat is missing from the machine. skipping...\"; fi;'",
+            "dash",
+            "root",
+            "wirpo-test"
+        ],
+        [
+            "2025-05-07 16:20:16.791938+00:00",
+            "wirpo-test",
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd",
+            "dash",
+            "sh -c 'if [ \"$(uname)\" = 'FreeBSD' ]; then cmd=\"netstat -Sp tcp\"; else cmd=\"netstat -ant\"; fi;\nif [ -x \"$(command -v arp)\" ]; then arp -a; else echo \"arp is missing from the machine. skipping...\"; fi;\nif [ -x \"$(command -v ifconfig)\" ]; then ifconfig; else echo \"ifconfig is missing from the machine. skipping...\"; fi;\nif [ -x \"$(command -v ip)\" ]; then ip addr; else echo \"ip is missing from the machine. skipping...\"; fi;\nif [ -x \"$(command -v netstat)\" ]; then $cmd | awk '{print $NF}' | grep -v '[[:lower:]]' | sort | uniq -c; else echo \"netstat is missing from the machine. skipping...\"; fi;'",
+            "dash",
+            "root",
+            "wirpo-test"
+        ],
+        [
+            "2025-05-07 16:20:16.799696+00:00",
+            "wirpo-test",
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd",
+            "dash",
+            "sh -c 'if [ \"$(uname)\" = 'FreeBSD' ]; then cmd=\"netstat -Sp tcp\"; else cmd=\"netstat -ant\"; fi;\nif [ -x \"$(command -v arp)\" ]; then arp -a; else echo \"arp is missing from the machine. skipping...\"; fi;\nif [ -x \"$(command -v ifconfig)\" ]; then ifconfig; else echo \"ifconfig is missing from the machine. skipping...\"; fi;\nif [ -x \"$(command -v ip)\" ]; then ip addr; else echo \"ip is missing from the machine. skipping...\"; fi;\nif [ -x \"$(command -v netstat)\" ]; then $cmd | awk '{print $NF}' | grep -v '[[:lower:]]' | sort | uniq -c; else echo \"netstat is missing from the machine. skipping...\"; fi;'",
+            "dash",
+            "root",
+            "wirpo-test"
+        ],
+        [
+            "2025-05-07 16:20:16.800175+00:00",
+            "wirpo-test",
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd",
+            "dash",
+            "sh -c 'if [ \"$(uname)\" = 'FreeBSD' ]; then cmd=\"netstat -Sp tcp\"; else cmd=\"netstat -ant\"; fi;\nif [ -x \"$(command -v arp)\" ]; then arp -a; else echo \"arp is missing from the machine. skipping...\"; fi;\nif [ -x \"$(command -v ifconfig)\" ]; then ifconfig; else echo \"ifconfig is missing from the machine. skipping...\"; fi;\nif [ -x \"$(command -v ip)\" ]; then ip addr; else echo \"ip is missing from the machine. skipping...\"; fi;\nif [ -x \"$(command -v netstat)\" ]; then $cmd | awk '{print $NF}' | grep -v '[[:lower:]]' | sort | uniq -c; else echo \"netstat is missing from the machine. skipping...\"; fi;'",
+            "dash",
+            "root",
+            "wirpo-test"
+        ],
+        [
+            "2025-05-07 16:20:16.803494+00:00",
+            "wirpo-test",
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd",
+            "dash",
+            "sh -c 'if [ \"$(uname)\" = 'FreeBSD' ]; then cmd=\"netstat -Sp tcp\"; else cmd=\"netstat -ant\"; fi;\nif [ -x \"$(command -v arp)\" ]; then arp -a; else echo \"arp is missing from the machine. skipping...\"; fi;\nif [ -x \"$(command -v ifconfig)\" ]; then ifconfig; else echo \"ifconfig is missing from the machine. skipping...\"; fi;\nif [ -x \"$(command -v ip)\" ]; then ip addr; else echo \"ip is missing from the machine. skipping...\"; fi;\nif [ -x \"$(command -v netstat)\" ]; then $cmd | awk '{print $NF}' | grep -v '[[:lower:]]' | sort | uniq -c; else echo \"netstat is missing from the machine. skipping...\"; fi;'",
+            "dash",
+            "root",
+            "wirpo-test"
+        ],
+        [
+            "2025-05-07 16:20:16.803945+00:00",
+            "wirpo-test",
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd",
+            "dash",
+            "sh -c 'if [ \"$(uname)\" = 'FreeBSD' ]; then cmd=\"netstat -Sp tcp\"; else cmd=\"netstat -ant\"; fi;\nif [ -x \"$(command -v arp)\" ]; then arp -a; else echo \"arp is missing from the machine. skipping...\"; fi;\nif [ -x \"$(command -v ifconfig)\" ]; then ifconfig; else echo \"ifconfig is missing from the machine. skipping...\"; fi;\nif [ -x \"$(command -v ip)\" ]; then ip addr; else echo \"ip is missing from the machine. skipping...\"; fi;\nif [ -x \"$(command -v netstat)\" ]; then $cmd | awk '{print $NF}' | grep -v '[[:lower:]]' | sort | uniq -c; else echo \"netstat is missing from the machine. skipping...\"; fi;'",
+            "dash",
+            "root",
+            "wirpo-test"
+        ],
+        [
+            "2025-05-07 16:20:16.804362+00:00",
+            "wirpo-test",
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd",
+            "dash",
+            "sh -c 'if [ \"$(uname)\" = 'FreeBSD' ]; then cmd=\"netstat -Sp tcp\"; else cmd=\"netstat -ant\"; fi;\nif [ -x \"$(command -v arp)\" ]; then arp -a; else echo \"arp is missing from the machine. skipping...\"; fi;\nif [ -x \"$(command -v ifconfig)\" ]; then ifconfig; else echo \"ifconfig is missing from the machine. skipping...\"; fi;\nif [ -x \"$(command -v ip)\" ]; then ip addr; else echo \"ip is missing from the machine. skipping...\"; fi;\nif [ -x \"$(command -v netstat)\" ]; then $cmd | awk '{print $NF}' | grep -v '[[:lower:]]' | sort | uniq -c; else echo \"netstat is missing from the machine. skipping...\"; fi;'",
+            "dash",
+            "root",
+            "wirpo-test"
+        ],
+        [
+            "2025-05-07 16:31:22.654191+00:00",
+            "wirpo-test",
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd",
+            "dash",
+            "sh -c 'if [ \"$(uname)\" = 'FreeBSD' ]; then cmd=\"netstat -Sp tcp\"; else cmd=\"netstat -ant\"; fi;\nif [ -x \"$(command -v arp)\" ]; then arp -a; else echo \"arp is missing from the machine. skipping...\"; fi;\nif [ -x \"$(command -v ifconfig)\" ]; then ifconfig; else echo \"ifconfig is missing from the machine. skipping...\"; fi;\nif [ -x \"$(command -v ip)\" ]; then ip addr; else echo \"ip is missing from the machine. skipping...\"; fi;\nif [ -x \"$(command -v netstat)\" ]; then $cmd | awk '{print $NF}' | grep -v '[[:lower:]]' | sort | uniq -c; else echo \"netstat is missing from the machine. skipping...\"; fi;'",
+            "pwsh",
+            "root",
+            "wirpo-test"
+        ],
+        [
+            "2025-05-07 16:31:22.658323+00:00",
+            "wirpo-test",
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd",
+            "arp",
+            "arp -a",
+            "dash",
+            "root",
+            "wirpo-test"
+        ]
+    ]
+}

@@ -1,0 +1,38 @@
+{
+    "technique_id": "T1614.001",
+    "question_id": "837d609b-845e-4519-90ce-edc3b4b0e138",
+    "context": "On a Linux endpoint, an adversary executed a utility to enumerate the system's language and territory settings.",
+    "objective": "Determine which tool was used to discover the system locale.",
+    "technical_details": {
+        "command_analysis": "Review process execution or syslog records for processes that invoked a command without arguments but produced locale environment variables.",
+        "detection_approach": "Filter Linux process or syslog events to identify executions where the process name corresponds to a standard localization utility."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Phrase the question to ask which executable name surfaced in the logs when the system language was queried.",
+    "prompt": "Using Linux process or syslog logs, identify the executable that was run to output the system's locale information.",
+    "answer": [
+        "locale"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "let LinuxDevices = DeviceInfo\n| where OSPlatform == \"Linux\"\n| project DeviceId, DeviceName;\n\nlet LocaleProc = DeviceProcessEvents\n| where DeviceId in (LinuxDevices | project DeviceId)\n| where isnotempty(ProcessCommandLine)\n| extend args = split(trim(\" \", ProcessCommandLine), \" \")\n| where args[0] == \"locale\" and array_length(args) == 1\n| project TimeGenerated, DeviceName, AccountName = InitiatingProcessAccountName, CommandLine = ProcessCommandLine;\n\nlet LocaleSys = Syslog\n| where Computer in (LinuxDevices | project DeviceName)\n| where ProcessName == \"locale\"\n| where SyslogMessage has \"LANG=\" or SyslogMessage has \"LC_\"\n| project TimeGenerated, DeviceName = Computer, AccountName = \"\", CommandLine = SyslogMessage;\n\nLocaleProc\n| union LocaleSys\n| sort by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: The expected answer is 'locale', and the query results show rows where the 'CommandLine' column contains 'locale'. Thus, the results have the required data to identify evidence for the detection question about 'locale' usage.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "AccountName",
+            "CommandLine"
+        ],
+        [
+            "2025-05-07 17:03:59.885173+00:00",
+            "wirpo-test",
+            "root",
+            "locale"
+        ],
+        [
+            "2025-05-07 17:01:25.864081+00:00",
+            "wirpo-test",
+            "art",
+            "locale"
+        ]
+    ]
+}

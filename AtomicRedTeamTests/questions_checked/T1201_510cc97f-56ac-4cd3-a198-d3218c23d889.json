@@ -1,0 +1,44 @@
+{
+    "technique_id": "T1201",
+    "question_id": "510cc97f-56ac-4cd3-a198-d3218c23d889",
+    "context": "On a Windows endpoint, there are logs of elevated commands that may indicate an adversary exporting local security settings.",
+    "objective": "Detect when SecEdit.exe is used to export the SECURITYPOLICY area and determine what output file was created.",
+    "technical_details": {
+        "command_analysis": "The command launches secedit.exe with '/export /areas SECURITYPOLICY' and uses '/cfg' to specify an output .txt file.",
+        "detection_approach": "Search process creation events for FileName 'secedit.exe' and a command line containing both '/export' and '/cfg' to extract the configured output filename."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Phrase a question asking which filename was passed to SecEdit.exe for the policy export.",
+    "prompt": "On Windows, an elevated SecEdit.exe process was observed exporting the local security policy. Review the process execution records to identify the name of the text file where the policy was saved.",
+    "answer": [
+        "output_mysecpol.txt"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "union\n(\n    DeviceProcessEvents\n    | where ProcessCommandLine has_cs 'secedit.exe'\n        and ProcessCommandLine has '/export'\n        and ProcessCommandLine has 'SECURITYPOLICY'\n        and ProcessCommandLine has '/cfg'\n    | extend OutputFile = extract('/cfg[ ]+([^ ]+[.]txt)', 1, ProcessCommandLine)\n    | where isnotempty(OutputFile)\n    | project TimeGenerated, DeviceName, InitiatingProcessAccountName, ProcessId, ProcessCommandLine, OutputFile\n),\n(\n    DeviceEvents\n    | where ActionType == 'ProcessCreated'\n        and ProcessCommandLine has_cs 'secedit.exe'\n        and ProcessCommandLine has '/export'\n        and ProcessCommandLine has 'SECURITYPOLICY'\n    | extend OutputFile = extract('/cfg[ ]+([^ ]+[.]txt)', 1, ProcessCommandLine)\n    | where isnotempty(OutputFile)\n    | project TimeGenerated, DeviceName, InitiatingProcessAccountName, ProcessId, ProcessCommandLine, OutputFile\n)\n| order by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: The expected answer 'output_mysecpol.txt' is present in the 'OutputFile' column for both returned rows. In addition, the 'ProcessCommandLine' values confirm the creation of this file using 'secedit.exe'. The evidence directly matches the expected output file, indicating the activity described by the expected answer is present in the data.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "ProcessId",
+            "ProcessCommandLine",
+            "OutputFile"
+        ],
+        [
+            "2025-05-07 16:53:24.843754+00:00",
+            "windows-vm",
+            "wipro",
+            4940,
+            "secedit.exe  /export /areas SECURITYPOLICY /cfg output_mysecpol.txt",
+            "output_mysecpol.txt"
+        ],
+        [
+            "2025-05-07 16:53:24.798571+00:00",
+            "windows-vm",
+            "wipro",
+            956,
+            "\"cmd.exe\" /c secedit.exe /export /areas SECURITYPOLICY /cfg output_mysecpol.txt",
+            "output_mysecpol.txt"
+        ]
+    ]
+}

@@ -1,0 +1,34 @@
+{
+    "technique_id": "T1222.002",
+    "question_id": "ea79f937-4a4d-4348-ace6-9916aec453a4",
+    "context": "In a Linux environment, unusual recursive permission changes have been detected.",
+    "objective": "Identify which file or folder had its permissions modified by a chmod -R command.",
+    "technical_details": {
+        "command_analysis": "Inspect the InitiatingProcessCommandLine field in process execution logs to parse out the numeric mode and the target path.",
+        "detection_approach": "Query the process events table for entries where FileName is 'chmod' and CommandLine contains '-R', then extract the argument representing the file or folder path."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question to direct the analyst toward process execution logs filtered for recursive chmod invocations, and specify that the answer is the bare file or folder name extracted from the command arguments.",
+    "prompt": "On a Linux host, process execution logs show a chmod invocation with a recursive flag. Which file or folder was targeted by this recursive permission change?",
+    "answer": [
+        "T1222.002"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where FileName == \"chmod\" and ProcessCommandLine contains \"-R\"\n| extend TargetPath = extract(@\"chmod\\s+-R\\s+\\S+\\s+(\\S+)\", 1, ProcessCommandLine)\n| where isnotempty(TargetPath)\n| project TimeGenerated, DeviceName, AccountName, ProcessCommandLine, TargetPath",
+    "KQL_validation_message": "KQL query validation successful: The query results show a command ('chmod -R 755 /tmp/AtomicRedTeam/atomics/T1222.002') executed by the account 'root' on a target path clearly referencing T1222.002. This directly relates to the MITRE ATT&CK technique T1222.002 (Permission Modification), particularly because 'chmod' is used for permission modification and the path references T1222.002. The data therefore contains the necessary evidence to support detection of the expected behavior.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "AccountName",
+            "ProcessCommandLine",
+            "TargetPath"
+        ],
+        [
+            "2025-05-07 16:52:21.344089+00:00",
+            "wirpo-test",
+            "root",
+            "chmod -R 755 /tmp/AtomicRedTeam/atomics/T1222.002",
+            "/tmp/AtomicRedTeam/atomics/T1222.002"
+        ]
+    ]
+}

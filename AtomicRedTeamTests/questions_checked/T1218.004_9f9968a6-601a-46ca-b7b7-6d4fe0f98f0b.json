@@ -1,0 +1,38 @@
+{
+    "technique_id": "T1218.004",
+    "question_id": "9f9968a6-601a-46ca-b7b7-6d4fe0f98f0b",
+    "context": "On Windows systems, a .NET framework install utility is often leveraged by attackers to execute malicious assemblies via its Install method, leaving traces in process creation logs.",
+    "objective": "Identify the name of the utility that was invoked to install the .NET assembly.",
+    "technical_details": {
+        "command_analysis": "Attackers construct a command line using parameters like \"/action=install\" pointing to a compiled DLL; this entire invocation appears in process creation events.",
+        "detection_approach": "Search the DeviceProcessEvents table for entries where the ProcessCommandLine contains \"/action=install\" and inspect the FileName or ProcessCommandLine to extract the invoked executable name."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question to ask what tool name appears in the process creation log for the .NET install action, expecting a single-word answer matching the executable.",
+    "prompt": "Review Windows process creation events for evidence of a .NET assembly being installed. Which executable was launched with an \"/action=install\" argument?",
+    "answer": [
+        "InstallUtil"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where ProcessCommandLine contains \"/action=install\"\n| project TimeGenerated, DeviceName, FileName, ProcessCommandLine\n| sort by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: The expected answer is 'InstallUtil', which refers to the use of the InstallUtil tool. In the query results, the second row has 'InstallUtil.exe' in the 'FileName' field and the corresponding command line, confirming that activity involving InstallUtil was captured by the query. Therefore, the results provide evidence needed to answer the detection question.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "FileName",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 17:17:20.471740+00:00",
+            "windows-vm",
+            "InstallUtil.exe",
+            "\"InstallUtil.exe\" /logfile= /logtoconsole=false /installtype=notransaction /action=install C:\\Users\\wipro\\AppData\\Local\\Temp\\T1218.004.dll "
+        ],
+        [
+            "2025-05-07 17:17:19.211484+00:00",
+            "windows-vm",
+            "powershell.exe",
+            "\"powershell.exe\" & {# Import the required test harness function, Invoke-BuildAndInvokeInstallUtilAssembly\n. \\\"\"C:\\AtomicRedTeam\\atomics\\T1218.004\\src\\InstallUtilTestHarness.ps1\\\"\"\n\n$InstallerAssemblyDir = \\\"\"$Env:TEMP\\\\\"\"\n$InstallerAssemblyFileName = \\\"\"T1218.004.dll\\\"\"\n$InstallerAssemblyFullPath = Join-Path -Path $InstallerAssemblyDir -ChildPath $InstallerAssemblyFileName\n\n$CommandLine = \\\"\"/logfile= /logtoconsole=false /installtype=notransaction /action=install `\\\"\"$InstallerAssemblyFullPath`\\\"\"\\\"\"\n$ExpectedOutput = 'Constructor_Install_'\n\n$TestArgs = @{\n    OutputAssemblyDirectory = $InstallerAssemblyDir\n    OutputAssemblyFileName = $InstallerAssemblyFileName\n    InvocationMethod = 'Executable'\n    CommandLine = $CommandLine\n}\n\n$ActualOutput = Invoke-BuildAndInvokeInstallUtilAssembly @TestArgs\n\nif ($ActualOutput -ne $ExpectedOutput) {\n    throw @\\\"\"\nInstallUtil Install method execution test failure. Installer assembly execution output did not match the expected output.\nExpected: $ExpectedOutput\nActual: $ActualOutput\n\\\"\"@\n}}"
+        ]
+    ]
+}

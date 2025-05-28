@@ -1,0 +1,26 @@
+{
+    "technique_id": "T1562.004",
+    "question_id": "a4651931-ebbb-4cde-9363-ddf3d66214cb",
+    "context": "On Windows devices, observe registry modifications related to firewall policy.",
+    "objective": "Determine the exact registry value name that an attacker modified to disable the firewall.",
+    "technical_details": {
+        "command_analysis": "The attacker executed registry modification commands that targeted a policy value under WindowsFirewall profiles.",
+        "detection_approach": "Search DeviceRegistryEvents for entries where RegistryKey contains the WindowsFirewall policy path and inspect RegistryValueName."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Ask specifically which registry value name was changed when the firewall policy was modified, expecting a single term from the logs.",
+    "prompt": "Investigate Windows registry modification events to find the name of the registry value that was changed under the WindowsFirewall policy path when someone turned the firewall off.",
+    "answer": [
+        "EnableFirewall"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "DeviceRegistryEvents\n| where TimeGenerated >= ago(1d)\n| where RegistryKey contains \"SOFTWARE\\\\Policies\\\\Microsoft\\\\WindowsFirewall\\\\\"\n| where ActionType contains \"Value\"\n| project TimeGenerated, DeviceName, RegistryKey, RegistryValueName, RegistryValueData, InitiatingProcessAccountName, InitiatingProcessCommandLine\n| distinct RegistryValueName",
+    "KQL_validation_message": "KQL query validation successful: The query result contains a row with 'EnableFirewall', which matches the expected answer. This means the results provide direct evidence enabling detection or identification of the activity related to 'EnableFirewall'. The structure is consistent, with each row containing a single value under 'RegistryValueName'. Thus, it can answer the detection question fully.",
+    "KQL_query_results": [
+        [
+            "RegistryValueName"
+        ],
+        [
+            "EnableFirewall"
+        ]
+    ]
+}

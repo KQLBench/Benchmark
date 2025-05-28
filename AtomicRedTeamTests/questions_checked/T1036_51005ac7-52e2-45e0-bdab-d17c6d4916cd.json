@@ -1,0 +1,36 @@
+{
+    "technique_id": "T1036",
+    "question_id": "51005ac7-52e2-45e0-bdab-d17c6d4916cd",
+    "context": "On Windows systems, core executables like cmd.exe are normally stored and run from System32 or SysWOW64. Seeing these binaries copied to and executed from a non-system directory could indicate malicious persistence or evasion.",
+    "objective": "Determine which system executable was relocated to an unusual location and executed.",
+    "technical_details": {
+        "command_analysis": "A PowerShell command sequence copies cmd.exe from the Windows system directory to the All Users profile folder, then launches the copied executable before terminating.",
+        "detection_approach": "Search file event logs for creations where the source path is C:\\Windows\\System32\\cmd.exe and the destination is outside standard system directories, then correlate with process creation events for executions originating from that non-system path."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Consider which log types capture file copy operations and how to filter on source and destination paths to pinpoint when a core system executable is moved out of its normal directory.",
+    "prompt": "A Windows host shows a core command-line utility being duplicated from its System32 location to a user-profile folder and subsequently run. Identify the name of the executable that was copied.",
+    "answer": [
+        "cmd.exe"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "let CopiedExecutables = DeviceFileEvents\n| where TimeGenerated >= ago(7d)\n| where ActionType == \"FileCreated\"\n| where FileName == \"cmd.exe\"\n// Only consider creations outside of the normal system directories\n| where FolderPath !startswith @\"C:\\Windows\\System32\"\n    and FolderPath !startswith @\"C:\\Windows\\SysWOW64\"\n// Ensure the creating process came from a system directory (indicating a copy operation)\n| where InitiatingProcessFolderPath startswith @\"C:\\Windows\\System32\"\n    or InitiatingProcessFolderPath startswith @\"C:\\Windows\\SysWOW64\"\n| project DeviceId, DeviceName, FileName, DestinationPath = FolderPath, CopyTime = TimeGenerated;\n\nlet ExecutedCopies = DeviceProcessEvents\n| where ProcessCreationTime >= ago(7d)\n| where FileName == \"cmd.exe\"\n// Execution outside of the normal system directories\n| where FolderPath !startswith @\"C:\\Windows\\System32\"\n    and FolderPath !startswith @\"C:\\Windows\\SysWOW64\"\n| project DeviceId, FileName, DeviceName, DestinationPath = FolderPath, ExecTime = ProcessCreationTime, ProcessCommandLine;\n\nCopiedExecutables\n| join kind=inner ExecutedCopies on DeviceId, FileName, DestinationPath\n// Execution must follow the copy\n| where ExecTime >= CopyTime and ExecTime <= CopyTime + 5m\n| project DeviceName, FileName, DestinationPath, CopyTime, ExecTime, ProcessCommandLine",
+    "KQL_validation_message": "KQL query validation successful: The query results table includes a row where the 'FileName' column value is 'cmd.exe', which directly corresponds to the expected answer of ['cmd.exe']. This shows that the activity related to 'cmd.exe' was detected and the results would provide the evidence needed.",
+    "KQL_query_results": [
+        [
+            "DeviceName",
+            "FileName",
+            "DestinationPath",
+            "CopyTime",
+            "ExecTime",
+            "ProcessCommandLine"
+        ],
+        [
+            "windows-vm",
+            "cmd.exe",
+            "C:\\ProgramData\\cmd.exe",
+            "2025-05-07 17:17:06.814062+00:00",
+            "2025-05-07 17:17:06.927128+00:00",
+            "\"cmd.exe\" "
+        ]
+    ]
+}

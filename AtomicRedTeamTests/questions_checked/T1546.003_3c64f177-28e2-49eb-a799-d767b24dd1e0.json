@@ -1,0 +1,30 @@
+{
+    "technique_id": "T1546.003",
+    "question_id": "3c64f177-28e2-49eb-a799-d767b24dd1e0",
+    "context": "Windows hosts are susceptible to persistence mechanisms that leverage WMI Event Subscriptions to automatically launch payloads via the CommandLineEventConsumer class.",
+    "objective": "Detect when a PowerShell command creates a new WMI event consumer and determine which executable it is configured to invoke.",
+    "technical_details": {
+        "command_analysis": "The adversary issues PowerShell New-CimInstance calls to create __EventFilter and CommandLineEventConsumer objects, linking them via __FilterToConsumerBinding. The consumer’s CommandLineTemplate property holds the path to the payload executable.",
+        "detection_approach": "Review process creation or script execution logs for PowerShell invocations containing New-CimInstance and references to CommandLineEventConsumer. Extract the value of CommandLineTemplate from the command arguments to identify the persisted executable."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Phrase the question so the analyst knows they need to search for PowerShell-based WMI subscription creation in process logs and then extract the configured executable name.",
+    "prompt": "On a Windows endpoint, an attacker ran a PowerShell sequence to establish a WMI event subscription using CommandLineEventConsumer. Inspect the process or script execution logs to uncover which executable was set to run by this subscription.",
+    "answer": [
+        "notepad.exe"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "let lookback = ago(7d);\nunion DeviceProcessEvents, DeviceEvents\n| where TimeGenerated >= lookback\n| where FileName in~ ('powershell.exe','pwsh.exe') or InitiatingProcessFileName in~ ('powershell.exe','pwsh.exe')\n| extend cmdLine = coalesce(ProcessCommandLine, InitiatingProcessCommandLine)\n| where cmdLine has 'New-CimInstance' and cmdLine has 'CommandLineEventConsumer'\n| extend tmpl1 = extract(\"CommandLineTemplate.*?'([^']+)'\", 1, cmdLine), tmpl2 = extract('CommandLineTemplate.*?\\\"([^\\\"]+)\\\"', 1, cmdLine)\n| extend CommandLineTemplate = coalesce(tmpl1, tmpl2)\n| where isnotempty(CommandLineTemplate)\n| summarize Occurrences = count(), AffectedDevices = make_set(DeviceName) by CommandLineTemplate\n| order by Occurrences desc",
+    "KQL_validation_message": "KQL query validation successful: The query results contain a row with '$($Env:SystemRoot)\\System32\\notepad.exe\\' under 'CommandLineTemplate'. This pattern references notepad.exe, which matches the expected answer. Therefore, the results include the necessary data to identify activity involving notepad.exe.",
+    "KQL_query_results": [
+        [
+            "CommandLineTemplate",
+            "Occurrences",
+            "AffectedDevices"
+        ],
+        [
+            "$($Env:SystemRoot)\\System32\\notepad.exe\\",
+            1,
+            "[\"windows-vm\"]"
+        ]
+    ]
+}

@@ -1,0 +1,43 @@
+{
+    "technique_id": "T1112",
+    "question_id": "68254a85-aa42-4312-a695-38b7276307f8",
+    "context": "On Windows systems, adversaries may use PowerShell to modify the WDigest registry settings, causing Windows to store logon credentials in clear text.",
+    "objective": "Detect and surface the exact PowerShell command that changed the 'UseLogonCredential' value under the WDigest registry key.",
+    "technical_details": {
+        "command_analysis": "The attacker ran Set-ItemProperty in PowerShell to write a value of 1 to the 'UseLogonCredential' entry at HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\WDigest.",
+        "detection_approach": "Search DeviceRegistryEvents for entries where RegistryKey matches the WDigest path and RegistryValueName equals 'UseLogonCredential', then inspect InitiatingProcessCommandLine for the modifying command."
+    },
+    "thinking_how_to_phrase_question_and_answer": "How would you construct a KQL query to filter registry change events for modifications to the UseLogonCredential setting and retrieve the full PowerShell command used?",
+    "prompt": "On a Windows host, registry events reveal that PowerShell modified a value under the WDigest provider. Identify the exact command line that performed this registry change.",
+    "answer": [
+        "Set-ItemProperty -Force -Path  'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\WDigest' -Name  'UseLogonCredential' -Value '1' -ErrorAction Ignore",
+        "Set-ItemProperty -Force -Path  'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\WDigest' -Name  'UseLogonCredential' -Value '0' -ErrorAction Ignore"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceRegistryEvents\n| where TimeGenerated >= ago(90d)\n| where RegistryKey has \"WDigest\"\n| where RegistryValueName == \"UseLogonCredential\"\n| where RegistryValueData == \"1\"\n| where ActionType contains \"Set\"\n| where (tolower(InitiatingProcessFileName) endswith \"powershell.exe\" or tolower(InitiatingProcessFileName) endswith \"pwsh.exe\")\n| where InitiatingProcessCommandLine has \"Set-ItemProperty\"\n      and InitiatingProcessCommandLine has \"-Path\"\n      and InitiatingProcessCommandLine has \"WDigest\"\n      and InitiatingProcessCommandLine has \"-Name\"\n      and InitiatingProcessCommandLine has \"UseLogonCredential\"\n      and InitiatingProcessCommandLine has \"-Value\"\n      and InitiatingProcessCommandLine has \"1\"\n| project TimeGenerated, DeviceName, InitiatingProcessAccountDomain, InitiatingProcessAccountName, InitiatingProcessFileName, InitiatingProcessCommandLine, RegistryKey, RegistryValueName, RegistryValueData\n| order by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: The 'InitiatingProcessCommandLine' field in the results includes the complete expected powershell command as specified in the expected answer. Additionally, the related registry path, value name, and value data all match the details expected. Thus, the results provide clear evidence to uniquely identify the described activity.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountDomain",
+            "InitiatingProcessAccountName",
+            "InitiatingProcessFileName",
+            "InitiatingProcessCommandLine",
+            "RegistryKey",
+            "RegistryValueName",
+            "RegistryValueData"
+        ],
+        [
+            "2025-05-07 16:39:54.569574+00:00",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            "powershell.exe",
+            "\"powershell.exe\" & {Set-ItemProperty -Force -Path  'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\WDigest' -Name  'UseLogonCredential' -Value '1' -ErrorAction Ignore}",
+            "HKEY_LOCAL_MACHINE\\SYSTEM\\ControlSet001\\Control\\SecurityProviders\\WDigest",
+            "UseLogonCredential",
+            "1"
+        ]
+    ]
+}

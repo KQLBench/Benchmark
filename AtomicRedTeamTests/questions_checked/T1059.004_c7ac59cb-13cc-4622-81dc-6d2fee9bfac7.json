@@ -1,0 +1,164 @@
+{
+    "technique_id": "T1059.004",
+    "question_id": "c7ac59cb-13cc-4622-81dc-6d2fee9bfac7",
+    "context": "A Linux system administrator reviewing audit logs suspects that an unauthorized change was made to a user’s login shell. Standard shell change operations are logged by the system’s process monitoring.",
+    "objective": "Determine the exact command-line invocation that was used to change a user’s login shell.",
+    "technical_details": {
+        "command_analysis": "Examine process creation records for instances where the shell-change utility is invoked, then extract the full command line.",
+        "detection_approach": "Filter process event logs for the shell modification tool and inspect its parameters to identify the targeted user and shell path."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Phrase the question so it asks for the precise shell-change command as recorded in the logs, then provide that exact command string.",
+    "prompt": "On a Linux host, identify the process invocation that altered a user’s login shell. What was the full command used?",
+    "answer": [
+        "chsh -s /bin/sh art"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where TimeGenerated >= ago(30d)\n| where ProcessCommandLine contains 'chsh' and ProcessCommandLine contains '-s'\n| extend TargetShell = extract(\"-s\\\\s+(\\\\S+)\", 1, ProcessCommandLine), TargetUser = extract(\"-s\\\\s+\\\\S+\\\\s+(\\\\S+)\", 1, ProcessCommandLine)\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, TargetUser, TargetShell, ProcessCommandLine",
+    "KQL_validation_message": "KQL query validation successful: The expected answer was ['chsh -s /bin/sh art']. In the query results, multiple rows are present where the 'ProcessCommandLine' field contains exactly 'chsh -s /bin/sh art', with the 'TargetUser' being 'art' and 'TargetShell' being '/bin/sh'. This provides direct evidence that the 'chsh -s /bin/sh art' command was executed, satisfying the detection requirement.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "TargetUser",
+            "TargetShell",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 17:01:58.858222+00:00",
+            "wirpo-test",
+            "root",
+            "||",
+            "/bin/csh",
+            "bash -c '[ \"$(uname)\" = 'FreeBSD' ] && pw useradd art -g wheel -s /bin/csh || useradd -s /bin/bash art; cat /etc/passwd |grep ^art; chsh -s /bin/sh art; cat /etc/passwd |grep ^art'"
+        ],
+        [
+            "2025-05-07 17:01:58.868146+00:00",
+            "wirpo-test",
+            "root",
+            "||",
+            "/bin/csh",
+            "bash -c '[ \"$(uname)\" = 'FreeBSD' ] && pw useradd art -g wheel -s /bin/csh || useradd -s /bin/bash art; cat /etc/passwd |grep ^art; chsh -s /bin/sh art; cat /etc/passwd |grep ^art'"
+        ],
+        [
+            "2025-05-07 17:01:58.873246+00:00",
+            "wirpo-test",
+            "root",
+            "||",
+            "/bin/csh",
+            "bash -c '[ \"$(uname)\" = 'FreeBSD' ] && pw useradd art -g wheel -s /bin/csh || useradd -s /bin/bash art; cat /etc/passwd |grep ^art; chsh -s /bin/sh art; cat /etc/passwd |grep ^art'"
+        ],
+        [
+            "2025-05-07 17:01:59.085139+00:00",
+            "wirpo-test",
+            "root",
+            "||",
+            "/bin/csh",
+            "bash -c '[ \"$(uname)\" = 'FreeBSD' ] && pw useradd art -g wheel -s /bin/csh || useradd -s /bin/bash art; cat /etc/passwd |grep ^art; chsh -s /bin/sh art; cat /etc/passwd |grep ^art'"
+        ],
+        [
+            "2025-05-07 17:01:59.107458+00:00",
+            "wirpo-test",
+            "root",
+            "||",
+            "/bin/csh",
+            "bash -c '[ \"$(uname)\" = 'FreeBSD' ] && pw useradd art -g wheel -s /bin/csh || useradd -s /bin/bash art; cat /etc/passwd |grep ^art; chsh -s /bin/sh art; cat /etc/passwd |grep ^art'"
+        ],
+        [
+            "2025-05-07 17:01:59.122578+00:00",
+            "wirpo-test",
+            "root",
+            "||",
+            "/bin/csh",
+            "bash -c '[ \"$(uname)\" = 'FreeBSD' ] && pw useradd art -g wheel -s /bin/csh || useradd -s /bin/bash art; cat /etc/passwd |grep ^art; chsh -s /bin/sh art; cat /etc/passwd |grep ^art'"
+        ],
+        [
+            "2025-05-07 17:01:59.134651+00:00",
+            "wirpo-test",
+            "root",
+            "||",
+            "/bin/csh",
+            "bash -c '[ \"$(uname)\" = 'FreeBSD' ] && pw useradd art -g wheel -s /bin/csh || useradd -s /bin/bash art; cat /etc/passwd |grep ^art; chsh -s /bin/sh art; cat /etc/passwd |grep ^art'"
+        ],
+        [
+            "2025-05-07 17:01:59.150397+00:00",
+            "wirpo-test",
+            "root",
+            "||",
+            "/bin/csh",
+            "bash -c '[ \"$(uname)\" = 'FreeBSD' ] && pw useradd art -g wheel -s /bin/csh || useradd -s /bin/bash art; cat /etc/passwd |grep ^art; chsh -s /bin/sh art; cat /etc/passwd |grep ^art'"
+        ],
+        [
+            "2025-05-07 17:01:59.155312+00:00",
+            "wirpo-test",
+            "root",
+            "||",
+            "/bin/csh",
+            "bash -c '[ \"$(uname)\" = 'FreeBSD' ] && pw useradd art -g wheel -s /bin/csh || useradd -s /bin/bash art; cat /etc/passwd |grep ^art; chsh -s /bin/sh art; cat /etc/passwd |grep ^art'"
+        ],
+        [
+            "2025-05-07 17:01:59.175315+00:00",
+            "wirpo-test",
+            "root",
+            "||",
+            "/bin/csh",
+            "bash -c '[ \"$(uname)\" = 'FreeBSD' ] && pw useradd art -g wheel -s /bin/csh || useradd -s /bin/bash art; cat /etc/passwd |grep ^art; chsh -s /bin/sh art; cat /etc/passwd |grep ^art'"
+        ],
+        [
+            "2025-05-07 17:01:59.179076+00:00",
+            "wirpo-test",
+            "root",
+            "||",
+            "/bin/csh",
+            "bash -c '[ \"$(uname)\" = 'FreeBSD' ] && pw useradd art -g wheel -s /bin/csh || useradd -s /bin/bash art; cat /etc/passwd |grep ^art; chsh -s /bin/sh art; cat /etc/passwd |grep ^art'"
+        ],
+        [
+            "2025-05-07 17:01:59.202848+00:00",
+            "wirpo-test",
+            "root",
+            "art",
+            "/bin/sh",
+            "chsh -s /bin/sh art"
+        ],
+        [
+            "2025-05-07 17:01:59.258499+00:00",
+            "wirpo-test",
+            "root",
+            "art",
+            "/bin/sh",
+            "chsh -s /bin/sh art"
+        ],
+        [
+            "2025-05-07 17:01:59.263322+00:00",
+            "wirpo-test",
+            "root",
+            "art",
+            "/bin/sh",
+            "chsh -s /bin/sh art"
+        ],
+        [
+            "2025-05-07 17:01:59.265397+00:00",
+            "wirpo-test",
+            "root",
+            "art",
+            "/bin/sh",
+            "chsh -s /bin/sh art"
+        ],
+        [
+            "2025-05-07 17:01:59.270083+00:00",
+            "wirpo-test",
+            "root",
+            "art",
+            "/bin/sh",
+            "chsh -s /bin/sh art"
+        ],
+        [
+            "2025-05-07 17:01:59.274098+00:00",
+            "wirpo-test",
+            "root",
+            "art",
+            "/bin/sh",
+            "chsh -s /bin/sh art"
+        ]
+    ]
+}

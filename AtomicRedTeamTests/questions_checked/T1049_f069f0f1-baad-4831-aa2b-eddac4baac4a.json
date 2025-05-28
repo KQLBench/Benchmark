@@ -1,0 +1,38 @@
+{
+    "technique_id": "T1049",
+    "question_id": "f069f0f1-baad-4831-aa2b-eddac4baac4a",
+    "context": "A Windows environment where an adversary may leverage built-in PowerShell capabilities to enumerate active network connections.",
+    "objective": "Identify when the PowerShell cmdlet for TCP connection discovery was executed on a Windows host.",
+    "technical_details": {
+        "command_analysis": "The built-in PowerShell cmdlet Get-NetTCPConnection was invoked to list current TCP connections.",
+        "detection_approach": "Use DeviceProcessEvents to find powershell.exe executions containing the NetTCPConnection cmdlet. For example, a base KQL could be:\n```\nDeviceProcessEvents\n| where FileName == \"powershell.exe\"\n| where ProcessCommandLine contains \"Get-NetTCPConnection\"\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, ProcessCommandLine\n```"
+    },
+    "thinking_how_to_phrase_question_and_answer": "We want the analyst to query process events for PowerShell network discovery and report the exact cmdlet used. The answer is the specific Get-NetTCPConnection command.",
+    "prompt": "In a Windows log analytics workspace, search for PowerShell processes that were used to enumerate network connections. Determine which PowerShell cmdlet was executed to list active TCP connections.",
+    "answer": [
+        "Get-NetTCPConnection"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "DeviceProcessEvents\n| where FileName == \"powershell.exe\"\n| where ProcessCommandLine contains \"Get-NetTCPConnection\"\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, ProcessCommandLine",
+    "KQL_validation_message": "KQL query validation successful: The expected answer is 'Get-NetTCPConnection'. Analyzing the 'ProcessCommandLine' field in the results, both entries display PowerShell command lines invoking 'Get-NetTCPConnection'. The first directly executes 'Get-NetTCPConnection', while the second uses it within a script to obtain local process details. Therefore, the required evidence is present.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 17:04:59.746786+00:00",
+            "windows-vm",
+            "wipro",
+            "\"powershell.exe\" & {Get-NetTCPConnection}"
+        ],
+        [
+            "2025-05-07 17:12:30.644627+00:00",
+            "windows-vm",
+            "wipro",
+            "\"powershell.exe\" & {$ps = (Get-NetTCPConnection -LocalPort 3389 -State Established -ErrorAction Ignore)\nif($ps){$id = $ps[0].OwningProcess} else {$id = (Get-Process svchost)[0].Id }\nC:\\Windows\\System32\\rundll32.exe C:\\windows\\System32\\comsvcs.dll, MiniDump $id $env:TEMP\\svchost-exe.dmp full}"
+        ]
+    ]
+}

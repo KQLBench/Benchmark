@@ -1,0 +1,41 @@
+{
+    "technique_id": "T1070.004",
+    "question_id": "039b4b10-2900-404b-b67f-4b6d49aa6499",
+    "context": "On Linux endpoints, attackers may leverage the native shred utility to securely overwrite and then delete files, leaving minimal recoverable artifacts.",
+    "objective": "Detect a shred command execution that overwrote and removed a temporary file and determine the exact file that was shredded.",
+    "technical_details": {
+        "command_analysis": "Review process creation logs for shred invocations and parse its arguments to find the targeted file path.",
+        "detection_approach": "Query DeviceProcessEvents for FileName equals 'shred' and ProcessCommandLine containing '-u', then extract the file name parameter."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question to direct analysts toward process event logs where shred was run with the delete flag, and then ask for the specific file name argument.",
+    "prompt": "A Linux host executed a native utility to overwrite and then remove a temporary file in one step. Identify the name of the file that was securely deleted by this action.",
+    "answer": [
+        "victim-shred.txt"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "DeviceProcessEvents\n| where FileName == \"shred\"\n| where ProcessCommandLine contains \"-u\"\n| extend ShreddedFile = extract(@\"-u\\s+([^\\s]+)\", 1, ProcessCommandLine)\n| where isnotempty(ShreddedFile)\n| project TimeGenerated, DeviceName, AccountName, ProcessId, ShreddedFile\n| order by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: The expected answer 'victim-shred.txt' is present (with a '/tmp/' path prefix) in the 'ShreddedFile' field of the query results. Each result row shows an event involving the shredding of '/tmp/victim-shred.txt'. This provides direct evidence to answer the detection question about activities relating to 'victim-shred.txt'. The rows are structured with sufficient detail (including time, device, user, process, and file name) to support this determination.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "AccountName",
+            "ProcessId",
+            "ShreddedFile"
+        ],
+        [
+            "2025-05-07 16:33:00.025469+00:00",
+            "wirpo-test",
+            "root",
+            9287,
+            "/tmp/victim-shred.txt"
+        ],
+        [
+            "2025-05-07 16:22:14.838900+00:00",
+            "wirpo-test",
+            "root",
+            6660,
+            "/tmp/victim-shred.txt"
+        ]
+    ]
+}

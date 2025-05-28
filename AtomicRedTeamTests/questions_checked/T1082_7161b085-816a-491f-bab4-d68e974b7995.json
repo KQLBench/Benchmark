@@ -1,0 +1,44 @@
+{
+    "technique_id": "T1082",
+    "question_id": "7161b085-816a-491f-bab4-d68e974b7995",
+    "context": "An attacker or administrator on a Windows host lists all volume shadow copies by running a system utility with elevated privileges.",
+    "objective": "Detect instances where the Windows built-in tool for managing Volume Shadow Copies is invoked to enumerate existing snapshots.",
+    "technical_details": {
+        "command_analysis": "The attacker uses vssadmin.exe with the “list shadows” parameter to display all shadow copies.",
+        "detection_approach": "Search process creation logs for any executions of vssadmin.exe that include the “list shadows” argument in the command line."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Think about which log table captures process launches on Windows, and which fields record both the executable name and its full command line. How would you isolate just the shadow-copy listing calls?",
+    "prompt": "On Windows systems, identify when the built-in Shadow Copy utility is used to enumerate existing snapshots. What was the full command executed?",
+    "answer": [
+        "vssadmin.exe list shadows"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "DeviceProcessEvents\n| where FileName == \"vssadmin.exe\"\n| where ProcessCommandLine has \"list shadows\"\n| project TimeGenerated, DeviceName, AccountName, ProcessCommandLine, InitiatingProcessFileName, InitiatingProcessCommandLine",
+    "KQL_validation_message": "KQL query validation successful: Examining the content of the 'ProcessCommandLine' fields, both records include the string 'vssadmin.exe list shadows', which matches the expected answer exactly. The evidence required to verify this command was executed is present in the results, along with relevant metadata (timestamps, device, user, initiator). Therefore, the data required to answer the detection question is present and properly structured.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "AccountName",
+            "ProcessCommandLine",
+            "InitiatingProcessFileName",
+            "InitiatingProcessCommandLine"
+        ],
+        [
+            "2025-05-07 17:05:09.839655+00:00",
+            "windows-vm",
+            "wipro",
+            "\"vssadmin.exe\" list shadows",
+            "powershell.exe",
+            "\"powershell.exe\" & {if(!(vssadmin.exe list shadows | findstr \\\"\"No items found that satisfy the query.\\\"\")) { exit 0 } else { exit 1 }} "
+        ],
+        [
+            "2025-05-07 17:05:11.252672+00:00",
+            "windows-vm",
+            "wipro",
+            "\"vssadmin.exe\" list shadows",
+            "powershell.exe",
+            "\"powershell.exe\" & {if(!(vssadmin.exe list shadows | findstr \\\"\"No items found that satisfy the query.\\\"\")) { exit 0 } else { exit 1 }} "
+        ]
+    ]
+}

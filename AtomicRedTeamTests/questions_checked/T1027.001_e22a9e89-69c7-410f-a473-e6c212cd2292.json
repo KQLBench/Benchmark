@@ -1,0 +1,48 @@
+{
+    "technique_id": "T1027.001",
+    "question_id": "e22a9e89-69c7-410f-a473-e6c212cd2292",
+    "context": "In advanced evasion techniques, adversaries may pad binaries to manipulate their cryptographic hashes and bypass signature-based detection on Linux hosts.",
+    "objective": "Detect when a process execution padded an existing binary by one byte to alter its hash.",
+    "technical_details": {
+        "command_analysis": "The atomic test uses the command 'truncate -s +1' to append exactly one byte to the target binary file.",
+        "detection_approach": "Search DeviceProcessEvents for ProcessCommandLine entries invoking a file‐size increase with 'truncate -s +1' against any file path."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Ask which utility was invoked to perform the padding operation, expecting the single‐word tool name from the command.",
+    "prompt": "On a Linux system, spotting a file‐size change by exactly one byte can indicate hash tampering via padding. Review process execution logs for invocations that increased a file’s size by one byte. Which utility was invoked to perform this padding?",
+    "answer": [
+        "truncate"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where ProcessCommandLine has \"truncate -s +1\"\n| project TimeGenerated, DeviceName, AccountName, FileName, ProcessCommandLine",
+    "KQL_validation_message": "KQL query validation successful: The query results show a row where the FileName is 'truncate' and the ProcessCommandLine is 'truncate -s +1 /tmp/evil-binary', directly containing the term 'truncate' as specified in the expected answers. Additional rows show 'truncate' being called via 'sh -c', which also gives context for how the command was executed. Therefore, the required evidence is present to answer the detection question regarding the use of 'truncate'.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "AccountName",
+            "FileName",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 17:17:20.121521+00:00",
+            "wirpo-test",
+            "root",
+            "dash",
+            "sh -c \"truncate -s +1 /tmp/evil-binary #adds a byte to the file size\""
+        ],
+        [
+            "2025-05-07 17:17:20.123301+00:00",
+            "wirpo-test",
+            "root",
+            "dash",
+            "sh -c \"truncate -s +1 /tmp/evil-binary #adds a byte to the file size\""
+        ],
+        [
+            "2025-05-07 17:17:20.123522+00:00",
+            "wirpo-test",
+            "root",
+            "truncate",
+            "truncate -s +1 /tmp/evil-binary"
+        ]
+    ]
+}

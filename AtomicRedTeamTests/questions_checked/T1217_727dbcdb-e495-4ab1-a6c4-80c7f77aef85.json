@@ -1,0 +1,34 @@
+{
+    "technique_id": "T1217",
+    "question_id": "727dbcdb-e495-4ab1-a6c4-80c7f77aef85",
+    "context": "On a Windows system, a user’s Internet Explorer bookmarks are stored in the Favorites folder. An attacker might leverage the command prompt to enumerate these files.",
+    "objective": "Detect when the Windows command prompt is used to recursively list the contents of the Favorites directory, which could reveal Internet Explorer bookmarks.",
+    "technical_details": {
+        "command_analysis": "The command 'dir /s /b %USERPROFILE%\\Favorites' performs a recursive, bare-format directory listing of the current user’s Favorites folder, exposing all bookmark file names.",
+        "detection_approach": "Search process creation logs for command-line executions where cmd.exe or the command_prompt executor runs a directory listing targeting the Favorites folder."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Ask for the exact command line that was executed to list the Favorites folder contents.",
+    "prompt": "An attacker is suspected of using the Windows shell to enumerate a user’s Internet Explorer bookmarks via the Favorites folder. Identify the exact command they executed to perform this listing.",
+    "answer": [
+        "dir /s /b %USERPROFILE%\\Favorites"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "DeviceProcessEvents\n| where FileName == \"cmd.exe\"\n| where ProcessCommandLine has \"dir\" and ProcessCommandLine has \"/s\" and ProcessCommandLine has \"/b\" and ProcessCommandLine contains \"\\\\Favorites\"\n| project ProcessCreationTime, DeviceName, InitiatingProcessAccountDomain, InitiatingProcessAccountName, ProcessCommandLine",
+    "KQL_validation_message": "KQL query validation successful: The expected answer is the command 'dir /s /b %USERPROFILE%\\Favorites'. The query results provide a row where 'ProcessCommandLine' has the value '\"cmd.exe\" /c dir /s /b %USERPROFILE%\\Favorites', which clearly shows that the command of interest was executed. The information provided is sufficient to confirm this activity using the ProcessCommandLine column. Thus, the results contain the information necessary to answer the detection question and are mapped 1:1 with the expected command.",
+    "KQL_query_results": [
+        [
+            "ProcessCreationTime",
+            "DeviceName",
+            "InitiatingProcessAccountDomain",
+            "InitiatingProcessAccountName",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 17:12:57.686007+00:00",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            "\"cmd.exe\" /c dir /s /b %USERPROFILE%\\Favorites"
+        ]
+    ]
+}

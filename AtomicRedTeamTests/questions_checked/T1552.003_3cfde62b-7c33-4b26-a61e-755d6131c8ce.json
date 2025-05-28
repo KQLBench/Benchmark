@@ -1,0 +1,48 @@
+{
+    "technique_id": "T1552.003",
+    "question_id": "3cfde62b-7c33-4b26-a61e-755d6131c8ce",
+    "context": "On a Linux workstation, security monitoring captured a shell command that reads a user’s bash history, filters for sensitive keywords, and redirects the matches into a file.",
+    "objective": "Detect when an actor scans the bash history for specific terms and saves the results to a file.",
+    "technical_details": {
+        "command_analysis": "The adversary runs a shell pipeline that cats the .bash_history, applies grep with multiple expressions, and redirects output.",
+        "detection_approach": "Search process events for commands invoking ‘cat’ on bash_history piped to ‘grep’ and containing redirection to an output filename."
+    },
+    "thinking_how_to_phrase_question_and_answer": "We need to ask what filename was used as the destination for the filtered history results, expecting an exact match to the tool’s output file.",
+    "prompt": "A Linux user’s bash history was searched for patterns like ‘pass’ and ‘ssh’, and the matching lines were redirected into a new file. Determine the name of that file.",
+    "answer": [
+        "loot.txt"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where TimeGenerated >= ago(1d)\n| where ProcessCommandLine has 'cat' and ProcessCommandLine has '.bash_history' and ProcessCommandLine has '| grep' and ProcessCommandLine has '>'\n| extend OutputFile = extract(@\"(?:>{1,2})\\s*(\\S+)\", 1, ProcessCommandLine)\n| where isnotempty(OutputFile)\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, ProcessCommandLine, OutputFile",
+    "KQL_validation_message": "KQL query validation successful: The expected answer is 'loot.txt'. Each row in the query results has the OutputFile value '~/loot.txt\"', which, after trimming potential extraneous quotes, refers directly to 'loot.txt'. Therefore, the data contains the necessary information to confirm the presence or creation of the expected file and provides enough evidence to answer the detection question.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "ProcessCommandLine",
+            "OutputFile"
+        ],
+        [
+            "2025-05-07 16:59:02.525649+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c \"cat ~/.bash_history | grep -e '-p ' -e 'pass' -e 'ssh' > ~/loot.txt\"",
+            "~/loot.txt\""
+        ],
+        [
+            "2025-05-07 16:59:02.528284+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c \"cat ~/.bash_history | grep -e '-p ' -e 'pass' -e 'ssh' > ~/loot.txt\"",
+            "~/loot.txt\""
+        ],
+        [
+            "2025-05-07 16:59:02.528405+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c \"cat ~/.bash_history | grep -e '-p ' -e 'pass' -e 'ssh' > ~/loot.txt\"",
+            "~/loot.txt\""
+        ]
+    ]
+}

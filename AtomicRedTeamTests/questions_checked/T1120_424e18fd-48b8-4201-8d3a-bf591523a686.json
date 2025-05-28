@@ -1,0 +1,44 @@
+{
+    "technique_id": "T1120",
+    "question_id": "424e18fd-48b8-4201-8d3a-bf591523a686",
+    "context": "An attacker on a Windows host ran a command to enumerate all connected drives in an attempt to discover peripheral devices. Your environment captures process execution events from DeviceProcessEvents.",
+    "objective": "Identify when a built-in Windows utility was used to list all logical drives.",
+    "technical_details": {
+        "command_analysis": "The adversary invoked the Windows fsutil tool with the ‘fsinfo drives’ argument.",
+        "detection_approach": "Search the DeviceProcessEvents table for executions where FileName is fsutil.exe (or ProcessCommandLine contains ‘fsinfo drives’)."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Phrase the question so the analyst focuses on spotting the native tool leveraged for drive enumeration, and ensure the answer is the exact utility name.",
+    "prompt": "Review Windows process execution logs to find any native utility that was used to enumerate connected drives. Which utility was invoked?",
+    "answer": [
+        "fsutil"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "DeviceProcessEvents\n| where FileName == \"fsutil.exe\" or ProcessCommandLine contains \"fsinfo drives\"\n| project TimeGenerated, DeviceName, AccountName, FileName, ProcessCommandLine, ProcessId",
+    "KQL_validation_message": "KQL query validation successful: The 'FileName' column in both result rows has 'fsutil.exe', and the 'ProcessCommandLine' confirms commands run with 'fsutil'. This directly matches the expected answer, indicating 'fsutil' activity is present in the logs and can be identified from the results.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "AccountName",
+            "FileName",
+            "ProcessCommandLine",
+            "ProcessId"
+        ],
+        [
+            "2025-05-07 16:33:44.790228+00:00",
+            "windows-vm",
+            "wipro",
+            "fsutil.exe",
+            "fsutil  usn deletejournal /D C:",
+            5288
+        ],
+        [
+            "2025-05-07 16:33:51.999650+00:00",
+            "windows-vm",
+            "wipro",
+            "fsutil.exe",
+            "fsutil  usn createjournal m=1000 a=100 c:",
+            7552
+        ]
+    ]
+}

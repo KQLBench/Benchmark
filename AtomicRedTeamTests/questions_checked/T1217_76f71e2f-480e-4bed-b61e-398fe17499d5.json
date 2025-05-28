@@ -1,0 +1,36 @@
+{
+    "technique_id": "T1217",
+    "question_id": "76f71e2f-480e-4bed-b61e-398fe17499d5",
+    "context": "An adversary used a Windows command prompt to search across all user profiles for browser bookmark files on a compromised host.",
+    "objective": "Detect invocations of a Windows utility that recursively searched for bookmark files under C:\\Users.",
+    "technical_details": {
+        "command_analysis": "Search process event logs for executions of the 'where' command with the /R flag targeting C:\\Users and 'Bookmarks'.",
+        "detection_approach": "Query DeviceProcessEvents filtering on ProcessFileName and ProcessCommandLine for indicators of a recursive file search for 'Bookmarks'."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question to ask specifically which command-line utility was invoked for the bookmarks enumeration. The answer must match the exact tool name from the logs.",
+    "prompt": "On a Windows system, you notice a process that recursively enumerates files named 'Bookmarks' under every user profile directory. Which Windows command-line utility was used to perform that search?",
+    "answer": [
+        "where"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where TimeGenerated >= ago(1d)\n| where FileName =~ \"where.exe\"\n| where ProcessCommandLine has \"/R\" and ProcessCommandLine has \"C:\\\\Users\" and ProcessCommandLine has \"Bookmarks\"\n| project TimeGenerated, DeviceName, InitiatingProcessAccountDomain, InitiatingProcessAccountName, FileName, ProcessCommandLine",
+    "KQL_validation_message": "KQL query validation successful: The expected answer is 'where', indicating the detection question is likely about identifying the usage of the 'where' utility. The query result shows a record where the 'FileName' is 'where.exe' and the 'ProcessCommandLine' begins with 'where', meaning the evidence to answer the detection question is present.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountDomain",
+            "InitiatingProcessAccountName",
+            "FileName",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 17:12:43.007488+00:00",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            "where.exe",
+            "where  /R C:\\Users\\ Bookmarks"
+        ]
+    ]
+}

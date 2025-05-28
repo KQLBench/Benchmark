@@ -1,0 +1,32 @@
+{
+    "technique_id": "T1546.004",
+    "question_id": "94500ae1-7e31-47e3-886b-c328da46872f",
+    "context": "On a Linux host, an adversary appended a line to the current user’s .bash_profile to establish persistence.",
+    "objective": "Identify the exact command that was added to the .bash_profile file.",
+    "technical_details": {
+        "command_analysis": "Detection should look for file write events where the target file name is .bash_profile, capturing any appended text in the operation.",
+        "detection_approach": "Search DeviceFileEvents (or Syslog) for write or append actions on files named '.bash_profile' and extract the contents of the appended text."
+    },
+    "thinking_how_to_phrase_question_and_answer": "We want the prompt to ask for the full command string inserted into .bash_profile; the answer must exactly match that appended command.",
+    "prompt": "A suspicious file modification on a Linux device targeted the ~/.bash_profile file, apparently adding a new line. What was the full command string that was appended?",
+    "answer": [
+        "echo \"Hello from Atomic Red Team T1546.004\" > /tmp/T1546.004"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "let fileMods = DeviceFileEvents\n| where FileName == \".bash_profile\" and ActionType in (\"FileModified\",\"FileCreated\")\n| project DeviceName, Account = InitiatingProcessAccountName, PID = InitiatingProcessId, FileTime = TimeGenerated;\nlet echoProcs = DeviceProcessEvents\n| where ProcessCommandLine has \".bash_profile\" and ProcessCommandLine has \"echo\"\n| project DeviceName, Account = InitiatingProcessAccountName, PID = ProcessId, ProcTime = TimeGenerated, AddedCommand = ProcessCommandLine;\nechoProcs\n| join kind=inner fileMods on DeviceName, Account, PID\n| project Timestamp = coalesce(ProcTime, FileTime), DeviceName, Account, AddedCommand",
+    "KQL_validation_message": "KQL query validation successful: The AddedCommand field in the query results contains 'sh -c 'echo 'echo \"Hello from Atomic Red Team T1546.004\" > /tmp/T1546.004' >> ~/.bash_profile''. The inner command matches the expected answer exactly: 'echo \"Hello from Atomic Red Team T1546.004\" > /tmp/T1546.004'. This structure clearly reveals that the suspicious command is being echoed into the .bash_profile, fulfilling the detection requirement.",
+    "KQL_query_results": [
+        [
+            "Timestamp",
+            "DeviceName",
+            "Account",
+            "AddedCommand"
+        ],
+        [
+            "2025-05-07 17:01:08.279252+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c 'echo 'echo \"Hello from Atomic Red Team T1546.004\" > /tmp/T1546.004' >> ~/.bash_profile'"
+        ]
+    ]
+}

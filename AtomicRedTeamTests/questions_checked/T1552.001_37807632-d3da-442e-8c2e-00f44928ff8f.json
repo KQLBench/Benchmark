@@ -1,0 +1,36 @@
+{
+    "technique_id": "T1552.001",
+    "question_id": "37807632-d3da-442e-8c2e-00f44928ff8f",
+    "context": "On a Linux host, an attacker runs a filesystem search to locate AWS credential files by probing .aws directories.",
+    "objective": "Detect when a process is attempting to find AWS credentials files on a Linux system.",
+    "technical_details": {
+        "command_analysis": "The adversary executed a shell command: find <search_path>/.aws -name \"credentials\" -type f",
+        "detection_approach": "Search process execution logs for 'find' commands targeting '.aws' directories and filtering for files named 'credentials' using DeviceProcessEvents or file access in DeviceFileEvents."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Phrase the question to pinpoint exactly which filename was being searched for by the attacker.",
+    "prompt": "A Linux system shows a 'find' command used to search within .aws directories. Which specific AWS credential filename was the attacker attempting to locate?",
+    "answer": [
+        "credentials"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "let LinuxDevices = DeviceInfo\n| where OSPlatform == \"Linux\"\n| distinct DeviceId;\n\nlet FindCredSearch = DeviceProcessEvents\n| where DeviceId in (LinuxDevices)\n    and FileName == \"find\"\n    and ProcessCommandLine has \".aws\"\n    and ProcessCommandLine has \"credentials\"\n| project TimeGenerated, DeviceName, AccountName = InitiatingProcessAccountName, FileName, ProcessCommandLine, DeviceId;\n\nlet FileCredAccess = DeviceFileEvents\n| where DeviceId in (LinuxDevices)\n    and FileName == \"credentials\"\n    and FolderPath has \".aws\"\n| project TimeGenerated, DeviceName, AccountName = InitiatingProcessAccountName, FileName = InitiatingProcessFileName, ProcessCommandLine = InitiatingProcessCommandLine, DeviceId;\n\nFindCredSearch\n| union FileCredAccess\n| sort by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: The 'ProcessCommandLine' field in the results shows the executed command: 'find //.aws -name credentials -type f'. This directly matches the expected answer regarding 'credentials' because it is clear evidence of someone looking for a file named 'credentials' (commonly containing sensitive information). Therefore, the query results provide the necessary evidence to detect the activity described by the expected answer.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "AccountName",
+            "FileName",
+            "ProcessCommandLine",
+            "DeviceId"
+        ],
+        [
+            "2025-05-07 17:10:02.193064+00:00",
+            "wirpo-test",
+            "root",
+            "find",
+            "find //.aws -name credentials -type f",
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd"
+        ]
+    ]
+}

@@ -1,0 +1,44 @@
+{
+    "technique_id": "T1112",
+    "question_id": "c0413fb5-33e2-40b7-9b6f-60b29f4a7a18",
+    "context": "An adversary on a Windows system has executed a registry modification to enable storage of cleartext logon credentials by changing an entry under the WDigest key. This action is logged in the registry event logs.",
+    "objective": "Detect unauthorized registry writes that configure Windows to store plaintext passwords and identify which value was modified.",
+    "technical_details": {
+        "command_analysis": "The attacker ran: reg add HKLM\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\WDigest /v UseLogonCredential /t REG_DWORD /d 1 /f",
+        "detection_approach": "Query DeviceRegistryEvents for registry value writes where RegistryKey ends with 'WDigest' and RegistryValueData equals '1' to pinpoint the modified entry."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Framed the question to guide the analyst toward examining DeviceRegistryEvents for a specific registry value change. The answer is the exact registry value name altered, pulled directly from the log data.",
+    "prompt": "On a Windows endpoint, review the registry write events to spot when the WDigest key is altered to permit plaintext credential storage. What registry value name was changed?",
+    "answer": [
+        "UseLogonCredential"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceRegistryEvents\n| where RegistryKey endswith @\"\\Control\\SecurityProviders\\WDigest\"\n| where RegistryValueData == \"1\"\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, InitiatingProcessCommandLine, RegistryValueName, RegistryValueData",
+    "KQL_validation_message": "KQL query validation successful: The query results contain records where the 'RegistryValueName' column is 'UseLogonCredential', matching the expected answer. Additionally, the command lines in the results demonstrate the modification of the 'UseLogonCredential' registry value, which is exactly the information needed to answer the detection question about changes to this setting.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "InitiatingProcessCommandLine",
+            "RegistryValueName",
+            "RegistryValueData"
+        ],
+        [
+            "2025-05-07 16:39:54.569574+00:00",
+            "windows-vm",
+            "wipro",
+            "\"powershell.exe\" & {Set-ItemProperty -Force -Path  'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\WDigest' -Name  'UseLogonCredential' -Value '1' -ErrorAction Ignore}",
+            "UseLogonCredential",
+            "1"
+        ],
+        [
+            "2025-05-07 16:42:30.578013+00:00",
+            "windows-vm",
+            "wipro",
+            "reg  add HKLM\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\WDigest /v UseLogonCredential /t REG_DWORD /d 1 /f",
+            "UseLogonCredential",
+            "1"
+        ]
+    ]
+}

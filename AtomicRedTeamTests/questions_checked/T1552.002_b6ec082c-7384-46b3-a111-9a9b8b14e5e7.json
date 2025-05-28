@@ -1,0 +1,33 @@
+{
+    "technique_id": "T1552.002",
+    "question_id": "b6ec082c-7384-46b3-a111-9a9b8b14e5e7",
+    "context": "In a Windows environment, an adversary is probing the registry for stored credentials by searching for keys containing the word “password.”",
+    "objective": "Identify the exact command line used to scan the registry for credential entries.",
+    "technical_details": {
+        "command_analysis": "The detection will hinge on locating process execution events where reg.exe is invoked with query parameters targeting 'password' entries.",
+        "detection_approach": "Search the DeviceProcessEvents table for ProcessCommandLine values that include 'reg query', '/f password', and '/t REG_SZ'."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Phrase the question to lead the analyst toward inspecting process execution logs for registry query commands and ensure the answer matches the exact logged command string.",
+    "prompt": "On Windows endpoints, find the registry enumeration activity that was used to locate password entries. What was the full command line executed?",
+    "answer": [
+        "reg query HKLM /f password /t REG_SZ /s",
+        "reg query HKCU /f password /t REG_SZ /s"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "DeviceProcessEvents\n| where ProcessCommandLine contains \"reg query\" and ProcessCommandLine contains \"/f password\" and ProcessCommandLine contains \"/t REG_SZ\"\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, ProcessCommandLine\n",
+    "KQL_validation_message": "KQL query validation successful: Reviewing the results, the 'ProcessCommandLine' field holds the value: '\"cmd.exe\" /c reg query HKLM /f password /t REG_SZ /s & reg query HKCU /f password /t REG_SZ /s'. This contains both expected commands ('reg query HKLM /f password /t REG_SZ /s' and 'reg query HKCU /f password /t REG_SZ /s') linked with a command concatenation. All necessary strings to meet the detection requirement are present in the structured results.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 17:04:08.109741+00:00",
+            "windows-vm",
+            "wipro",
+            "\"cmd.exe\" /c reg query HKLM /f password /t REG_SZ /s & reg query HKCU /f password /t REG_SZ /s"
+        ]
+    ]
+}

@@ -1,0 +1,38 @@
+{
+    "technique_id": "T1553.006",
+    "question_id": "bb6b51e1-ab92-45b5-aeea-e410d06405f8",
+    "context": "In a Windows environment, an adversary modified the system’s boot configuration to allow unsigned kernel drivers, potentially undermining platform integrity.",
+    "objective": "Determine the exact command executed to enable test signing mode on the target device.",
+    "technical_details": {
+        "command_analysis": "The attacker used a built-in Windows utility to alter boot configuration data, toggling a setting that permits unsigned drivers.",
+        "detection_approach": "Investigate registry modification events for changes to boot configuration keys or values associated with test signing, then trace back to the initiating process command line."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame a question that points analysts toward registry events tied to boot configuration changes without revealing the command syntax, and prompt them to extract the precise command executed.",
+    "prompt": "A Windows host shows registry modifications in its boot configuration store enabling test signing mode. Investigate which process made this change and identify the exact command it ran to turn on test signing.",
+    "answer": [
+        "bcdedit /set testsigning on"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where TimeGenerated >= ago(7d)\n| where FileName == \"bcdedit.exe\"\n| where ProcessCommandLine has \"/set testsigning on\"\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, ProcessCommandLine\n| order by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: The query results include two entries where the 'ProcessCommandLine' is 'bcdedit  /set testsigning on', matching the expected answer 'bcdedit /set testsigning on'. The additional whitespace between 'bcdedit' and '/set' does not affect the semantic meaning, so these results would provide the evidence needed for the detection.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 16:36:15.291593+00:00",
+            "windows-vm",
+            "wipro",
+            "bcdedit  /set testsigning on"
+        ],
+        [
+            "2025-05-07 16:25:32.648281+00:00",
+            "windows-vm",
+            "wipro",
+            "bcdedit  /set testsigning on"
+        ]
+    ]
+}

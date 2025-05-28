@@ -1,0 +1,48 @@
+{
+    "technique_id": "T1614.001",
+    "question_id": "07ce871a-b3c3-44a3-97fa-a20118fdc7c9",
+    "context": "On a Linux host, an adversary ran a command to report the system language settings.",
+    "objective": "Determine which utility was invoked to discover the system locale.",
+    "technical_details": {
+        "command_analysis": "Search process execution logs for a command that queries locale information.",
+        "detection_approach": "Filter DeviceProcessEvents for FileName or ProcessCommandLine entries related to the locale discovery command."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Phrase the question so that the analyst focuses on finding the name of the tool executed without giving away specific query syntax.",
+    "prompt": "During investigation of a Linux device, you see evidence of a process that reports system locale details. Identify the tool used.",
+    "answer": [
+        "localectl"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "DeviceProcessEvents\n| where FileName =~ \"localectl\" or ProcessCommandLine contains \"localectl\"\n| project TimeGenerated, DeviceName, FileName, ProcessCommandLine, AccountName\n| order by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: The query results have a row with 'FileName' as 'localectl' and matching command line invocation ('localectl status'), providing direct evidence for 'localectl' activity as expected in the answer. Additionally, other rows demonstrate 'localectl' executed via 'dash', further supporting visibility of this command. Thus, the results meet the requirements for the detection question.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "FileName",
+            "ProcessCommandLine",
+            "AccountName"
+        ],
+        [
+            "2025-05-07 17:03:56.997081+00:00",
+            "wirpo-test",
+            "localectl",
+            "localectl status",
+            "root"
+        ],
+        [
+            "2025-05-07 17:03:56.989496+00:00",
+            "wirpo-test",
+            "dash",
+            "sh -c \"localectl status\"",
+            "root"
+        ],
+        [
+            "2025-05-07 17:03:56.988909+00:00",
+            "wirpo-test",
+            "dash",
+            "sh -c \"localectl status\"",
+            "root"
+        ]
+    ]
+}

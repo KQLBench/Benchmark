@@ -1,0 +1,218 @@
+{
+    "technique_id": "T1201",
+    "question_id": "4588d243-f24e-4549-b2e3-e627acc089f6",
+    "context": "Security teams often need to detect when built-in Windows utilities are used to enumerate system configurations. A common example is extracting the local password policy.",
+    "objective": "Identify instances where the local password policy is listed via a command prompt on Windows endpoints.",
+    "technical_details": {
+        "command_analysis": "The built-in command `net accounts` is invoked to display password policy settings.",
+        "detection_approach": "Query DeviceProcessEvents for executions of net.exe with ‘accounts’ in the command line, and inspect related process metadata."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question to require pinpointing the exact command used, ensuring the analyst crafts a KQL query against process execution logs.",
+    "prompt": "Windows systems may be probed for their password policy settings using a native command-line tool. Determine which command was executed to list the local password policy on the target hosts.",
+    "answer": [
+        "net accounts"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "DeviceProcessEvents\n| where TimeGenerated >= ago(30d)\n| where FileName == \"net.exe\"\n      and ProcessCommandLine has_cs \"accounts\"\n| project TimeGenerated,\n          DeviceName,\n          AccountDomain,\n          AccountName,\n          InitiatingProcessFileName,\n          InitiatingProcessCommandLine,\n          ProcessCommandLine",
+    "KQL_validation_message": "KQL query validation successful: The expected answer is 'net accounts'. Reviewing the results, in the 'ProcessCommandLine' and 'InitiatingProcessCommandLine' fields, there are entries such as 'net accounts', 'net  accounts', and '\"net.exe\" accounts' (the latter is functionally equivalent to 'net accounts'). The use of cmd.exe and powershell.exe running these Net command variants directly corresponds to the activity of interest. Thus, these results would provide evidence needed to identify the detection question's activities.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "AccountDomain",
+            "AccountName",
+            "InitiatingProcessFileName",
+            "InitiatingProcessCommandLine",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 16:53:18.055514+00:00",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            "cmd.exe",
+            "\"cmd.exe\" /c net accounts",
+            "net  accounts"
+        ],
+        [
+            "2025-05-07 18:02:31.057134+00:00",
+            "windows-vm",
+            "nt authority",
+            "system",
+            "powershell.exe",
+            "powershell.exe -ExecutionPolicy AllSigned -NoProfile -NonInteractive -Command \"& {$OutputEncoding = [Console]::OutputEncoding =[System.Text.Encoding]::UTF8;$scriptFileStream = [System.IO.File]::Open('C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12864860.0.12864860-90e81dc09c586e6c503e353db9908a848420a1b5\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1', [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::Read);$calculatedHash = Microsoft.PowerShell.Utility\\Get-FileHash 'C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12864860.0.12864860-90e81dc09c586e6c503e353db9908a848420a1b5\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1' -Algorithm SHA256;if (!($calculatedHash.Hash -eq '94c1e276d15dc6e4a81b5e8481eecea4b3cd4b8c387cc0bc9a4415852ed0f365')) { exit 323;}; . 'C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12864860.0.12864860-90e81dc09c586e6c503e353db9908a848420a1b5\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1' }\"",
+            "\"net.exe\" accounts"
+        ],
+        [
+            "2025-05-07 18:02:31.154876+00:00",
+            "windows-vm",
+            "nt authority",
+            "system",
+            "powershell.exe",
+            "powershell.exe -ExecutionPolicy AllSigned -NoProfile -NonInteractive -Command \"& {$OutputEncoding = [Console]::OutputEncoding =[System.Text.Encoding]::UTF8;$scriptFileStream = [System.IO.File]::Open('C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12864860.0.12864860-90e81dc09c586e6c503e353db9908a848420a1b5\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1', [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::Read);$calculatedHash = Microsoft.PowerShell.Utility\\Get-FileHash 'C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12864860.0.12864860-90e81dc09c586e6c503e353db9908a848420a1b5\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1' -Algorithm SHA256;if (!($calculatedHash.Hash -eq '94c1e276d15dc6e4a81b5e8481eecea4b3cd4b8c387cc0bc9a4415852ed0f365')) { exit 323;}; . 'C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12864860.0.12864860-90e81dc09c586e6c503e353db9908a848420a1b5\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1' }\"",
+            "\"net.exe\" accounts"
+        ],
+        [
+            "2025-05-07 18:02:31.215009+00:00",
+            "windows-vm",
+            "nt authority",
+            "system",
+            "powershell.exe",
+            "powershell.exe -ExecutionPolicy AllSigned -NoProfile -NonInteractive -Command \"& {$OutputEncoding = [Console]::OutputEncoding =[System.Text.Encoding]::UTF8;$scriptFileStream = [System.IO.File]::Open('C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12864860.0.12864860-90e81dc09c586e6c503e353db9908a848420a1b5\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1', [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::Read);$calculatedHash = Microsoft.PowerShell.Utility\\Get-FileHash 'C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12864860.0.12864860-90e81dc09c586e6c503e353db9908a848420a1b5\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1' -Algorithm SHA256;if (!($calculatedHash.Hash -eq '94c1e276d15dc6e4a81b5e8481eecea4b3cd4b8c387cc0bc9a4415852ed0f365')) { exit 323;}; . 'C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12864860.0.12864860-90e81dc09c586e6c503e353db9908a848420a1b5\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1' }\"",
+            "\"net.exe\" accounts"
+        ],
+        [
+            "2025-05-07 18:02:31.634250+00:00",
+            "windows-vm",
+            "nt authority",
+            "system",
+            "powershell.exe",
+            "powershell.exe -ExecutionPolicy AllSigned -NoProfile -NonInteractive -Command \"& {$OutputEncoding = [Console]::OutputEncoding =[System.Text.Encoding]::UTF8;$scriptFileStream = [System.IO.File]::Open('C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12864860.0.12864860-90e81dc09c586e6c503e353db9908a848420a1b5\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1', [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::Read);$calculatedHash = Microsoft.PowerShell.Utility\\Get-FileHash 'C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12864860.0.12864860-90e81dc09c586e6c503e353db9908a848420a1b5\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1' -Algorithm SHA256;if (!($calculatedHash.Hash -eq '94c1e276d15dc6e4a81b5e8481eecea4b3cd4b8c387cc0bc9a4415852ed0f365')) { exit 323;}; . 'C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12864860.0.12864860-90e81dc09c586e6c503e353db9908a848420a1b5\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1' }\"",
+            "\"net.exe\" accounts"
+        ],
+        [
+            "2025-05-07 18:02:31.682777+00:00",
+            "windows-vm",
+            "nt authority",
+            "system",
+            "powershell.exe",
+            "powershell.exe -ExecutionPolicy AllSigned -NoProfile -NonInteractive -Command \"& {$OutputEncoding = [Console]::OutputEncoding =[System.Text.Encoding]::UTF8;$scriptFileStream = [System.IO.File]::Open('C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12864860.0.12864860-90e81dc09c586e6c503e353db9908a848420a1b5\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1', [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::Read);$calculatedHash = Microsoft.PowerShell.Utility\\Get-FileHash 'C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12864860.0.12864860-90e81dc09c586e6c503e353db9908a848420a1b5\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1' -Algorithm SHA256;if (!($calculatedHash.Hash -eq '94c1e276d15dc6e4a81b5e8481eecea4b3cd4b8c387cc0bc9a4415852ed0f365')) { exit 323;}; . 'C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12864860.0.12864860-90e81dc09c586e6c503e353db9908a848420a1b5\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1' }\"",
+            "\"net.exe\" accounts"
+        ],
+        [
+            "2025-05-07 18:02:32.196062+00:00",
+            "windows-vm",
+            "nt authority",
+            "system",
+            "powershell.exe",
+            "powershell.exe -ExecutionPolicy AllSigned -NoProfile -NonInteractive -Command \"& {$OutputEncoding = [Console]::OutputEncoding =[System.Text.Encoding]::UTF8;$scriptFileStream = [System.IO.File]::Open('C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12864860.0.12864860-90e81dc09c586e6c503e353db9908a848420a1b5\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1', [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::Read);$calculatedHash = Microsoft.PowerShell.Utility\\Get-FileHash 'C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12864860.0.12864860-90e81dc09c586e6c503e353db9908a848420a1b5\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1' -Algorithm SHA256;if (!($calculatedHash.Hash -eq '94c1e276d15dc6e4a81b5e8481eecea4b3cd4b8c387cc0bc9a4415852ed0f365')) { exit 323;}; . 'C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12864860.0.12864860-90e81dc09c586e6c503e353db9908a848420a1b5\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1' }\"",
+            "\"net.exe\" accounts"
+        ],
+        [
+            "2025-05-07 18:02:32.263665+00:00",
+            "windows-vm",
+            "nt authority",
+            "system",
+            "powershell.exe",
+            "powershell.exe -ExecutionPolicy AllSigned -NoProfile -NonInteractive -Command \"& {$OutputEncoding = [Console]::OutputEncoding =[System.Text.Encoding]::UTF8;$scriptFileStream = [System.IO.File]::Open('C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12864860.0.12864860-90e81dc09c586e6c503e353db9908a848420a1b5\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1', [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::Read);$calculatedHash = Microsoft.PowerShell.Utility\\Get-FileHash 'C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12864860.0.12864860-90e81dc09c586e6c503e353db9908a848420a1b5\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1' -Algorithm SHA256;if (!($calculatedHash.Hash -eq '94c1e276d15dc6e4a81b5e8481eecea4b3cd4b8c387cc0bc9a4415852ed0f365')) { exit 323;}; . 'C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12864860.0.12864860-90e81dc09c586e6c503e353db9908a848420a1b5\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1' }\"",
+            "\"net.exe\" accounts"
+        ],
+        [
+            "2025-05-07 18:02:32.307930+00:00",
+            "windows-vm",
+            "nt authority",
+            "system",
+            "powershell.exe",
+            "powershell.exe -ExecutionPolicy AllSigned -NoProfile -NonInteractive -Command \"& {$OutputEncoding = [Console]::OutputEncoding =[System.Text.Encoding]::UTF8;$scriptFileStream = [System.IO.File]::Open('C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12864860.0.12864860-90e81dc09c586e6c503e353db9908a848420a1b5\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1', [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::Read);$calculatedHash = Microsoft.PowerShell.Utility\\Get-FileHash 'C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12864860.0.12864860-90e81dc09c586e6c503e353db9908a848420a1b5\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1' -Algorithm SHA256;if (!($calculatedHash.Hash -eq '94c1e276d15dc6e4a81b5e8481eecea4b3cd4b8c387cc0bc9a4415852ed0f365')) { exit 323;}; . 'C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12864860.0.12864860-90e81dc09c586e6c503e353db9908a848420a1b5\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1' }\"",
+            "\"net.exe\" accounts"
+        ],
+        [
+            "2025-05-07 18:02:32.352199+00:00",
+            "windows-vm",
+            "nt authority",
+            "system",
+            "powershell.exe",
+            "powershell.exe -ExecutionPolicy AllSigned -NoProfile -NonInteractive -Command \"& {$OutputEncoding = [Console]::OutputEncoding =[System.Text.Encoding]::UTF8;$scriptFileStream = [System.IO.File]::Open('C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12864860.0.12864860-90e81dc09c586e6c503e353db9908a848420a1b5\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1', [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::Read);$calculatedHash = Microsoft.PowerShell.Utility\\Get-FileHash 'C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12864860.0.12864860-90e81dc09c586e6c503e353db9908a848420a1b5\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1' -Algorithm SHA256;if (!($calculatedHash.Hash -eq '94c1e276d15dc6e4a81b5e8481eecea4b3cd4b8c387cc0bc9a4415852ed0f365')) { exit 323;}; . 'C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12864860.0.12864860-90e81dc09c586e6c503e353db9908a848420a1b5\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1' }\"",
+            "\"net.exe\" accounts"
+        ],
+        [
+            "2025-05-07 11:31:35.500767+00:00",
+            "windows-vm",
+            "nt authority",
+            "system",
+            "powershell.exe",
+            "powershell.exe -ExecutionPolicy AllSigned -NoProfile -NonInteractive -Command \"& {$OutputEncoding = [Console]::OutputEncoding =[System.Text.Encoding]::UTF8;$scriptFileStream = [System.IO.File]::Open('C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12861524.0.12861524-373be7a19c9e66ca01e40ff4f9c32e877074e099\\cb7aec68-dfca-4632-88ad-5b019cb0957d.ps1', [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::Read);$calculatedHash = Microsoft.PowerShell.Utility\\Get-FileHash 'C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12861524.0.12861524-373be7a19c9e66ca01e40ff4f9c32e877074e099\\cb7aec68-dfca-4632-88ad-5b019cb0957d.ps1' -Algorithm SHA256;if (!($calculatedHash.Hash -eq '9a01458164f1d5d795719c435c68c4f5806a2fd162d9d57a106600d03e1d9cc7')) { exit 323;}; . 'C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12861524.0.12861524-373be7a19c9e66ca01e40ff4f9c32e877074e099\\cb7aec68-dfca-4632-88ad-5b019cb0957d.ps1' }\"",
+            "\"net.exe\" accounts"
+        ],
+        [
+            "2025-05-07 12:04:56.444213+00:00",
+            "windows-vm",
+            "nt authority",
+            "system",
+            "powershell.exe",
+            "powershell.exe -ExecutionPolicy AllSigned -NoProfile -NonInteractive -Command \"& {$OutputEncoding = [Console]::OutputEncoding =[System.Text.Encoding]::UTF8;$scriptFileStream = [System.IO.File]::Open('C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12861524.0.12861524-373be7a19c9e66ca01e40ff4f9c32e877074e099\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1', [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::Read);$calculatedHash = Microsoft.PowerShell.Utility\\Get-FileHash 'C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12861524.0.12861524-373be7a19c9e66ca01e40ff4f9c32e877074e099\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1' -Algorithm SHA256;if (!($calculatedHash.Hash -eq 'd5bd729f2c6cb66157dac79bb645e3dafa5b39e05a6add3ea13f028a59b93484')) { exit 323;}; . 'C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12861524.0.12861524-373be7a19c9e66ca01e40ff4f9c32e877074e099\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1' }\"",
+            "\"net.exe\" accounts"
+        ],
+        [
+            "2025-05-07 12:04:56.518324+00:00",
+            "windows-vm",
+            "nt authority",
+            "system",
+            "powershell.exe",
+            "powershell.exe -ExecutionPolicy AllSigned -NoProfile -NonInteractive -Command \"& {$OutputEncoding = [Console]::OutputEncoding =[System.Text.Encoding]::UTF8;$scriptFileStream = [System.IO.File]::Open('C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12861524.0.12861524-373be7a19c9e66ca01e40ff4f9c32e877074e099\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1', [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::Read);$calculatedHash = Microsoft.PowerShell.Utility\\Get-FileHash 'C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12861524.0.12861524-373be7a19c9e66ca01e40ff4f9c32e877074e099\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1' -Algorithm SHA256;if (!($calculatedHash.Hash -eq 'd5bd729f2c6cb66157dac79bb645e3dafa5b39e05a6add3ea13f028a59b93484')) { exit 323;}; . 'C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12861524.0.12861524-373be7a19c9e66ca01e40ff4f9c32e877074e099\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1' }\"",
+            "\"net.exe\" accounts"
+        ],
+        [
+            "2025-05-07 12:04:56.575165+00:00",
+            "windows-vm",
+            "nt authority",
+            "system",
+            "powershell.exe",
+            "powershell.exe -ExecutionPolicy AllSigned -NoProfile -NonInteractive -Command \"& {$OutputEncoding = [Console]::OutputEncoding =[System.Text.Encoding]::UTF8;$scriptFileStream = [System.IO.File]::Open('C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12861524.0.12861524-373be7a19c9e66ca01e40ff4f9c32e877074e099\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1', [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::Read);$calculatedHash = Microsoft.PowerShell.Utility\\Get-FileHash 'C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12861524.0.12861524-373be7a19c9e66ca01e40ff4f9c32e877074e099\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1' -Algorithm SHA256;if (!($calculatedHash.Hash -eq 'd5bd729f2c6cb66157dac79bb645e3dafa5b39e05a6add3ea13f028a59b93484')) { exit 323;}; . 'C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12861524.0.12861524-373be7a19c9e66ca01e40ff4f9c32e877074e099\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1' }\"",
+            "\"net.exe\" accounts"
+        ],
+        [
+            "2025-05-07 12:04:56.854615+00:00",
+            "windows-vm",
+            "nt authority",
+            "system",
+            "powershell.exe",
+            "powershell.exe -ExecutionPolicy AllSigned -NoProfile -NonInteractive -Command \"& {$OutputEncoding = [Console]::OutputEncoding =[System.Text.Encoding]::UTF8;$scriptFileStream = [System.IO.File]::Open('C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12861524.0.12861524-373be7a19c9e66ca01e40ff4f9c32e877074e099\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1', [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::Read);$calculatedHash = Microsoft.PowerShell.Utility\\Get-FileHash 'C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12861524.0.12861524-373be7a19c9e66ca01e40ff4f9c32e877074e099\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1' -Algorithm SHA256;if (!($calculatedHash.Hash -eq 'd5bd729f2c6cb66157dac79bb645e3dafa5b39e05a6add3ea13f028a59b93484')) { exit 323;}; . 'C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12861524.0.12861524-373be7a19c9e66ca01e40ff4f9c32e877074e099\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1' }\"",
+            "\"net.exe\" accounts"
+        ],
+        [
+            "2025-05-07 12:04:56.895345+00:00",
+            "windows-vm",
+            "nt authority",
+            "system",
+            "powershell.exe",
+            "powershell.exe -ExecutionPolicy AllSigned -NoProfile -NonInteractive -Command \"& {$OutputEncoding = [Console]::OutputEncoding =[System.Text.Encoding]::UTF8;$scriptFileStream = [System.IO.File]::Open('C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12861524.0.12861524-373be7a19c9e66ca01e40ff4f9c32e877074e099\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1', [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::Read);$calculatedHash = Microsoft.PowerShell.Utility\\Get-FileHash 'C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12861524.0.12861524-373be7a19c9e66ca01e40ff4f9c32e877074e099\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1' -Algorithm SHA256;if (!($calculatedHash.Hash -eq 'd5bd729f2c6cb66157dac79bb645e3dafa5b39e05a6add3ea13f028a59b93484')) { exit 323;}; . 'C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12861524.0.12861524-373be7a19c9e66ca01e40ff4f9c32e877074e099\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1' }\"",
+            "\"net.exe\" accounts"
+        ],
+        [
+            "2025-05-07 12:04:57.459364+00:00",
+            "windows-vm",
+            "nt authority",
+            "system",
+            "powershell.exe",
+            "powershell.exe -ExecutionPolicy AllSigned -NoProfile -NonInteractive -Command \"& {$OutputEncoding = [Console]::OutputEncoding =[System.Text.Encoding]::UTF8;$scriptFileStream = [System.IO.File]::Open('C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12861524.0.12861524-373be7a19c9e66ca01e40ff4f9c32e877074e099\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1', [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::Read);$calculatedHash = Microsoft.PowerShell.Utility\\Get-FileHash 'C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12861524.0.12861524-373be7a19c9e66ca01e40ff4f9c32e877074e099\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1' -Algorithm SHA256;if (!($calculatedHash.Hash -eq 'd5bd729f2c6cb66157dac79bb645e3dafa5b39e05a6add3ea13f028a59b93484')) { exit 323;}; . 'C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12861524.0.12861524-373be7a19c9e66ca01e40ff4f9c32e877074e099\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1' }\"",
+            "\"net.exe\" accounts"
+        ],
+        [
+            "2025-05-07 12:04:57.512830+00:00",
+            "windows-vm",
+            "nt authority",
+            "system",
+            "powershell.exe",
+            "powershell.exe -ExecutionPolicy AllSigned -NoProfile -NonInteractive -Command \"& {$OutputEncoding = [Console]::OutputEncoding =[System.Text.Encoding]::UTF8;$scriptFileStream = [System.IO.File]::Open('C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12861524.0.12861524-373be7a19c9e66ca01e40ff4f9c32e877074e099\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1', [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::Read);$calculatedHash = Microsoft.PowerShell.Utility\\Get-FileHash 'C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12861524.0.12861524-373be7a19c9e66ca01e40ff4f9c32e877074e099\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1' -Algorithm SHA256;if (!($calculatedHash.Hash -eq 'd5bd729f2c6cb66157dac79bb645e3dafa5b39e05a6add3ea13f028a59b93484')) { exit 323;}; . 'C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12861524.0.12861524-373be7a19c9e66ca01e40ff4f9c32e877074e099\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1' }\"",
+            "\"net.exe\" accounts"
+        ],
+        [
+            "2025-05-07 12:04:57.551586+00:00",
+            "windows-vm",
+            "nt authority",
+            "system",
+            "powershell.exe",
+            "powershell.exe -ExecutionPolicy AllSigned -NoProfile -NonInteractive -Command \"& {$OutputEncoding = [Console]::OutputEncoding =[System.Text.Encoding]::UTF8;$scriptFileStream = [System.IO.File]::Open('C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12861524.0.12861524-373be7a19c9e66ca01e40ff4f9c32e877074e099\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1', [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::Read);$calculatedHash = Microsoft.PowerShell.Utility\\Get-FileHash 'C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12861524.0.12861524-373be7a19c9e66ca01e40ff4f9c32e877074e099\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1' -Algorithm SHA256;if (!($calculatedHash.Hash -eq 'd5bd729f2c6cb66157dac79bb645e3dafa5b39e05a6add3ea13f028a59b93484')) { exit 323;}; . 'C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12861524.0.12861524-373be7a19c9e66ca01e40ff4f9c32e877074e099\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1' }\"",
+            "\"net.exe\" accounts"
+        ],
+        [
+            "2025-05-07 12:04:57.595017+00:00",
+            "windows-vm",
+            "nt authority",
+            "system",
+            "powershell.exe",
+            "powershell.exe -ExecutionPolicy AllSigned -NoProfile -NonInteractive -Command \"& {$OutputEncoding = [Console]::OutputEncoding =[System.Text.Encoding]::UTF8;$scriptFileStream = [System.IO.File]::Open('C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12861524.0.12861524-373be7a19c9e66ca01e40ff4f9c32e877074e099\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1', [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::Read);$calculatedHash = Microsoft.PowerShell.Utility\\Get-FileHash 'C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12861524.0.12861524-373be7a19c9e66ca01e40ff4f9c32e877074e099\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1' -Algorithm SHA256;if (!($calculatedHash.Hash -eq 'd5bd729f2c6cb66157dac79bb645e3dafa5b39e05a6add3ea13f028a59b93484')) { exit 323;}; . 'C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12861524.0.12861524-373be7a19c9e66ca01e40ff4f9c32e877074e099\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1' }\"",
+            "\"net.exe\" accounts"
+        ],
+        [
+            "2025-05-07 12:05:06.335812+00:00",
+            "windows-vm",
+            "nt authority",
+            "system",
+            "powershell.exe",
+            "powershell.exe -ExecutionPolicy AllSigned -NoProfile -NonInteractive -Command \"& {$OutputEncoding = [Console]::OutputEncoding =[System.Text.Encoding]::UTF8;$scriptFileStream = [System.IO.File]::Open('C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12861524.0.12861524-373be7a19c9e66ca01e40ff4f9c32e877074e099\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1', [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::Read);$calculatedHash = Microsoft.PowerShell.Utility\\Get-FileHash 'C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12861524.0.12861524-373be7a19c9e66ca01e40ff4f9c32e877074e099\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1' -Algorithm SHA256;if (!($calculatedHash.Hash -eq 'd5bd729f2c6cb66157dac79bb645e3dafa5b39e05a6add3ea13f028a59b93484')) { exit 323;}; . 'C:\\ProgramData\\Microsoft\\Windows Defender Advanced Threat Protection\\DataCollection\\8799.12861524.0.12861524-373be7a19c9e66ca01e40ff4f9c32e877074e099\\a391f42c-7e1a-4611-8494-1817d2420e09.ps1' }\"",
+            "\"net.exe\" accounts"
+        ]
+    ]
+}

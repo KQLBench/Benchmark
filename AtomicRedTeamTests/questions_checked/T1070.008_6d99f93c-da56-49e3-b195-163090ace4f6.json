@@ -1,0 +1,164 @@
+{
+    "technique_id": "T1070.008",
+    "question_id": "6d99f93c-da56-49e3-b195-163090ace4f6",
+    "context": "On a Linux server, an adversary crafted a bash command to duplicate mailbox files under /var/spool/mail and then append custom content to those copies.",
+    "objective": "Detect when a new directory is created under /var/spool/mail to stage copied mailbox data.",
+    "technical_details": {
+        "command_analysis": "Investigate process events for mkdir operations targeting /var/spool/mail followed by cp commands.",
+        "detection_approach": "Use process creation logs to spot bash invocations that create and populate a subfolder beneath /var/spool/mail."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Phrase the question to isolate the directory name used for the mailbox copies, ensuring the answer is exactly that folder name.",
+    "prompt": "An attacker on Linux used bash to copy all files from /var/spool/mail into a newly created subdirectory before modifying them. What is the name of that subdirectory?",
+    "answer": [
+        "copy"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "let timeframe = 1d;\n\nlet MkDirs = DeviceProcessEvents\n| where TimeGenerated >= ago(timeframe)\n// Identify mkdir calls under /var/spool/mail\n| where (FileName in (\"bash\",\"sh\") and ProcessCommandLine has \"mkdir\") or FileName == \"mkdir\"\n| where ProcessCommandLine has \"/var/spool/mail/\"\n| extend MkDirTime = TimeGenerated, MkDirCommand = ProcessCommandLine;\n\nlet CopyOps = DeviceProcessEvents\n| where TimeGenerated >= ago(timeframe)\n// Identify cp calls under /var/spool/mail\n| where FileName == \"cp\"\n| where ProcessCommandLine has \"/var/spool/mail/\"\n| extend CopyTime = TimeGenerated, CopyCommand = ProcessCommandLine;\n\nMkDirs\n| join kind=inner CopyOps on DeviceId, InitiatingProcessAccountName\n// Ensure copy happens within 30 minutes of the mkdir\n| where CopyTime between (MkDirTime .. MkDirTime + 30m)\n| project MkDirTime, CopyTime, DeviceName, User = InitiatingProcessAccountName, MkDirCommand, CopyCommand",
+    "KQL_validation_message": "KQL query validation successful: The expected answer is 'copy', which could refer to a directory name or the act of copying files. The query results include the 'CopyCommand' column showing commands such as 'cp -R /var/spool/mail/root /var/spool/mail/copy/', and the MkDirCommand field includes loops that skip files named 'copy'. These results clearly evidence both the use of copy operations and the creation/use of a directory named 'copy', matching the expected activity. Thus, the results do contain the information needed to answer the detection question.",
+    "KQL_query_results": [
+        [
+            "MkDirTime",
+            "CopyTime",
+            "DeviceName",
+            "User",
+            "MkDirCommand",
+            "CopyCommand"
+        ],
+        [
+            "2025-05-07 17:15:34.578829+00:00",
+            "2025-05-07 17:15:34.581125+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c 'mkdir -p ********** for file in /var/spool/mail/*; do if [ \"$(basename \"$file\")\" != \"copy\" ]; then cp -R \"$file\" /var/spool/mail/copy/; if [ -f \"/var/spool/mail/copy/$(basename \"$file\")\" ]; then echo \"Modification for Atomic Red Test\" >> \"/var/spool/mail/copy/$(basename \"$file\")\"; fi; fi; done'",
+            "cp -R /var/spool/mail/root /var/spool/mail/copy/"
+        ],
+        [
+            "2025-05-07 17:15:34.571052+00:00",
+            "2025-05-07 17:15:34.581125+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c 'mkdir -p ********** for file in /var/spool/mail/*; do if [ \"$(basename \"$file\")\" != \"copy\" ]; then cp -R \"$file\" /var/spool/mail/copy/; if [ -f \"/var/spool/mail/copy/$(basename \"$file\")\" ]; then echo \"Modification for Atomic Red Test\" >> \"/var/spool/mail/copy/$(basename \"$file\")\"; fi; fi; done'",
+            "cp -R /var/spool/mail/root /var/spool/mail/copy/"
+        ],
+        [
+            "2025-05-07 17:15:34.565124+00:00",
+            "2025-05-07 17:15:34.581125+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c 'mkdir -p ********** for file in /var/spool/mail/*; do if [ \"$(basename \"$file\")\" != \"copy\" ]; then cp -R \"$file\" /var/spool/mail/copy/; if [ -f \"/var/spool/mail/copy/$(basename \"$file\")\" ]; then echo \"Modification for Atomic Red Test\" >> \"/var/spool/mail/copy/$(basename \"$file\")\"; fi; fi; done'",
+            "cp -R /var/spool/mail/root /var/spool/mail/copy/"
+        ],
+        [
+            "2025-05-07 17:15:34.551063+00:00",
+            "2025-05-07 17:15:34.581125+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c 'mkdir -p ********** for file in /var/spool/mail/*; do if [ \"$(basename \"$file\")\" != \"copy\" ]; then cp -R \"$file\" /var/spool/mail/copy/; if [ -f \"/var/spool/mail/copy/$(basename \"$file\")\" ]; then echo \"Modification for Atomic Red Test\" >> \"/var/spool/mail/copy/$(basename \"$file\")\"; fi; fi; done'",
+            "cp -R /var/spool/mail/root /var/spool/mail/copy/"
+        ],
+        [
+            "2025-05-07 17:15:34.543832+00:00",
+            "2025-05-07 17:15:34.581125+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c 'mkdir -p ********** for file in /var/spool/mail/*; do if [ \"$(basename \"$file\")\" != \"copy\" ]; then cp -R \"$file\" /var/spool/mail/copy/; if [ -f \"/var/spool/mail/copy/$(basename \"$file\")\" ]; then echo \"Modification for Atomic Red Test\" >> \"/var/spool/mail/copy/$(basename \"$file\")\"; fi; fi; done'",
+            "cp -R /var/spool/mail/root /var/spool/mail/copy/"
+        ],
+        [
+            "2025-05-07 17:15:41.318081+00:00",
+            "2025-05-07 17:15:41.319283+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c 'mkdir -p ********** && for file in /var/spool/mail/*; do if [ \"$(basename \"$file\")\" != \"copy\" ]; then cp -R \"$file\" /var/spool/mail/copy/; fi; done && rm -rf /var/spool/mail/copy/*'",
+            "cp -R /var/spool/mail/root /var/spool/mail/copy/"
+        ],
+        [
+            "2025-05-07 17:15:41.314907+00:00",
+            "2025-05-07 17:15:41.319283+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c 'mkdir -p ********** && for file in /var/spool/mail/*; do if [ \"$(basename \"$file\")\" != \"copy\" ]; then cp -R \"$file\" /var/spool/mail/copy/; fi; done && rm -rf /var/spool/mail/copy/*'",
+            "cp -R /var/spool/mail/root /var/spool/mail/copy/"
+        ],
+        [
+            "2025-05-07 17:15:41.312895+00:00",
+            "2025-05-07 17:15:41.319283+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c 'mkdir -p ********** && for file in /var/spool/mail/*; do if [ \"$(basename \"$file\")\" != \"copy\" ]; then cp -R \"$file\" /var/spool/mail/copy/; fi; done && rm -rf /var/spool/mail/copy/*'",
+            "cp -R /var/spool/mail/root /var/spool/mail/copy/"
+        ],
+        [
+            "2025-05-07 17:15:41.310443+00:00",
+            "2025-05-07 17:15:41.319283+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c 'mkdir -p ********** && for file in /var/spool/mail/*; do if [ \"$(basename \"$file\")\" != \"copy\" ]; then cp -R \"$file\" /var/spool/mail/copy/; fi; done && rm -rf /var/spool/mail/copy/*'",
+            "cp -R /var/spool/mail/root /var/spool/mail/copy/"
+        ],
+        [
+            "2025-05-07 17:15:41.308328+00:00",
+            "2025-05-07 17:15:41.319283+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c 'mkdir -p ********** && for file in /var/spool/mail/*; do if [ \"$(basename \"$file\")\" != \"copy\" ]; then cp -R \"$file\" /var/spool/mail/copy/; fi; done && rm -rf /var/spool/mail/copy/*'",
+            "cp -R /var/spool/mail/root /var/spool/mail/copy/"
+        ],
+        [
+            "2025-05-07 17:15:34.593362+00:00",
+            "2025-05-07 17:15:41.319283+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c 'mkdir -p ********** for file in /var/spool/mail/*; do if [ \"$(basename \"$file\")\" != \"copy\" ]; then cp -R \"$file\" /var/spool/mail/copy/; if [ -f \"/var/spool/mail/copy/$(basename \"$file\")\" ]; then echo \"Modification for Atomic Red Test\" >> \"/var/spool/mail/copy/$(basename \"$file\")\"; fi; fi; done'",
+            "cp -R /var/spool/mail/root /var/spool/mail/copy/"
+        ],
+        [
+            "2025-05-07 17:15:34.586575+00:00",
+            "2025-05-07 17:15:41.319283+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c 'mkdir -p ********** for file in /var/spool/mail/*; do if [ \"$(basename \"$file\")\" != \"copy\" ]; then cp -R \"$file\" /var/spool/mail/copy/; if [ -f \"/var/spool/mail/copy/$(basename \"$file\")\" ]; then echo \"Modification for Atomic Red Test\" >> \"/var/spool/mail/copy/$(basename \"$file\")\"; fi; fi; done'",
+            "cp -R /var/spool/mail/root /var/spool/mail/copy/"
+        ],
+        [
+            "2025-05-07 17:15:34.578829+00:00",
+            "2025-05-07 17:15:41.319283+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c 'mkdir -p ********** for file in /var/spool/mail/*; do if [ \"$(basename \"$file\")\" != \"copy\" ]; then cp -R \"$file\" /var/spool/mail/copy/; if [ -f \"/var/spool/mail/copy/$(basename \"$file\")\" ]; then echo \"Modification for Atomic Red Test\" >> \"/var/spool/mail/copy/$(basename \"$file\")\"; fi; fi; done'",
+            "cp -R /var/spool/mail/root /var/spool/mail/copy/"
+        ],
+        [
+            "2025-05-07 17:15:34.571052+00:00",
+            "2025-05-07 17:15:41.319283+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c 'mkdir -p ********** for file in /var/spool/mail/*; do if [ \"$(basename \"$file\")\" != \"copy\" ]; then cp -R \"$file\" /var/spool/mail/copy/; if [ -f \"/var/spool/mail/copy/$(basename \"$file\")\" ]; then echo \"Modification for Atomic Red Test\" >> \"/var/spool/mail/copy/$(basename \"$file\")\"; fi; fi; done'",
+            "cp -R /var/spool/mail/root /var/spool/mail/copy/"
+        ],
+        [
+            "2025-05-07 17:15:34.565124+00:00",
+            "2025-05-07 17:15:41.319283+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c 'mkdir -p ********** for file in /var/spool/mail/*; do if [ \"$(basename \"$file\")\" != \"copy\" ]; then cp -R \"$file\" /var/spool/mail/copy/; if [ -f \"/var/spool/mail/copy/$(basename \"$file\")\" ]; then echo \"Modification for Atomic Red Test\" >> \"/var/spool/mail/copy/$(basename \"$file\")\"; fi; fi; done'",
+            "cp -R /var/spool/mail/root /var/spool/mail/copy/"
+        ],
+        [
+            "2025-05-07 17:15:34.551063+00:00",
+            "2025-05-07 17:15:41.319283+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c 'mkdir -p ********** for file in /var/spool/mail/*; do if [ \"$(basename \"$file\")\" != \"copy\" ]; then cp -R \"$file\" /var/spool/mail/copy/; if [ -f \"/var/spool/mail/copy/$(basename \"$file\")\" ]; then echo \"Modification for Atomic Red Test\" >> \"/var/spool/mail/copy/$(basename \"$file\")\"; fi; fi; done'",
+            "cp -R /var/spool/mail/root /var/spool/mail/copy/"
+        ],
+        [
+            "2025-05-07 17:15:34.543832+00:00",
+            "2025-05-07 17:15:41.319283+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c 'mkdir -p ********** for file in /var/spool/mail/*; do if [ \"$(basename \"$file\")\" != \"copy\" ]; then cp -R \"$file\" /var/spool/mail/copy/; if [ -f \"/var/spool/mail/copy/$(basename \"$file\")\" ]; then echo \"Modification for Atomic Red Test\" >> \"/var/spool/mail/copy/$(basename \"$file\")\"; fi; fi; done'",
+            "cp -R /var/spool/mail/root /var/spool/mail/copy/"
+        ]
+    ]
+}

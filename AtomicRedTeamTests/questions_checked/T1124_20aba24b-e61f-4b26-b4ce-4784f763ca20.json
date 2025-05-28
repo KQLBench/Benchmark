@@ -1,0 +1,44 @@
+{
+    "technique_id": "T1124",
+    "question_id": "20aba24b-e61f-4b26-b4ce-4784f763ca20",
+    "context": "A Windows endpoint where an attacker is performing system time discovery using native utilities.",
+    "objective": "Detect the invocation of built-in commands used to retrieve system time and determine which executor facilitated their execution.",
+    "technical_details": {
+        "command_analysis": "The adversary executed ‘net time \\\\computer_name’ followed by ‘w32tm /tz’ via a command interpreter.",
+        "detection_approach": "Search process event logs for executions of net.exe and w32tm.exe, then examine the parent or executor identifier to identify what tool was used."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame a question that asks which executor name from the test configuration appears in the logs when net time and w32tm are run, requiring log exploration rather than prior knowledge.",
+    "prompt": "In Windows process event logs, you notice both the net time and w32tm commands being executed to display the system time and timezone. Which executor name from the test configuration was responsible for launching these utilities?",
+    "answer": [
+        "cmd.exe"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "DeviceProcessEvents\n| where FileName in (\"net.exe\",\"w32tm.exe\")\n| where (FileName == \"net.exe\" and ProcessCommandLine startswith_cs \"net time\")\n       or (FileName == \"w32tm.exe\" and ProcessCommandLine has_cs \"/tz\")\n| project TimeGenerated, DeviceName, FileName, ProcessCommandLine, InitiatingProcessFileName, InitiatingProcessCommandLine",
+    "KQL_validation_message": "KQL query validation successful: The expected answer is 'cmd.exe'. In the query results, the 'InitiatingProcessFileName' column has the value 'cmd.exe' for both rows, clearly indicating that the observed process activity was started from the Windows command prompt (cmd.exe). This directly supports identifying 'cmd.exe' activity as described in the expected answer.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "FileName",
+            "ProcessCommandLine",
+            "InitiatingProcessFileName",
+            "InitiatingProcessCommandLine"
+        ],
+        [
+            "2025-05-07 16:27:02.648310+00:00",
+            "windows-vm",
+            "w32tm.exe",
+            "w32tm  /tz",
+            "cmd.exe",
+            "\"cmd.exe\" /c net time \\\\localhost & w32tm /tz"
+        ],
+        [
+            "2025-05-07 16:37:43.037108+00:00",
+            "windows-vm",
+            "w32tm.exe",
+            "w32tm  /tz",
+            "cmd.exe",
+            "\"cmd.exe\" /c net time \\\\localhost & w32tm /tz"
+        ]
+    ]
+}

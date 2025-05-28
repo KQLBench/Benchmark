@@ -1,0 +1,44 @@
+{
+    "technique_id": "T1562.004",
+    "question_id": "899a7fb5-d197-4951-8614-f19ac4a73ad4",
+    "context": "On a Linux host, adversaries may quietly remove specific iptables rules rather than disabling the firewall entirely, for example deleting a rule that blocks outbound FTP traffic. Process execution logs capture each command invocation.",
+    "objective": "Detect when an iptables rule blocking FTP on the OUTPUT chain has been deleted and identify the exact command used.",
+    "technical_details": {
+        "command_analysis": "Look for iptables invocations containing the delete flag (-D), the OUTPUT chain, and the FTP port (21) with a DROP target.",
+        "detection_approach": "Query process execution records to filter commands where iptables was called to delete a rule on the OUTPUT chain targeting TCP port 21 with DROP."
+    },
+    "thinking_how_to_phrase_question_and_answer": "The question is phrased to focus the analyst on locating the precise deletion command in execution logs, prompting them to filter for specific iptables arguments.",
+    "prompt": "Investigate Linux process execution logs for any use of iptables that removes a rule blocking outbound FTP traffic. What full command was issued to delete this rule?",
+    "answer": [
+        "iptables -D OUTPUT -p tcp --dport 21 -j DROP"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where TimeGenerated >= ago(7d)\n| where ProcessCommandLine has \"iptables\"\n| where ProcessCommandLine has \"-D\"\n| where ProcessCommandLine has \"OUTPUT\"\n| where ProcessCommandLine has \"-p tcp\"\n| where ProcessCommandLine has \"--dport 21\"\n| where ProcessCommandLine has \"-j DROP\"\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, ProcessCommandLine\n| sort by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: The expected answer 'iptables -D OUTPUT -p tcp --dport 21 -j DROP' is present exactly in one of the Query results under the 'ProcessCommandLine' field. In addition, the same command appears within a shell wrapper in the other results. This means that the dataset includes clear evidence of the activity described in the detection question.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 16:51:35.724523+00:00",
+            "wirpo-test",
+            "root",
+            "iptables -D OUTPUT -p tcp --dport 21 -j DROP"
+        ],
+        [
+            "2025-05-07 16:51:35.723880+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c \"iptables -D OUTPUT -p tcp --dport 21 -j DROP\""
+        ],
+        [
+            "2025-05-07 16:51:35.720965+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c \"iptables -D OUTPUT -p tcp --dport 21 -j DROP\""
+        ]
+    ]
+}

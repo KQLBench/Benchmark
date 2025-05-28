@@ -1,0 +1,34 @@
+{
+    "technique_id": "T1555",
+    "question_id": "bc071188-459f-44d5-901a-f8f2625b2d2e",
+    "context": "On a Windows host, an actor ran a built-in utility to enumerate credentials stored in the Web Credentials vault of the Windows Credential Manager.",
+    "objective": "Detect and identify the tool used to extract web credentials by searching process execution logs.",
+    "technical_details": {
+        "command_analysis": "A vaultcmd command was executed with the /listcreds:\"Web Credentials\" and /all flags, which enumerates stored web credentials.",
+        "detection_approach": "Query process creation events for invocations of vaultcmd.exe and inspect the command line arguments to confirm enumeration activity against the Web Credentials vault."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question around discovering which built-in Windows utility was leveraged to list web credentials, and ensure the answer matches the executable name.",
+    "prompt": "A security investigator suspects that someone attempted to dump stored web credentials on a Windows system using an in-built command-line tool. Review process creation logs to determine which executable was called to list the Web Credentials vault.",
+    "answer": [
+        "vaultcmd.exe"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "let vaultUsage = DeviceProcessEvents\n| where FileName =~ \"vaultcmd.exe\"\n| where ProcessCommandLine has \"/listcreds:\" and ProcessCommandLine has \"Web Credentials\" and ProcessCommandLine has \"/all\";\nlet vaultEvents = DeviceEvents\n| where ActionType == \"ProcessCreated\"\n| where FileName =~ \"vaultcmd.exe\"\n| where ProcessCommandLine has \"/listcreds:\" and ProcessCommandLine has \"Web Credentials\" and ProcessCommandLine has \"/all\";\nvaultUsage\n| union vaultEvents\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, FileName, ProcessCommandLine",
+    "KQL_validation_message": "KQL query validation successful: The single returned row in the results has 'VaultCmd.exe' (case-insensitive match to 'vaultcmd.exe') in the 'FileName' column, fulfilling the expected answer. The query results are also structured with appropriate context (timestamp, device, account, command line), directly providing the evidence to detect 'vaultcmd.exe' usage.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "FileName",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 17:04:16.709691+00:00",
+            "windows-vm",
+            "wipro",
+            "VaultCmd.exe",
+            "\"VaultCmd.exe\" \"/listcreds:Web Credentials\" /all"
+        ]
+    ]
+}

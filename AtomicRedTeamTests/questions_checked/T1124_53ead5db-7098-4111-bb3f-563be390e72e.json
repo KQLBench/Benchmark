@@ -1,0 +1,50 @@
+{
+    "technique_id": "T1124",
+    "question_id": "53ead5db-7098-4111-bb3f-563be390e72e",
+    "context": "On a Windows endpoint, unusual activity was observed where a built-in utility for viewing system time was invoked during an incident tied to Ursnif malware.",
+    "objective": "Detect invocations of the Windows native 'time' command in process creation logs to identify potential hostile reconnaissance.",
+    "technical_details": {
+        "command_analysis": "The Windows 'time' command is a legacy tool that displays or sets system time. When executed, it appears in DeviceProcessEvents as FileName 'time' and usually a minimal ProcessCommandLine.",
+        "detection_approach": "Query the DeviceProcessEvents table for entries where the initiating or created process equals 'time' or the command line is just 'time' to catch this built-in tool usage."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question to ask which built-in time utility was executed, leading to an answer of the single word command name.",
+    "prompt": "A Windows host recorded a process that simply executes the system’s native time utility. Without spelling out the query, determine which command was run based on process creation events.",
+    "answer": [
+        "time"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "DeviceProcessEvents\n| where tolower(FileName) == \"time\"\n      or (tolower(FileName) == \"cmd.exe\" and ProcessCommandLine matches regex @\"(?i)(/c|/k)\\s+time(\\s|$)\")\n| project TimeGenerated, DeviceName, AccountName, FileName, ProcessId, ProcessCommandLine, InitiatingProcessFileName, InitiatingProcessId\n| order by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: The expected answer is 'time', i.e., evidence that the 'time' command was run. The 'ProcessCommandLine' field shows '\"cmd.exe\" /c time' for both returned events, explicitly capturing the execution of the 'time' command. Therefore, these results provide the necessary information to answer the detection question affirmatively.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "AccountName",
+            "FileName",
+            "ProcessId",
+            "ProcessCommandLine",
+            "InitiatingProcessFileName",
+            "InitiatingProcessId"
+        ],
+        [
+            "2025-05-07 16:37:46.349087+00:00",
+            "windows-vm",
+            "wipro",
+            "cmd.exe",
+            7484,
+            "\"cmd.exe\" /c time",
+            "powershell.exe",
+            6668
+        ],
+        [
+            "2025-05-07 16:27:05.689908+00:00",
+            "windows-vm",
+            "wipro",
+            "cmd.exe",
+            14288,
+            "\"cmd.exe\" /c time",
+            "powershell.exe",
+            8348
+        ]
+    ]
+}

@@ -1,0 +1,128 @@
+{
+    "technique_id": "T1571",
+    "question_id": "21fe622f-8e53-4b31-ba83-6d333c2583f4",
+    "context": "Windows environments support native PowerShell cmdlets for connectivity checks, which can be abused by adversaries to probe uncommon network ports.",
+    "objective": "Detect when PowerShell’s Test-NetConnection is leveraged to test connectivity to a non-standard port on a remote host.",
+    "technical_details": {
+        "command_analysis": "The Test-NetConnection cmdlet is invoked with a specified ComputerName and Port argument, performing a TCP/ICMP probe; the command line includes “-port <number>”.",
+        "detection_approach": "Search Windows process or network events for PowerShell invocations containing “Test-NetConnection” and extract the port argument; correlate with any outbound connection or network event records to confirm the port tested."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question to ask which numeric port was probed by a PowerShell Test-NetConnection execution, expecting the exact port number (e.g., 8081).",
+    "prompt": "On a Windows system, identify any PowerShell Test-NetConnection executions against an uncommon port. Which port number was checked?",
+    "answer": [
+        "8081"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "let testNet = DeviceProcessEvents\n| where FileName in (\"powershell.exe\",\"pwsh.exe\")\n| where tolower(ProcessCommandLine) contains \"test-netconnection\"\n| where ProcessCommandLine matches regex @\"-port\\s+\\d+\"\n| extend TestedPort = toint(extract(@\"-port\\s+(\\d+)\", 1, ProcessCommandLine))\n| where TestedPort !in (80,443,3389)\n| project DeviceId, InitiatingProcessId = ProcessId, Time = TimeGenerated, TestedPort, Account = InitiatingProcessAccountName, CommandLine = ProcessCommandLine;\ntestNet\n| join kind=inner (\n    DeviceNetworkEvents\n    | project DeviceId, InitiatingProcessId, NetworkTime = TimeGenerated, RemoteIP, RemotePort\n) on DeviceId, InitiatingProcessId\n| where RemotePort == TestedPort and NetworkTime between (Time - 5m .. Time + 5m)\n| project NetworkTime, DeviceId, Account, TestedPort, RemoteIP, RemotePort, CommandLine",
+    "KQL_validation_message": "KQL query validation successful: The query results show multiple rows with both 'TestedPort' and 'RemotePort' set to 8081, and the command line used includes '-port 8081'. This directly corresponds to the expected answer of \"8081\", demonstrating that the port 8081 was tested in these activities. Therefore, the results provide direct evidence needed to answer the detection question as specified by the expected answer.",
+    "KQL_query_results": [
+        [
+            "NetworkTime",
+            "DeviceId",
+            "Account",
+            "TestedPort",
+            "RemoteIP",
+            "RemotePort",
+            "CommandLine"
+        ],
+        [
+            "2025-05-07 16:20:57.880848+00:00",
+            "51a5c6755c43d60b18a177bfa334701b37f9171e",
+            "wipro",
+            8081,
+            "142.251.111.139",
+            8081,
+            "\"powershell.exe\" & {Test-NetConnection -ComputerName google.com -port 8081}"
+        ],
+        [
+            "2025-05-07 16:21:19.180262+00:00",
+            "51a5c6755c43d60b18a177bfa334701b37f9171e",
+            "wipro",
+            8081,
+            "142.251.111.101",
+            8081,
+            "\"powershell.exe\" & {Test-NetConnection -ComputerName google.com -port 8081}"
+        ],
+        [
+            "2025-05-07 16:21:40.228694+00:00",
+            "51a5c6755c43d60b18a177bfa334701b37f9171e",
+            "wipro",
+            8081,
+            "142.251.111.138",
+            8081,
+            "\"powershell.exe\" & {Test-NetConnection -ComputerName google.com -port 8081}"
+        ],
+        [
+            "2025-05-07 16:22:01.277861+00:00",
+            "51a5c6755c43d60b18a177bfa334701b37f9171e",
+            "wipro",
+            8081,
+            "142.251.111.100",
+            8081,
+            "\"powershell.exe\" & {Test-NetConnection -ComputerName google.com -port 8081}"
+        ],
+        [
+            "2025-05-07 16:22:22.329210+00:00",
+            "51a5c6755c43d60b18a177bfa334701b37f9171e",
+            "wipro",
+            8081,
+            "142.251.111.113",
+            8081,
+            "\"powershell.exe\" & {Test-NetConnection -ComputerName google.com -port 8081}"
+        ],
+        [
+            "2025-05-07 16:31:53.764108+00:00",
+            "51a5c6755c43d60b18a177bfa334701b37f9171e",
+            "wipro",
+            8081,
+            "172.253.122.138",
+            8081,
+            "\"powershell.exe\" & {Test-NetConnection -ComputerName google.com -port 8081}"
+        ],
+        [
+            "2025-05-07 16:32:14.881507+00:00",
+            "51a5c6755c43d60b18a177bfa334701b37f9171e",
+            "wipro",
+            8081,
+            "172.253.122.139",
+            8081,
+            "\"powershell.exe\" & {Test-NetConnection -ComputerName google.com -port 8081}"
+        ],
+        [
+            "2025-05-07 16:32:35.927898+00:00",
+            "51a5c6755c43d60b18a177bfa334701b37f9171e",
+            "wipro",
+            8081,
+            "172.253.122.100",
+            8081,
+            "\"powershell.exe\" & {Test-NetConnection -ComputerName google.com -port 8081}"
+        ],
+        [
+            "2025-05-07 16:32:57.008812+00:00",
+            "51a5c6755c43d60b18a177bfa334701b37f9171e",
+            "wipro",
+            8081,
+            "172.253.122.113",
+            8081,
+            "\"powershell.exe\" & {Test-NetConnection -ComputerName google.com -port 8081}"
+        ],
+        [
+            "2025-05-07 16:33:18.032115+00:00",
+            "51a5c6755c43d60b18a177bfa334701b37f9171e",
+            "wipro",
+            8081,
+            "172.253.122.102",
+            8081,
+            "\"powershell.exe\" & {Test-NetConnection -ComputerName google.com -port 8081}"
+        ],
+        [
+            "2025-05-07 16:33:32.319139+00:00",
+            "51a5c6755c43d60b18a177bfa334701b37f9171e",
+            "wipro",
+            8081,
+            "172.253.122.101",
+            8081,
+            "\"powershell.exe\" & {Test-NetConnection -ComputerName google.com -port 8081}"
+        ]
+    ]
+}

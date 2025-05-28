@@ -1,0 +1,36 @@
+{
+    "technique_id": "T1218.011",
+    "question_id": "83a95136-a496-423c-81d3-1c6750133917",
+    "context": "On Windows systems, attackers may abuse trusted binaries like rundll32.exe to execute malicious payloads under the guise of legitimate functionality. The LOLBAS “desk.cpl” library can be invoked to install screen savers, but a .scr file could actually be a renamed executable.",
+    "objective": "Detect when rundll32.exe is used to invoke desk.cpl,InstallScreenSaver with a .scr file—indicating a possible payload execution disguised as a screensaver.",
+    "technical_details": {
+        "command_analysis": "The attacker copies a valid executable (e.g., calc.exe) to a .scr file name and then runs: rundll32.exe desk.cpl,InstallScreenSaver not_an_scr.scr",
+        "detection_approach": "Search process creation logs for rundll32.exe where the command line references desk.cpl,InstallScreenSaver and captures the .scr filename argument"
+    },
+    "thinking_how_to_phrase_question_and_answer": "Phrase the question to prompt retrieval of the suspicious .scr filename from process creation events without revealing the exact KQL syntax.",
+    "prompt": "You notice rundll32.exe being used with desk.cpl,InstallScreenSaver on a Windows endpoint. Investigate your process creation logs to find which .scr file was loaded by this unusual invocation.",
+    "answer": [
+        "not_an_scr.scr"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where FileName == \"rundll32.exe\"\n| where ProcessCommandLine matches regex @\"(?i)\\bdesk\\.cpl,InstallScreenSaver\\s+([^\\s]+\\.scr)\\b\"\n| extend ScreensaverFile = extract(@\"(?i)desk\\.cpl,InstallScreenSaver\\s+([^\\s]+\\.scr)\", 1, ProcessCommandLine)\n| project TimeGenerated, DeviceName, AccountDomain, AccountName, ProcessCommandLine, ScreensaverFile",
+    "KQL_validation_message": "KQL query validation successful: The results contain a row where the 'ScreensaverFile' field's value is exactly 'not_an_scr.scr', which is the string provided in the expected answers. This structure directly answers whether 'not_an_scr.scr' was involved in the detected activity.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "AccountDomain",
+            "AccountName",
+            "ProcessCommandLine",
+            "ScreensaverFile"
+        ],
+        [
+            "2025-05-07 16:48:23.241424+00:00",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            "rundll32.exe  desk.cpl,InstallScreenSaver not_an_scr.scr",
+            "not_an_scr.scr"
+        ]
+    ]
+}

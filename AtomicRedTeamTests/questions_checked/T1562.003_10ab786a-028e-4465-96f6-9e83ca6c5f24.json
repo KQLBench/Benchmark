@@ -1,0 +1,56 @@
+{
+    "technique_id": "T1562.003",
+    "question_id": "10ab786a-028e-4465-96f6-9e83ca6c5f24",
+    "context": "On a Linux host, an adversary attempted to tamper with Bash history behavior by changing environment variables and clearing the history cache.",
+    "objective": "Detect when and how the HISTCONTROL variable was modified to suppress command logging.",
+    "technical_details": {
+        "command_analysis": "Identify bash process events where the ProcessCommandLine field includes an export of HISTCONTROL and extract the exact command issued.",
+        "detection_approach": "Search the DeviceProcessEvents table for entries where FileName is 'bash' and ProcessCommandLine contains 'HISTCONTROL' to spot environment variable changes."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Phrase the question to prompt the analyst to look through bash command logs for exports of HISTCONTROL and to report the full export command string.",
+    "prompt": "On a Linux system you suspect someone altered Bash’s history settings to hide their activity. Investigate process logs for evidence of HISTCONTROL being set to ignore entries. What was the full command executed to configure HISTCONTROL?",
+    "answer": [
+        "export HISTCONTROL=\"ignoreboth\""
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where FileName == \"bash\"\n| where ProcessCommandLine contains \"HISTCONTROL\"\n| project TimeGenerated, DeviceName, AccountName, ProcessCommandLine",
+    "KQL_validation_message": "KQL query validation successful: The 'ProcessCommandLine' field in the query contains bash commands that check if HISTCONTROL is not 'ignoreboth' and then run 'export HISTCONTROL=\"ignoreboth\";'. This directly matches the expected answer 'export HISTCONTROL=\"ignoreboth\"'. Therefore, the results provide the needed evidence to answer the detection question.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "AccountName",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 17:02:47.365920+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c 'TEST=$(echo $HISTCONTROL); if [ \"$HISTCONTROL\" != \"ignoreboth\" ]; then export HISTCONTROL=\"ignoreboth\"; fi; history -c ; ls -la $HISTFILE # \" ls -la $HISTFILE\"; if [ $(history |wc -l) -eq 1 ]; then echo \"ls -la is not in history cache\"; fi; if [ \"$HISTCONTROL\" != \"erasedups\" ]; then export HISTCONTROL=\"erasedups\"; fi; history -c ; ls -la $HISTFILE; ls -la $HISTFILE; ls -la $HISTFILE; if [ $(history |wc -l) -eq 2 ]; then echo \"Their is only one entry for ls -la $HISTFILE\"; fi'"
+        ],
+        [
+            "2025-05-07 17:02:47.368572+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c 'TEST=$(echo $HISTCONTROL); if [ \"$HISTCONTROL\" != \"ignoreboth\" ]; then export HISTCONTROL=\"ignoreboth\"; fi; history -c ; ls -la $HISTFILE # \" ls -la $HISTFILE\"; if [ $(history |wc -l) -eq 1 ]; then echo \"ls -la is not in history cache\"; fi; if [ \"$HISTCONTROL\" != \"erasedups\" ]; then export HISTCONTROL=\"erasedups\"; fi; history -c ; ls -la $HISTFILE; ls -la $HISTFILE; ls -la $HISTFILE; if [ $(history |wc -l) -eq 2 ]; then echo \"Their is only one entry for ls -la $HISTFILE\"; fi'"
+        ],
+        [
+            "2025-05-07 17:02:49.052779+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c \"export HISTCONTROL=$(echo $TEST)\""
+        ],
+        [
+            "2025-05-07 17:02:49.054494+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c \"export HISTCONTROL=$(echo $TEST)\""
+        ],
+        [
+            "2025-05-07 17:03:10.794397+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c \"export HISTCONTROL=$(echo $TEST)\""
+        ]
+    ]
+}

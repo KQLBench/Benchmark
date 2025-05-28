@@ -1,0 +1,32 @@
+{
+    "technique_id": "T1027",
+    "question_id": "a50d5a97-2531-499e-a1de-5544c74432c6",
+    "context": "During a security test, an adversary executed a PowerShell command that was first base64-encoded and then run on a Windows system.",
+    "objective": "Find instances where a base64-encoded command was executed and identify which executable was used.",
+    "technical_details": {
+        "command_analysis": "Look for DeviceProcessEvents where the ProcessCommandLine contains the '-EncodedCommand' switch.",
+        "detection_approach": "Query process creation logs to filter on encoded PowerShell executions and inspect the initiating process name."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Ask the analyst to determine the name of the process that launched the encoded command; the expected answer is the executable name.",
+    "prompt": "On a Windows endpoint, look for evidence of a base64-encoded PowerShell payload execution. Which executable launched the encoded command?",
+    "answer": [
+        "powershell.exe"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where ProcessCommandLine has \"-EncodedCommand\"\n| project TimeGenerated, DeviceName, FileName, ProcessCommandLine",
+    "KQL_validation_message": "KQL query validation successful: The query results include a row where the 'FileName' is 'powershell.exe'. This matches the expected answer list. The additional context in 'ProcessCommandLine' further supports identification of PowerShell activity. Therefore, these results provide the needed evidence to answer the detection question focused on 'powershell.exe'.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "FileName",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 17:17:22.040119+00:00",
+            "windows-vm",
+            "powershell.exe",
+            "\"powershell.exe\" -encodedCommand ZwBlAHQALQBlAHYAZQBuAHQAbABvAGcAIAAnAFMAZQBjAHUAcgBpAHQAeQAnACAAfAAgAHcAaABlAHIAZQAgAHsAJABfAC4ATQBlAHMAcwBhAGcAZQAgAC0AbABpAGsAZQAgACcAKgBTAFkAUwBUAEUATQAqACcAfQAgAHwAIABlAHgAcABvAHIAdAAtAGMAcwB2ACAAJABlAG4AdgA6AHQAZQBtAHAAXABUADEANgA1ADQAXwBlAHYAZQBuAHQAcwAuAHQAeAB0AA== -inputFormat xml -outputFormat text"
+        ]
+    ]
+}

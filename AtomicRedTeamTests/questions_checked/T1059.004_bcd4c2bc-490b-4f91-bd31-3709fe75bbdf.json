@@ -1,0 +1,44 @@
+{
+    "technique_id": "T1059.004",
+    "question_id": "bcd4c2bc-490b-4f91-bd31-3709fe75bbdf",
+    "context": "On a Linux host, adversaries can abuse the CPAN package manager to escape restricted environments and spawn an interactive shell by injecting '! exec \"/bin/sh &\"' commands.",
+    "objective": "Identify cases where the package manager was leveraged to create an interactive shell.",
+    "technical_details": {
+        "command_analysis": "Focus on entries where the ProcessCommandLine field includes both 'cpan' and exec calls to '/bin/sh'.",
+        "detection_approach": "Search the DeviceProcessEvents table for process command lines containing exec \"/bin/sh\" combined with unusual package manager invocations."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Ask which tool name appears in the command that enabled the shell escape and ensure the answer is exactly as logged.",
+    "prompt": "An analyst suspects that a restricted shell escape was executed using a common Perl package manager on Linux. Review the process execution records to determine which tool was invoked to spawn the shell.",
+    "answer": [
+        "cpan"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where TimeGenerated >= ago(7d)\n| where ProcessCommandLine has \"cpan\" and ProcessCommandLine has \"exec\" and ProcessCommandLine has \"/bin/sh\"\n| order by TimeGenerated desc\n| project TimeGenerated, DeviceName, AccountName, ProcessCommandLine",
+    "KQL_validation_message": "KQL query validation successful: The 'ProcessCommandLine' field in each returned row includes 'cpan', which matches exactly with the expected answer. The rows are structured with timestamps, device name, account, and process command line, providing sufficient detail to support detection of 'cpan' activity as required.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "AccountName",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 17:01:52.695261+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c 'echo '! exec \"/bin/sh &\"' | PERL_MM_USE_DEFAULT=1  cpan'"
+        ],
+        [
+            "2025-05-07 17:01:52.693620+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c 'echo '! exec \"/bin/sh &\"' | PERL_MM_USE_DEFAULT=1  cpan'"
+        ],
+        [
+            "2025-05-07 17:01:52.692375+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c 'echo '! exec \"/bin/sh &\"' | PERL_MM_USE_DEFAULT=1  cpan'"
+        ]
+    ]
+}

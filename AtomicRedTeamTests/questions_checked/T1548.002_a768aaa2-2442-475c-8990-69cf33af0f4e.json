@@ -1,0 +1,53 @@
+{
+    "technique_id": "T1548.002",
+    "question_id": "a768aaa2-2442-475c-8990-69cf33af0f4e",
+    "context": "On Windows machines, attackers often disable UAC prompts by modifying system registry settings to allow elevated actions without user consent.",
+    "objective": "Detect when the UAC consent prompt behavior has been turned off via registry modification.",
+    "technical_details": {
+        "command_analysis": "A ‘reg add’ command targets HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System to set a DWORD value to 0, effectively disabling the UAC consent prompt for administrators.",
+        "detection_approach": "Search DeviceRegistryEvents for events where RegistryKey matches the System policy path and RegistryValueData equals ‘0’, then identify the specific value name that was modified."
+    },
+    "thinking_how_to_phrase_question_and_answer": "What registry value did an administrator set to zero in order to disable UAC consent prompts on Windows?",
+    "prompt": "A Windows host shows a registry write under DeviceRegistryEvents affecting the System policy path. Investigate entries where the data is set to ‘0’ and determine which registry value was modified to turn off UAC consent prompts.",
+    "answer": [
+        "ConsentPromptBehaviorAdmin"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceRegistryEvents\n| where RegistryKey has \"Policies\\\\System\"\n| where RegistryValueName == \"ConsentPromptBehaviorAdmin\"\n| where RegistryValueData in (\"0\", \"0x0\")\n| project TimeGenerated, DeviceName, InitiatingProcessAccountDomain, InitiatingProcessAccountName, InitiatingProcessFileName, InitiatingProcessCommandLine, RegistryKey, RegistryValueName, RegistryValueData",
+    "KQL_validation_message": "KQL query validation successful: The KQL results display rows with the 'RegistryValueName' field specifically set to 'ConsentPromptBehaviorAdmin', matching the expected answer. Furthermore, additional columns show context such as the PowerShell activity altering this value, further confirming the presence and manipulation of 'ConsentPromptBehaviorAdmin'. Thus, these results contain the necessary evidence to answer the detection question related to this registry setting.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountDomain",
+            "InitiatingProcessAccountName",
+            "InitiatingProcessFileName",
+            "InitiatingProcessCommandLine",
+            "RegistryKey",
+            "RegistryValueName",
+            "RegistryValueData"
+        ],
+        [
+            "2025-05-07 16:26:18.288554+00:00",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            "powershell.exe",
+            "\"powershell.exe\" & {$orgValue =(Get-ItemProperty HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System -Name ConsentPromptBehaviorAdmin).ConsentPromptBehaviorAdmin\nSet-ItemProperty HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System -Name ConsentPromptBehaviorAdmin -Value 0 -Type Dword -Force}",
+            "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+            "ConsentPromptBehaviorAdmin",
+            "0"
+        ],
+        [
+            "2025-05-07 16:36:59.065007+00:00",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            "powershell.exe",
+            "\"powershell.exe\" & {$orgValue =(Get-ItemProperty HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System -Name ConsentPromptBehaviorAdmin).ConsentPromptBehaviorAdmin\nSet-ItemProperty HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System -Name ConsentPromptBehaviorAdmin -Value 0 -Type Dword -Force}",
+            "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+            "ConsentPromptBehaviorAdmin",
+            "0"
+        ]
+    ]
+}

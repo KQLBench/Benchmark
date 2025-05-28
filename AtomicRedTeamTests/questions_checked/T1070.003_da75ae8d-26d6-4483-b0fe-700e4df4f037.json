@@ -1,0 +1,44 @@
+{
+    "technique_id": "T1070.003",
+    "question_id": "da75ae8d-26d6-4483-b0fe-700e4df4f037",
+    "context": "On Windows endpoints, PowerShell stores session history in a file managed by PSReadLine.",
+    "objective": "Detect instances where an attacker cleared PowerShell history by deleting the history file.",
+    "technical_details": {
+        "command_analysis": "The attacker invokes Remove-Item on the path returned by Get-PSReadlineOption().HistorySavePath to erase the saved command history.",
+        "detection_approach": "Look for file deletion events or process events where PowerShell runs Remove-Item against a PSReadLine history file path."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Phrase the question to lead the analyst to query process or file events for deletion of the PSReadLine history file and extract the full command line used.",
+    "prompt": "On a Windows device, there’s evidence that PowerShell history was wiped by deleting the history file. What was the exact command used to perform this action?",
+    "answer": [
+        "Remove-Item (Get-PSReadlineOption).HistorySavePath"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "let fileDeletion = DeviceFileEvents\n| where ActionType == \"FileDeleted\"\n| where FolderPath contains \"\\\\PSReadLine\\\\\"\n| where FileName endswith \"_history.txt\"\n| project TimeGenerated, DeviceName, ActionType, FolderPath, FileName, InitiatingProcessFileName, InitiatingProcessCommandLine, InitiatingProcessAccountName;\n\nlet powershellClear = DeviceProcessEvents\n| where FileName in (\"powershell.exe\", \"pwsh.exe\")\n| where ProcessCommandLine has \"Remove-Item\"\n| where ProcessCommandLine has \"HistorySavePath\"\n| project TimeGenerated, DeviceName, ProcessId, FileName, ProcessCommandLine, InitiatingProcessAccountName;\n\nunion fileDeletion, powershellClear\n| sort by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: The expected answer is the command 'Remove-Item (Get-PSReadlineOption).HistorySavePath'. In the query result, the field 'ProcessCommandLine' contains the string '\"powershell.exe\" & {Remove-Item (Get-PSReadlineOption).HistorySavePath}', which includes the expected command. This evidence is sufficient to identify the activity described in the expected answer.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "ActionType",
+            "FolderPath",
+            "FileName",
+            "InitiatingProcessFileName",
+            "InitiatingProcessCommandLine",
+            "InitiatingProcessAccountName",
+            "ProcessId",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 17:06:19.390729+00:00",
+            "windows-vm",
+            "",
+            "",
+            "powershell.exe",
+            "",
+            "",
+            "wipro",
+            9836,
+            "\"powershell.exe\" & {Remove-Item (Get-PSReadlineOption).HistorySavePath}"
+        ]
+    ]
+}

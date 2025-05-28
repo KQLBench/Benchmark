@@ -1,0 +1,40 @@
+{
+    "technique_id": "T1003",
+    "question_id": "d400090a-d8ca-4be0-982e-c70598a23de9",
+    "context": "On Windows, svchost.exe can store decrypted RDP credentials in memory. An attacker may use PowerShell to locate the svchost process serving RDP (port 3389) then leverage rundll32.exe and comsvcs.dll to create a full memory dump in the temporary folder.",
+    "objective": "Detect when a memory dump of svchost.exe is created via rundll32.exe and identify the file’s exact name.",
+    "technical_details": {
+        "command_analysis": "The attack script finds the svchost process ID (either from an existing RDP connection or by default) then calls ‘rundll32.exe C:\\windows\\System32\\comsvcs.dll, MiniDump <pid> <temp>\\\\svchost-exe.dmp full’.",
+        "detection_approach": "Search file creation events for new .dmp files in user Temp directories initiated by rundll32.exe with comsvcs.dll in the command line."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Encourage the analyst to query the file event logs for rundll32.exe creating .dmp files under Temp and extract the file name, rather than simply naming the dump file without evidence.",
+    "prompt": "On a Windows host, an attacker leveraged COMSVCS.DLL via rundll32.exe to dump the memory of svchost.exe into a file under the Temp directory. Review the file creation logs to determine the exact name of the dump file that was generated.",
+    "answer": [
+        "svchost-exe.dmp"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceFileEvents\n| where ActionType == 'FileCreated'\n| where FileName endswith '.dmp'\n| where FolderPath has 'AppData' and FolderPath has 'Local' and FolderPath has 'Temp'\n| where InitiatingProcessFileName == 'rundll32.exe'\n| where InitiatingProcessCommandLine contains 'comsvcs.dll' and InitiatingProcessCommandLine contains 'MiniDump'\n| project TimeGenerated, DeviceName, InitiatingProcessAccountDomain, InitiatingProcessAccountName, InitiatingProcessFileName, InitiatingProcessCommandLine, FolderPath, FileName",
+    "KQL_validation_message": "KQL query validation successful: The expected answer is 'svchost-exe.dmp'. In the query results, the 'FileName' field contains 'svchost-exe.dmp', and the 'FolderPath' matches a temp location with the same file. The record also provides context (process and command line) indicating the file was generated. This meets the criteria specified in the expected answer.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountDomain",
+            "InitiatingProcessAccountName",
+            "InitiatingProcessFileName",
+            "InitiatingProcessCommandLine",
+            "FolderPath",
+            "FileName"
+        ],
+        [
+            "2025-05-07 17:12:32.951591+00:00",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            "rundll32.exe",
+            "\"rundll32.exe\" C:\\windows\\System32\\comsvcs.dll MiniDump 556 C:\\Users\\wipro\\AppData\\Local\\Temp\\svchost-exe.dmp full",
+            "C:\\Users\\wipro\\AppData\\Local\\Temp\\svchost-exe.dmp",
+            "svchost-exe.dmp"
+        ]
+    ]
+}

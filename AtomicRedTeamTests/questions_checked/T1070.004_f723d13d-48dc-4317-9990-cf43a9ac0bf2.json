@@ -1,0 +1,32 @@
+{
+    "technique_id": "T1070.004",
+    "question_id": "f723d13d-48dc-4317-9990-cf43a9ac0bf2",
+    "context": "On Windows endpoints, an adversary may clear the system recycle bin to hide traces, invoking built-in directory removal commands.",
+    "objective": "Identify the full command line used to delete the recycle bin contents.",
+    "technical_details": {
+        "command_analysis": "Recursive (/s) and quiet (/q) removal of the '%systemdrive%\\$RECYCLE.BIN' directory via rd.",
+        "detection_approach": "Search DeviceProcessEvents for instances where the command interpreter executed a directory removal targeting '$RECYCLE.BIN'."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question to elicit the precise cmd command including switches and environment variables, and ensure the answer matches the log entry exactly.",
+    "prompt": "Suspiciously, the recycle bin appears empty system-wide. Determine which command was executed on Windows to clear the system's recycle bin directory, including any switches and environment variables.",
+    "answer": [
+        "rd /s /q %systemdrive%\\$RECYCLE.BIN"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where FileName == \"cmd.exe\"\n| where tolower(ProcessCommandLine) has \"rd\"\n  and tolower(ProcessCommandLine) has \"/s\"\n  and tolower(ProcessCommandLine) has \"/q\"\n  and tolower(ProcessCommandLine) has \"\\\\$recycle.bin\"\n| project TimeGenerated, DeviceName, AccountName, ProcessCommandLine",
+    "KQL_validation_message": "KQL query validation successful: The expected answer is the command 'rd /s /q %systemdrive%\\$RECYCLE.BIN', which is present within the ProcessCommandLine field of the query results as part of the full command executed by cmd.exe. The structure of the results includes relevant context (timestamp, device, account, and process command line) and directly contains the expected activity. Therefore, the query results can be used to answer the detection question.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "AccountName",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 16:32:43.843238+00:00",
+            "windows-vm",
+            "wipro",
+            "\"cmd.exe\" /c rd /s /q %systemdrive%\\$RECYCLE.BIN"
+        ]
+    ]
+}

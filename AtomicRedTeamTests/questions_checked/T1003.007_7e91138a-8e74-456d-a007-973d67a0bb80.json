@@ -1,0 +1,124 @@
+{
+    "technique_id": "T1003.007",
+    "question_id": "7e91138a-8e74-456d-a007-973d67a0bb80",
+    "context": "A Linux host is suspected of having an unauthorized memory dump operation where one process reads another’s heap region from /proc/<pid>/mem and writes it to disk.",
+    "objective": "Detect process creation events indicative of dumping process memory via shell utilities and determine the output file name used.",
+    "technical_details": {
+        "command_analysis": "An attacker used a shell script that launches a target process identified by a unique string, finds its PID and heap address range, then invokes dd to copy /proc/<PID>/mem into an external file and finally greps that file for a keyword.",
+        "detection_approach": "Use DeviceProcessEvents to filter for ProcessCommandLine containing both ‘dd’ and ‘/proc/’ or references to mem, then parse the ‘of=’ argument to identify the output file name. (Base KQL example: DeviceProcessEvents\n| where ProcessCommandLine has \"dd if=/proc\" and ProcessCommandLine has \"of=\" )"
+    },
+    "thinking_how_to_phrase_question_and_answer": "We want to ask the analyst to look for the suspicious dd invocation in process events and extract only the file name used by the of= parameter.",
+    "prompt": "On a Linux system, review process creation logs to spot any dd commands reading from /proc/*/mem. What was the name of the file where the dumped memory was written?",
+    "answer": [
+        "T1003.007.bin"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where ProcessCommandLine has \"dd\" and (ProcessCommandLine has \"/proc/\" or ProcessCommandLine has \"mem\") and ProcessCommandLine has \"of=\"\n| extend OutputFile = extract(@\"of=(\\S+)\", 1, ProcessCommandLine)\n| where isnotempty(OutputFile)\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, ProcessId, ProcessCommandLine, OutputFile",
+    "KQL_validation_message": "KQL query validation successful: The expected answer is 'T1003.007.bin', which is associated with a specific file name related to credential dumping (T1003.007 corresponds to 'OS Credential Dumping: Proc Filesystem'). The query results show multiple activities (including command lines and output files) referencing the file '/tmp/T1003.007.bin'. This file name is present in the 'OutputFile' column of the results, which directly matches the expected answer. The detection of this activity can therefore be supported with the provided query results.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "ProcessId",
+            "ProcessCommandLine",
+            "OutputFile"
+        ],
+        [
+            "2025-05-07 17:00:39.511501+00:00",
+            "wirpo-test",
+            "root",
+            16064,
+            "sh -c 'sh /tmp/T1003.007.sh; PID=$(pgrep -n -f \"T1003.007\"); HEAP_MEM=$(grep -E \"^[0-9a-f-]* r\" /proc/\"$PID\"/maps | grep heap | cut -d' ' -f 1); MEM_START=$(echo $((0x$(echo \"$HEAP_MEM\" | cut -d\"-\" -f1)))); MEM_STOP=$(echo $((0x$(echo \"$HEAP_MEM\" | cut -d\"-\" -f2)))); MEM_SIZE=$(echo $((0x$MEM_STOP-0x$MEM_START))); dd if=/proc/\"${PID}\"/mem of=\"/tmp/T1003.007.bin\" ibs=1 skip=\"$MEM_START\" count=\"$MEM_SIZE\"; grep -i \"PASS\" \"/tmp/T1003.007.bin\"'",
+            "\"/tmp/T1003.007.bin\""
+        ],
+        [
+            "2025-05-07 17:00:39.513508+00:00",
+            "wirpo-test",
+            "root",
+            16065,
+            "sh -c 'sh /tmp/T1003.007.sh; PID=$(pgrep -n -f \"T1003.007\"); HEAP_MEM=$(grep -E \"^[0-9a-f-]* r\" /proc/\"$PID\"/maps | grep heap | cut -d' ' -f 1); MEM_START=$(echo $((0x$(echo \"$HEAP_MEM\" | cut -d\"-\" -f1)))); MEM_STOP=$(echo $((0x$(echo \"$HEAP_MEM\" | cut -d\"-\" -f2)))); MEM_SIZE=$(echo $((0x$MEM_STOP-0x$MEM_START))); dd if=/proc/\"${PID}\"/mem of=\"/tmp/T1003.007.bin\" ibs=1 skip=\"$MEM_START\" count=\"$MEM_SIZE\"; grep -i \"PASS\" \"/tmp/T1003.007.bin\"'",
+            "\"/tmp/T1003.007.bin\""
+        ],
+        [
+            "2025-05-07 17:00:39.518937+00:00",
+            "wirpo-test",
+            "root",
+            16068,
+            "sh -c 'sh /tmp/T1003.007.sh; PID=$(pgrep -n -f \"T1003.007\"); HEAP_MEM=$(grep -E \"^[0-9a-f-]* r\" /proc/\"$PID\"/maps | grep heap | cut -d' ' -f 1); MEM_START=$(echo $((0x$(echo \"$HEAP_MEM\" | cut -d\"-\" -f1)))); MEM_STOP=$(echo $((0x$(echo \"$HEAP_MEM\" | cut -d\"-\" -f2)))); MEM_SIZE=$(echo $((0x$MEM_STOP-0x$MEM_START))); dd if=/proc/\"${PID}\"/mem of=\"/tmp/T1003.007.bin\" ibs=1 skip=\"$MEM_START\" count=\"$MEM_SIZE\"; grep -i \"PASS\" \"/tmp/T1003.007.bin\"'",
+            "\"/tmp/T1003.007.bin\""
+        ],
+        [
+            "2025-05-07 17:00:39.553256+00:00",
+            "wirpo-test",
+            "root",
+            16070,
+            "sh -c 'sh /tmp/T1003.007.sh; PID=$(pgrep -n -f \"T1003.007\"); HEAP_MEM=$(grep -E \"^[0-9a-f-]* r\" /proc/\"$PID\"/maps | grep heap | cut -d' ' -f 1); MEM_START=$(echo $((0x$(echo \"$HEAP_MEM\" | cut -d\"-\" -f1)))); MEM_STOP=$(echo $((0x$(echo \"$HEAP_MEM\" | cut -d\"-\" -f2)))); MEM_SIZE=$(echo $((0x$MEM_STOP-0x$MEM_START))); dd if=/proc/\"${PID}\"/mem of=\"/tmp/T1003.007.bin\" ibs=1 skip=\"$MEM_START\" count=\"$MEM_SIZE\"; grep -i \"PASS\" \"/tmp/T1003.007.bin\"'",
+            "\"/tmp/T1003.007.bin\""
+        ],
+        [
+            "2025-05-07 17:00:39.553492+00:00",
+            "wirpo-test",
+            "root",
+            16071,
+            "sh -c 'sh /tmp/T1003.007.sh; PID=$(pgrep -n -f \"T1003.007\"); HEAP_MEM=$(grep -E \"^[0-9a-f-]* r\" /proc/\"$PID\"/maps | grep heap | cut -d' ' -f 1); MEM_START=$(echo $((0x$(echo \"$HEAP_MEM\" | cut -d\"-\" -f1)))); MEM_STOP=$(echo $((0x$(echo \"$HEAP_MEM\" | cut -d\"-\" -f2)))); MEM_SIZE=$(echo $((0x$MEM_STOP-0x$MEM_START))); dd if=/proc/\"${PID}\"/mem of=\"/tmp/T1003.007.bin\" ibs=1 skip=\"$MEM_START\" count=\"$MEM_SIZE\"; grep -i \"PASS\" \"/tmp/T1003.007.bin\"'",
+            "\"/tmp/T1003.007.bin\""
+        ],
+        [
+            "2025-05-07 17:00:39.553605+00:00",
+            "wirpo-test",
+            "root",
+            16072,
+            "sh -c 'sh /tmp/T1003.007.sh; PID=$(pgrep -n -f \"T1003.007\"); HEAP_MEM=$(grep -E \"^[0-9a-f-]* r\" /proc/\"$PID\"/maps | grep heap | cut -d' ' -f 1); MEM_START=$(echo $((0x$(echo \"$HEAP_MEM\" | cut -d\"-\" -f1)))); MEM_STOP=$(echo $((0x$(echo \"$HEAP_MEM\" | cut -d\"-\" -f2)))); MEM_SIZE=$(echo $((0x$MEM_STOP-0x$MEM_START))); dd if=/proc/\"${PID}\"/mem of=\"/tmp/T1003.007.bin\" ibs=1 skip=\"$MEM_START\" count=\"$MEM_SIZE\"; grep -i \"PASS\" \"/tmp/T1003.007.bin\"'",
+            "\"/tmp/T1003.007.bin\""
+        ],
+        [
+            "2025-05-07 17:00:39.553734+00:00",
+            "wirpo-test",
+            "root",
+            16073,
+            "sh -c 'sh /tmp/T1003.007.sh; PID=$(pgrep -n -f \"T1003.007\"); HEAP_MEM=$(grep -E \"^[0-9a-f-]* r\" /proc/\"$PID\"/maps | grep heap | cut -d' ' -f 1); MEM_START=$(echo $((0x$(echo \"$HEAP_MEM\" | cut -d\"-\" -f1)))); MEM_STOP=$(echo $((0x$(echo \"$HEAP_MEM\" | cut -d\"-\" -f2)))); MEM_SIZE=$(echo $((0x$MEM_STOP-0x$MEM_START))); dd if=/proc/\"${PID}\"/mem of=\"/tmp/T1003.007.bin\" ibs=1 skip=\"$MEM_START\" count=\"$MEM_SIZE\"; grep -i \"PASS\" \"/tmp/T1003.007.bin\"'",
+            "\"/tmp/T1003.007.bin\""
+        ],
+        [
+            "2025-05-07 17:00:39.565473+00:00",
+            "wirpo-test",
+            "root",
+            16074,
+            "sh -c 'sh /tmp/T1003.007.sh; PID=$(pgrep -n -f \"T1003.007\"); HEAP_MEM=$(grep -E \"^[0-9a-f-]* r\" /proc/\"$PID\"/maps | grep heap | cut -d' ' -f 1); MEM_START=$(echo $((0x$(echo \"$HEAP_MEM\" | cut -d\"-\" -f1)))); MEM_STOP=$(echo $((0x$(echo \"$HEAP_MEM\" | cut -d\"-\" -f2)))); MEM_SIZE=$(echo $((0x$MEM_STOP-0x$MEM_START))); dd if=/proc/\"${PID}\"/mem of=\"/tmp/T1003.007.bin\" ibs=1 skip=\"$MEM_START\" count=\"$MEM_SIZE\"; grep -i \"PASS\" \"/tmp/T1003.007.bin\"'",
+            "\"/tmp/T1003.007.bin\""
+        ],
+        [
+            "2025-05-07 17:00:39.566731+00:00",
+            "wirpo-test",
+            "root",
+            16075,
+            "sh -c 'sh /tmp/T1003.007.sh; PID=$(pgrep -n -f \"T1003.007\"); HEAP_MEM=$(grep -E \"^[0-9a-f-]* r\" /proc/\"$PID\"/maps | grep heap | cut -d' ' -f 1); MEM_START=$(echo $((0x$(echo \"$HEAP_MEM\" | cut -d\"-\" -f1)))); MEM_STOP=$(echo $((0x$(echo \"$HEAP_MEM\" | cut -d\"-\" -f2)))); MEM_SIZE=$(echo $((0x$MEM_STOP-0x$MEM_START))); dd if=/proc/\"${PID}\"/mem of=\"/tmp/T1003.007.bin\" ibs=1 skip=\"$MEM_START\" count=\"$MEM_SIZE\"; grep -i \"PASS\" \"/tmp/T1003.007.bin\"'",
+            "\"/tmp/T1003.007.bin\""
+        ],
+        [
+            "2025-05-07 17:00:39.566957+00:00",
+            "wirpo-test",
+            "root",
+            16076,
+            "sh -c 'sh /tmp/T1003.007.sh; PID=$(pgrep -n -f \"T1003.007\"); HEAP_MEM=$(grep -E \"^[0-9a-f-]* r\" /proc/\"$PID\"/maps | grep heap | cut -d' ' -f 1); MEM_START=$(echo $((0x$(echo \"$HEAP_MEM\" | cut -d\"-\" -f1)))); MEM_STOP=$(echo $((0x$(echo \"$HEAP_MEM\" | cut -d\"-\" -f2)))); MEM_SIZE=$(echo $((0x$MEM_STOP-0x$MEM_START))); dd if=/proc/\"${PID}\"/mem of=\"/tmp/T1003.007.bin\" ibs=1 skip=\"$MEM_START\" count=\"$MEM_SIZE\"; grep -i \"PASS\" \"/tmp/T1003.007.bin\"'",
+            "\"/tmp/T1003.007.bin\""
+        ],
+        [
+            "2025-05-07 17:00:39.567561+00:00",
+            "wirpo-test",
+            "root",
+            16077,
+            "sh -c 'sh /tmp/T1003.007.sh; PID=$(pgrep -n -f \"T1003.007\"); HEAP_MEM=$(grep -E \"^[0-9a-f-]* r\" /proc/\"$PID\"/maps | grep heap | cut -d' ' -f 1); MEM_START=$(echo $((0x$(echo \"$HEAP_MEM\" | cut -d\"-\" -f1)))); MEM_STOP=$(echo $((0x$(echo \"$HEAP_MEM\" | cut -d\"-\" -f2)))); MEM_SIZE=$(echo $((0x$MEM_STOP-0x$MEM_START))); dd if=/proc/\"${PID}\"/mem of=\"/tmp/T1003.007.bin\" ibs=1 skip=\"$MEM_START\" count=\"$MEM_SIZE\"; grep -i \"PASS\" \"/tmp/T1003.007.bin\"'",
+            "\"/tmp/T1003.007.bin\""
+        ],
+        [
+            "2025-05-07 17:00:39.578638+00:00",
+            "wirpo-test",
+            "root",
+            16083,
+            "dd if=/proc/16067/mem of=/tmp/T1003.007.bin ibs=1 skip=110274301583360 count=1659336",
+            "/tmp/T1003.007.bin"
+        ]
+    ]
+}

@@ -1,0 +1,68 @@
+{
+    "technique_id": "T1070.003",
+    "question_id": "b1251c35-dcd3-4ea1-86da-36d27b54f31f",
+    "context": "Investigation of a Linux system where an attacker may have attempted to cover their tracks by clearing the shell history file.",
+    "objective": "Identify any process activity that overwrote the bash history by redirecting data from the null device into the history file.",
+    "technical_details": {
+        "command_analysis": "The attacker invoked a shell utility to read from /dev/null and redirected its output into the bash history file, effectively erasing its contents.",
+        "detection_approach": "Query process execution or file write events for operations where /dev/null is the input source and the target file matches the typical bash history filename (~/.bash_history)."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Phrase the detection challenge to ask for the precise command line used to wipe out the history, with the analyst expected to return the full command string as seen in the logs.",
+    "prompt": "On a Linux endpoint, you suspect malicious clearing of the bash history by redirecting from the null device. Explore process or file events to uncover the exact shell command that performed this action.",
+    "answer": [
+        "cat /dev/null > ~/.bash_history"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where TimeGenerated >= ago(7d)\n| where ProcessCommandLine contains \"/dev/null\" and ProcessCommandLine contains \".bash_history\"\n| project TimeGenerated, DeviceName, ProcessId, FileName, ProcessCommandLine, InitiatingProcessAccountName",
+    "KQL_validation_message": "KQL query validation successful: In the provided query results, there are rows where the field 'ProcessCommandLine' shows the exact command 'sh -c \"cat /dev/null > ~/.bash_history\"'. This matches the expected answer. Therefore, the results contain sufficient data to confirm the detection of the expected activity.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "ProcessId",
+            "FileName",
+            "ProcessCommandLine",
+            "InitiatingProcessAccountName"
+        ],
+        [
+            "2025-05-07 17:05:48.989921+00:00",
+            "wirpo-test",
+            21517,
+            "dash",
+            "sh -c \"ln -sf /dev/null ~/.bash_history\"",
+            "root"
+        ],
+        [
+            "2025-05-07 17:05:48.990535+00:00",
+            "wirpo-test",
+            21519,
+            "dash",
+            "sh -c \"ln -sf /dev/null ~/.bash_history\"",
+            "root"
+        ],
+        [
+            "2025-05-07 17:05:48.991869+00:00",
+            "wirpo-test",
+            21519,
+            "ln",
+            "ln -sf /dev/null /root/.bash_history",
+            "root"
+        ],
+        [
+            "2025-05-07 17:05:57.199812+00:00",
+            "wirpo-test",
+            21688,
+            "dash",
+            "sh -c \"cat /dev/null > ~/.bash_history\"",
+            "root"
+        ],
+        [
+            "2025-05-07 17:05:57.201604+00:00",
+            "wirpo-test",
+            21690,
+            "dash",
+            "sh -c \"cat /dev/null > ~/.bash_history\"",
+            "root"
+        ]
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "technique_id": "T1112",
+    "question_id": "35727d9e-7a7f-4d0c-a259-dc3906d6e8b9",
+    "context": "An attacker simulation modifies a Windows registry setting under HKLM\\System\\CurrentControlSet\\Control\\Terminal Server to allow multiple RDP sessions per user.",
+    "objective": "Detect the utility used to change the fSingleSessionPerUser registry value under the Terminal Server key on Windows.",
+    "technical_details": {
+        "command_analysis": "The adversary invokes a Windows command-line utility to add a REG_DWORD value named fSingleSessionPerUser with data 0 to the Terminal Server registry key.",
+        "detection_approach": "Query DeviceRegistryEvents for entries where RegistryKey contains 'Terminal Server' and RegistryValueName is 'fSingleSessionPerUser', then inspect InitiatingProcessFileName or InitiatingProcessCommandLine to identify the modifying utility."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question around isolating the registry modification event and then determining the exact executable name that performed it.",
+    "prompt": "A Windows host logs a change to the Terminal Server registry key disabling single-session per user. Which command-line utility executed this registry modification?",
+    "answer": [
+        "reg"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceRegistryEvents\n| where RegistryKey has \"Terminal Server\"\n| where RegistryValueName == \"fSingleSessionPerUser\" and RegistryValueData == \"0\"\n| summarize Count = count() by InitiatingProcessFileName, InitiatingProcessCommandLine\n| order by Count desc",
+    "KQL_validation_message": "KQL query validation successful: The results include an entry where 'InitiatingProcessFileName' is 'reg.exe' and 'InitiatingProcessCommandLine' details a 'reg add' command. This aligns exactly with the expected answer of 'reg', demonstrating the activity described. The structure explicitly matches process execution evidence for 'reg', providing sufficient information for the detection question.",
+    "KQL_query_results": [
+        [
+            "InitiatingProcessFileName",
+            "InitiatingProcessCommandLine",
+            "Count"
+        ],
+        [
+            "reg.exe",
+            "reg  add \"HKLM\\System\\CurrentControlSet\\Control\\Terminal Server\" /v fSingleSessionPerUser /t REG_DWORD /d 0 /f",
+            1
+        ]
+    ]
+}

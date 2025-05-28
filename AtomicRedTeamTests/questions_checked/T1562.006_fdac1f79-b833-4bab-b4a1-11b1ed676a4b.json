@@ -1,0 +1,28 @@
+{
+    "technique_id": "T1562.006",
+    "question_id": "fdac1f79-b833-4bab-b4a1-11b1ed676a4b",
+    "context": "A Windows endpoint had its .NET framework event tracing disabled by manipulating an environment variable in the user registry. This change was applied via a built-in command-line utility.",
+    "objective": "Detect the tool used to apply the registry modification that disables COMPlus .NET event tracing.",
+    "technical_details": {
+        "command_analysis": "The adversary ran a registry add command targeting HKCU\\Environment to set COMPlus_ETWEnabled to 0.",
+        "detection_approach": "Query registry change events for HKCU\\Environment, filter on RegistryValueName COMPlus_ETWEnabled and inspect the initiating process filename."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question around identifying which Windows utility wrote to the registry key that disables .NET event tracing. The expected answer should be the exact process name used.",
+    "prompt": "A .NET tracing environment variable was turned off in a user’s registry on a Windows system. Which built-in command-line tool was used to make this registry change?",
+    "answer": [
+        "reg.exe"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "let Exec = DeviceProcessEvents\n| where TimeGenerated >= ago(30d)\n| where FileName == \"reg.exe\"\n| where ProcessCommandLine has_any (\"add\",\"HKCU\\\\Environment\",\"COMPlus_ETWEnabled\")\n| where ProcessCommandLine has_any (\"/d 0\",\"0x0\",\"dword:00000000\")\n| extend Tool = FileName;\nlet Reg = DeviceRegistryEvents\n| where TimeGenerated >= ago(30d)\n| where ActionType contains \"SetValue\"\n| where RegistryKey has_any (\"HKCU\\\\Environment\",\"HKEY_CURRENT_USER\\\\Environment\")\n| where RegistryValueName == \"COMPlus_ETWEnabled\"\n| where RegistryValueData in (\"0\",\"0x0\") or RegistryValueData has \"00000000\"\n| extend Tool = InitiatingProcessFileName;\nExec\n| union Reg\n| summarize Count = count() by Tool\n| sort by Count desc",
+    "KQL_validation_message": "KQL query validation successful: The query results include the 'Tool' column with a value of 'reg.exe', which matches the expected answer exactly. The count provides additional context about frequency, but the key fact is that 'reg.exe' is present in the results, thereby providing the necessary evidence to answer the detection question as specified.",
+    "KQL_query_results": [
+        [
+            "Tool",
+            "Count"
+        ],
+        [
+            "reg.exe",
+            32
+        ]
+    ]
+}

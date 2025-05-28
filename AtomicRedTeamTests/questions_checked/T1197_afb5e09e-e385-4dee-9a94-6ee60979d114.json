@@ -1,0 +1,38 @@
+{
+    "technique_id": "T1197",
+    "question_id": "afb5e09e-e385-4dee-9a94-6ee60979d114",
+    "context": "A Windows endpoint was used to simulate a malicious file download by invoking a little‐known image downloader tool that points at a remote URL and leverages BITS under the covers.",
+    "objective": "Determine which executable was used to kick off the download via the desktop image downloader.",
+    "technical_details": {
+        "command_analysis": "Investigate process creation logs for commands that reference a lockscreenurl parameter and identify the initiating executable.",
+        "detection_approach": "Correlate process creation events with unusual downloader tools, then verify any resulting network or file write activity tied to that process."
+    },
+    "thinking_how_to_phrase_question_and_answer": "What is the name of the tool used to initiate the download?",
+    "prompt": "On a Windows system, a non-standard image downloader was used to fetch a remote file by passing a URL to a lockscreen utility. Identify the executable responsible for launching that activity.",
+    "answer": [
+        "desktopimgdownldr.exe"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "let suspiciousProcs = DeviceProcessEvents\n| where TimeGenerated between(ago(7d)..now())\n| where ProcessCommandLine contains \"lockscreenurl\"\n| project suspiciousTime=TimeGenerated, deviceName=DeviceName, procId=ProcessId, downloaderExe=FileName, cmdLine=ProcessCommandLine;\n\nlet netActivity = DeviceNetworkEvents\n| where TimeGenerated between(ago(7d)..now())\n| project netTime=TimeGenerated, deviceName=DeviceName, procId=InitiatingProcessId, remoteUrl=RemoteUrl;\n\nlet fileWrites = DeviceFileEvents\n| where TimeGenerated between(ago(7d)..now())\n| project fileTime=TimeGenerated, deviceName=DeviceName, procId=InitiatingProcessId, writtenFileName=FileName, folderPath=FolderPath;\n\nsuspiciousProcs\n| join kind=leftouter netActivity on deviceName, procId\n| join kind=leftouter fileWrites on deviceName, procId\n| project deviceName, downloaderExe, cmdLine, remoteUrl, writtenFileName, folderPath, suspiciousTime, netTime, fileTime\n| summarize occurrences=count(), networkCalls=countif(isnotempty(remoteUrl)), fileWrites=countif(isnotempty(writtenFileName)) by downloaderExe",
+    "KQL_validation_message": "KQL query validation successful: The results table lists 'desktopimgdownldr.exe' in the 'downloaderExe' column, confirming its presence. This matches the expected answer, so the query results contain the needed evidence.",
+    "KQL_query_results": [
+        [
+            "downloaderExe",
+            "occurrences",
+            "networkCalls",
+            "fileWrites"
+        ],
+        [
+            "desktopimgdownldr.exe",
+            1,
+            0,
+            0
+        ],
+        [
+            "cmd.exe",
+            2,
+            0,
+            0
+        ]
+    ]
+}

@@ -1,0 +1,28 @@
+{
+    "technique_id": "T1622",
+    "question_id": "58bd8c8d-3a1a-4467-a69c-439c75469b07",
+    "context": "A Windows host where a PowerShell-based script was executed to detect debugger processes by enumerating running processes for names containing “dbg” or “debug” and checking the .NET debugger attachment flag.",
+    "objective": "Identify the tool used to perform the debugger presence check on the endpoint.",
+    "technical_details": {
+        "command_analysis": "The PowerShell snippet lists processes whose names match substrings “dbg” or “debug” and evaluates [System.Diagnostics.Debugger]::IsAttached to detect an attached debugger.",
+        "detection_approach": "Search DeviceProcessEvents for the PowerShell execution that performed this enumeration and extract the initiating process file name."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Guide the analyst to query process creation events on Windows, filter for the PowerShell command execution, and then retrieve the name of the executable that initiated the debugger check.",
+    "prompt": "On the Windows device, a security check was run to detect debugger processes via PowerShell. Which tool (process) carried out this check?",
+    "answer": [
+        "powershell"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "DeviceProcessEvents\n| where TimeGenerated >= ago(7d)\n| where FileName == \"powershell.exe\"\n| where ProcessCommandLine has_any(\"Get-Process\",\"dbg\",\"debug\",\"System.Diagnostics.Debugger\",\"IsAttached\",\"EncodedCommand\")\n| extend Tool = replace(@\"\\.exe$\",\"\", FileName)\n| summarize InvocationCount = count() by Tool\n| order by InvocationCount desc",
+    "KQL_validation_message": "KQL query validation successful: The results have a row with 'powershell' in the 'Tool' field and an associated count, which provides evidence that 'powershell' activity was detected. This aligns directly with the expected answers, so the necessary information is included.",
+    "KQL_query_results": [
+        [
+            "Tool",
+            "InvocationCount"
+        ],
+        [
+            "powershell",
+            8
+        ]
+    ]
+}

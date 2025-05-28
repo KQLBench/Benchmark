@@ -1,0 +1,42 @@
+{
+    "technique_id": "T1036.003",
+    "question_id": "ac9d0fc3-8aa8-4ab5-b11f-682cd63b40aa",
+    "context": "On a Windows system, an adversary copied the legitimate PowerShell binary into the user’s AppData directory, renamed it to mimic a system component, and executed it from this non-standard location.",
+    "objective": "Detect instances where powershell.exe has been masqueraded by copying and renaming it to a familiar Windows process name in an unexpected folder.",
+    "technical_details": {
+        "command_analysis": "The attacker ran a command to copy powershell.exe from the System32 directory to the AppData folder and renamed it to taskhostw.exe, then executed the renamed binary.",
+        "detection_approach": "Query process creation events for executions of a file named like a Windows system host (e.g., taskhostw.exe) running from a non-standard path; correlate with internal file metadata to confirm it’s actually powershell.exe."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question to ask for the specific filename that was used to impersonate a legitimate system executable. The answer should be the exact name of that masqueraded file.",
+    "prompt": "A process is running under a familiar Windows host name but originates from a user's AppData folder rather than the System32 directory. Identify the filename used to masquerade the PowerShell binary on this Windows device.",
+    "answer": [
+        "taskhostw.exe"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where FileName == \"taskhostw.exe\"\n| where tolower(FolderPath) contains \"\\\\appdata\\\\\"\n| where tolower(ProcessVersionInfoOriginalFileName) endswith \"powershell.exe\" \n      or tolower(ProcessVersionInfoInternalFileName) endswith \"powershell.exe\"\n| project TimeGenerated, DeviceName, AccountDomain, AccountName, FolderPath, FileName, ProcessCommandLine, ProcessVersionInfoOriginalFileName, ProcessVersionInfoInternalFileName\n| order by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: The expected answer is 'taskhostw.exe'. The key evidence required is the presence of this executable in the results. The returned log includes a row where 'FileName' is 'taskhostw.exe', directly matching the expected answer. Therefore, these results indeed contain the evidence needed to answer the detection question with a 1:1 match.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "AccountDomain",
+            "AccountName",
+            "FolderPath",
+            "FileName",
+            "ProcessCommandLine",
+            "ProcessVersionInfoOriginalFileName",
+            "ProcessVersionInfoInternalFileName"
+        ],
+        [
+            "2025-05-07 17:06:49.641219+00:00",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            "C:\\Users\\wipro\\AppData\\Roaming\\taskhostw.exe",
+            "taskhostw.exe",
+            "taskhostw.exe",
+            "PowerShell.EXE",
+            "POWERSHELL"
+        ]
+    ]
+}

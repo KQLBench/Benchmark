@@ -1,0 +1,68 @@
+{
+    "technique_id": "T1059.004",
+    "question_id": "b04ed73c-7d43-4dc8-b563-a2fc595cba1a",
+    "context": "On a Linux host, an attacker may avoid writing script files by typing multi-line shell commands directly into a terminal. In this scenario, a simple loop was executed that echoed a distinguishing message several times.",
+    "objective": "Detect and retrieve the exact interactive shell command used to perform the loop.",
+    "technical_details": {
+        "command_analysis": "Inspect DeviceProcessEvents (or Syslog) for shell invocations where the ProcessCommandLine contains the unique marker 'Atomic Red Team was here!'.",
+        "detection_approach": "Query the DeviceProcessEvents table for ProcessCommandLine entries matching the distinctive string, then project the full command to see what was run."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question to ask for the full loop command entered and expect the exact command string as the answer.",
+    "prompt": "Which full interactive shell command, as recorded in the Linux process logs, repeatedly echoed a distinctive marker message to the terminal?",
+    "answer": [
+        "for i in $(seq 1 5); do echo \"$i, Atomic Red Team was here!\"; sleep 1; done"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "DeviceProcessEvents\n| where ProcessCommandLine has \"for i in\"\n| where ProcessCommandLine contains \"Atomic Red Team was here!\"\n| project TimeGenerated, DeviceName, AccountName, ProcessCommandLine\n| order by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: The expected answer is the shell command 'for i in $(seq 1 5); do echo \"$i, Atomic Red Team was here!\"; sleep 1; done'. The 'ProcessCommandLine' values in the results are 'sh -c' followed by that exact same command. This indicates that the activity described (execution of that command) is captured directly in the results, specifically in the 'ProcessCommandLine' field, multiple times and with time stamps. Therefore, the results provide the information needed to detect the described activity.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "AccountName",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 17:02:18.675512+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c 'for i in $(seq 1 5); do echo \"$i, Atomic Red Team was here!\"; sleep 1; done'"
+        ],
+        [
+            "2025-05-07 17:02:17.665864+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c 'for i in $(seq 1 5); do echo \"$i, Atomic Red Team was here!\"; sleep 1; done'"
+        ],
+        [
+            "2025-05-07 17:02:16.663373+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c 'for i in $(seq 1 5); do echo \"$i, Atomic Red Team was here!\"; sleep 1; done'"
+        ],
+        [
+            "2025-05-07 17:02:15.650620+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c 'for i in $(seq 1 5); do echo \"$i, Atomic Red Team was here!\"; sleep 1; done'"
+        ],
+        [
+            "2025-05-07 17:02:14.638397+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c 'for i in $(seq 1 5); do echo \"$i, Atomic Red Team was here!\"; sleep 1; done'"
+        ],
+        [
+            "2025-05-07 17:02:14.626224+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c 'for i in $(seq 1 5); do echo \"$i, Atomic Red Team was here!\"; sleep 1; done'"
+        ],
+        [
+            "2025-05-07 17:02:14.625371+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c 'for i in $(seq 1 5); do echo \"$i, Atomic Red Team was here!\"; sleep 1; done'"
+        ]
+    ]
+}

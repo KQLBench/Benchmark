@@ -1,0 +1,18 @@
+{
+    "technique_id": "T1003.008",
+    "question_id": "3723ab77-c546-403c-8fb4-bb577033b235",
+    "context": "On a Linux system, an elevated process was executed to access the /etc/shadow file.",
+    "objective": "Determine the file name used to store the contents of /etc/shadow after the command execution.",
+    "technical_details": {
+        "command_analysis": "The executed command involved 'sudo cat /etc/shadow > #{output_file}' followed by a subsequent cat of the output file.",
+        "detection_approach": "Investigate process command line or file events to identify file creation operations that involve the /etc/shadow access and capture the resulting file name."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the query to explore logs on Linux that show an instance where /etc/shadow was read and its output saved. Focus on determining the exact file name generated from this activity.",
+    "prompt": "In a Linux environment, an elevated process was used to execute a command that read /etc/shadow and redirected its output to a file. Identify what file name was employed to store these results.",
+    "answer": [
+        "T1003.008.txt"
+    ],
+    "KQL_query": "DeviceProcessEvents\n| where Timestamp > ago(1d)                       // adjust as needed\n| where ProcessCommandLine has \"/etc/shadow\"\n      and FileName in~ (\"cat\",\"less\",\"more\",\"awk\",\"grep\",\"sed\",\"cut\",\n                        \"tail\",\"head\",\"view\",\"vi\") // common text readers\n| project\n    Timestamp,\n    DeviceName,\n    Evidence   = \"Process\",\n    Actor      = InitiatingProcessAccountName,\n    FileName,\n    ProcessCommandLine,\n    InitiatingProcessParentFileName",
+    "KQL_query_clean": "DeviceProcessEvents\n| where InitiatingProcessCommandLine contains \"sudo cat /etc/shadow >\"\n| extend OutputFile = extract(@\">\\s*(\\S+)\", 1, InitiatingProcessCommandLine)\n| where isnotempty(OutputFile)\n| sort by TimeGenerated desc",
+    "difficulty": "unknown"
+}

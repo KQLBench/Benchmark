@@ -1,0 +1,52 @@
+{
+    "technique_id": "T1057",
+    "question_id": "c5806a4f-62b8-4900-980b-c7ec004e9908",
+    "context": "An adversary on a Windows host leveraged built-in utilities to enumerate running processes as part of their reconnaissance.",
+    "objective": "Identify when and how the Windows tasklist command was executed via the command prompt.",
+    "technical_details": {
+        "command_analysis": "The attacker used cmd.exe to invoke a native process enumeration tool rather than a custom binary.",
+        "detection_approach": "Query process creation events for executions where ProcessCommandLine or FileName corresponds to \"tasklist\" or the command prompt invoking it."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question to ask which native Windows tool was executed for process discovery; the answer is the exact command name.",
+    "prompt": "A Windows endpoint recorded a command-line activity through cmd.exe that lists all running processes. Determine which built-in tool was executed to perform this action.",
+    "answer": [
+        "tasklist"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "DeviceProcessEvents\n| where ProcessCommandLine has_cs \"tasklist\"\n      and (InitiatingProcessFileName has_cs \"cmd.exe\" or FileName has_cs \"tasklist\")\n| project TimeGenerated, DeviceName, FileName, ProcessCommandLine, InitiatingProcessFileName, InitiatingProcessCommandLine",
+    "KQL_validation_message": "KQL query validation successful: All returned rows have 'tasklist.exe' as the FileName and 'tasklist' in the ProcessCommandLine. The command lines make it clear that the 'tasklist' command was invoked, matching the expected answers. The data structure provides time, host, and the initiating process, which supports detection and investigation.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "FileName",
+            "ProcessCommandLine",
+            "InitiatingProcessFileName",
+            "InitiatingProcessCommandLine"
+        ],
+        [
+            "2025-05-07 16:22:27.753286+00:00",
+            "windows-vm",
+            "tasklist.exe",
+            "tasklist",
+            "cmd.exe",
+            "\"cmd.exe\" /c tasklist"
+        ],
+        [
+            "2025-05-07 16:33:12.981381+00:00",
+            "windows-vm",
+            "tasklist.exe",
+            "tasklist",
+            "cmd.exe",
+            "\"cmd.exe\" /c tasklist"
+        ],
+        [
+            "2025-05-07 16:33:32.554330+00:00",
+            "windows-vm",
+            "tasklist.exe",
+            "tasklist  ",
+            "cmd.exe",
+            "\"cmd.exe\" /c tasklist | findstr lsass"
+        ]
+    ]
+}

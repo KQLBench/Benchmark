@@ -1,0 +1,36 @@
+{
+    "technique_id": "T1112",
+    "question_id": "282f929a-6bc5-42b8-bd93-960c3ba35afe",
+    "context": "On a Windows host, an elevated command prompt was used to modify the Local Machine Run registry key under HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Run, replacing the default Windows Defender startup executable.",
+    "objective": "Detect unauthorized changes to the SecurityHealth Run value in the Local Machine registry and determine which executable was set to launch at startup.",
+    "technical_details": {
+        "command_analysis": "The suspect action invokes a reg add targeting HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Run with a /v SecurityHealth parameter and specifies a new executable in the /d argument.",
+        "detection_approach": "Query DeviceRegistryEvents for entries where RegistryKey ends with CurrentVersion\\Run and RegistryValueName equals 'SecurityHealth', then inspect RegistryValueData for the substituted startup program."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question to lead the analyst to look for the specific registry value under HKLM Run and extract only the file name that was set.",
+    "prompt": "Evidence shows that the Windows Defender startup entry was tampered with via an elevated command prompt. Investigate registry events related to the Run key to discover which executable replaced the default SecurityHealth value. What is the name of the new program?",
+    "answer": [
+        "calc.exe"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceRegistryEvents\n| where TimeGenerated >= ago(7d)\n| where RegistryKey contains \"CurrentVersion\" and RegistryKey endswith \"Run\"\n| where RegistryValueName == \"SecurityHealth\"\n| where RegistryValueData contains \".exe\"\n| where InitiatingProcessIntegrityLevel == \"High\"\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, InitiatingProcessFileName, InitiatingProcessCommandLine, RegistryValueData\n| order by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: The expected answer is 'calc.exe'. In the query results, the relevant data ('calc.exe') appears in the field 'RegistryValueData'. This field indicates the value set during the registry modification, evidencing the activity explicitly. Thus, there is a direct 1:1 correlation between the expected and returned data.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "InitiatingProcessFileName",
+            "InitiatingProcessCommandLine",
+            "RegistryValueData"
+        ],
+        [
+            "2025-05-07 16:42:14.082755+00:00",
+            "windows-vm",
+            "wipro",
+            "reg.exe",
+            "reg  add HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\CurrentVersion\\Run /t REG_EXPAND_SZ /v SecurityHealth /d calc.exe /f",
+            "calc.exe"
+        ]
+    ]
+}

@@ -1,0 +1,56 @@
+{
+    "technique_id": "T1124",
+    "question_id": "f449c933-0891-407f-821e-7916a21a1a6f",
+    "context": "In a Linux environment, an operator executed a command to display the local system time and timezone.",
+    "objective": "Determine the exact command used by the user to query the system clock.",
+    "technical_details": {
+        "command_analysis": "Inspect process execution logs for invocations of time‐displaying utilities in the command line field.",
+        "detection_approach": "Use DeviceProcessEvents or Syslog records to identify executions where the process name or command line matches a typical time discovery tool."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question to direct the analyst to look for the process event that shows the time‐discovery action and extract the exact command string.",
+    "prompt": "On a Linux host, an activity was recorded where the local clock and timezone were queried. Review the available process execution logs to uncover what full command was run to fetch the system time and timezone.",
+    "answer": [
+        "date"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "let timeframe = 1h;\nunion kind=outer\n    (DeviceProcessEvents\n        | where TimeGenerated >= ago(timeframe)\n        | where FileName == \"date\" or ProcessCommandLine has \"date\"\n        | project TimeGenerated, DeviceName, InitiatingProcessAccountName, ProcessCommandLine),\n    (Syslog\n        | where TimeGenerated >= ago(timeframe)\n        | where ProcessName == \"date\" or SyslogMessage has \"date\"\n        | extend DeviceName = HostName, InitiatingProcessAccountName = \"\", ProcessCommandLine = SyslogMessage\n        | project TimeGenerated, DeviceName, InitiatingProcessAccountName, ProcessCommandLine)\n| order by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: The expected answer is 'date', and the ProcessCommandLine field in each row of the query results shows various uses of the 'date' command. This confirms the data includes precise evidence regarding 'date' activities, matching the expected answer 1:1.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-08 06:54:42.877358+00:00",
+            "flurin-monitoring.xv2g1ire1j0ehkxrurr1ew43qg.xx.internal.cloudapp.net",
+            "root",
+            "date --date=2025-05-08 +%s"
+        ],
+        [
+            "2025-05-08 06:54:42.875746+00:00",
+            "flurin-monitoring.xv2g1ire1j0ehkxrurr1ew43qg.xx.internal.cloudapp.net",
+            "root",
+            "date --iso-8601"
+        ],
+        [
+            "2025-05-08 06:54:42.874433+00:00",
+            "flurin-monitoring.xv2g1ire1j0ehkxrurr1ew43qg.xx.internal.cloudapp.net",
+            "root",
+            "date --date=2025-05-07 +%s"
+        ],
+        [
+            "2025-05-08 06:54:42.873274+00:00",
+            "flurin-monitoring.xv2g1ire1j0ehkxrurr1ew43qg.xx.internal.cloudapp.net",
+            "root",
+            "date -r /var/lib/apt/periodic/upgrade-stamp --iso-8601"
+        ],
+        [
+            "2025-05-08 06:54:42.814826+00:00",
+            "flurin-monitoring.xv2g1ire1j0ehkxrurr1ew43qg.xx.internal.cloudapp.net",
+            "root",
+            "date +%s"
+        ]
+    ]
+}

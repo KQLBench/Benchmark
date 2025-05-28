@@ -1,0 +1,38 @@
+{
+    "technique_id": "T1124",
+    "question_id": "d5d5a6b0-0f92-42d8-985d-47aafa2dd4db",
+    "context": "On Windows systems, adversaries may leverage native time utilities to introduce delays in their operations—commonly observed in certain RAT campaigns.",
+    "objective": "Detect when the W32tm command is executed with stripchart and period parameters that indicate a deliberate timing delay.",
+    "technical_details": {
+        "command_analysis": "The attack uses 'W32tm /stripchart /computer:localhost /period:5 /dataonly /samples:2' to poll system time in fixed intervals.",
+        "detection_approach": "Search process creation logs for executions of w32tm.exe where the command line includes '/stripchart' and a '/period' argument; extract the full command line."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question around identifying the unexpected invocation of W32tm with delay parameters and request the exact command used.",
+    "prompt": "An analyst reviewing Windows process logs wants to spot instances where a native time tool was repurposed to introduce a delay. Which full W32tm invocation, including the stripchart and period flags, appears in the logs?",
+    "answer": [
+        "W32tm /stripchart /computer:localhost /period:5 /dataonly /samples:2"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where TimeGenerated >= ago(7d)\n| where FileName =~ 'w32tm.exe'\n| where ProcessCommandLine has '/stripchart' and ProcessCommandLine has '/period'\n| project TimeGenerated, DeviceName, Account = AccountName, ProcessCommandLine\n| order by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: The column 'ProcessCommandLine' in the query results includes the exact expected string: 'W32tm /stripchart /computer:localhost /period:5 /dataonly /samples:2' (allowing for minor differences in whitespace). This confirms that the query results provide the necessary evidence to identify the specified activity. The relevant fields such as time, device, and account are also included, which would aid in further investigation and attribution.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "Account",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 16:37:36.309182+00:00",
+            "windows-vm",
+            "wipro",
+            "W32tm  /stripchart /computer:localhost /period:5 /dataonly /samples:2"
+        ],
+        [
+            "2025-05-07 16:26:56.848374+00:00",
+            "windows-vm",
+            "wipro",
+            "W32tm  /stripchart /computer:localhost /period:5 /dataonly /samples:2"
+        ]
+    ]
+}

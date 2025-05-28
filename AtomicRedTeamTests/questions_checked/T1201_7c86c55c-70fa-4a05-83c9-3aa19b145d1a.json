@@ -1,0 +1,50 @@
+{
+    "technique_id": "T1201",
+    "question_id": "7c86c55c-70fa-4a05-83c9-3aa19b145d1a",
+    "context": "In a Linux environment where system auditing captures file access events, an attacker may attempt to enumerate local password policies by reading configuration files.",
+    "objective": "Determine the exact command that was used to view the system’s password expiration policy on a Linux host.",
+    "technical_details": {
+        "command_analysis": "The access to /etc/login.defs will be logged as a file read event, with the full command recorded in the ProcessCommandLine or InitiatingProcessCommandLine field.",
+        "detection_approach": "Search for file access events targeting login.defs in DeviceFileEvents or Syslog, then extract the command line that performed the read action."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Phrase the question to ask which specific command accessed the password policy file, and expect the answer to be the full command string.",
+    "prompt": "On a Linux system, logs show that the password expiration settings file was accessed. Identify which command was executed to list its contents.",
+    "answer": [
+        "cat /etc/login.defs"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "// Detect processes that read /etc/login.defs by examining the full command line\nDeviceProcessEvents\n| where ProcessCommandLine contains \"/etc/login.defs\"\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, ProcessCommandLine\n| sort by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: The expected answer is 'cat /etc/login.defs'. In the results, we find both a direct execution ('cat /etc/login.defs') and an invocation via bash ('bash -c \"cat /etc/login.defs\"'). This directly matches the detection requirement, so the queried data provides clear evidence for the sought activities.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 17:02:40.861568+00:00",
+            "wirpo-test",
+            "root",
+            "grep ^PASS_MAX_DAYS\\|^PASS_MIN_DAYS\\|^PASS_WARN_AGE\\|^ENCRYPT_METHOD /etc/login.defs"
+        ],
+        [
+            "2025-05-07 17:02:40.853680+00:00",
+            "wirpo-test",
+            "root",
+            "grep -i ^UMASK /etc/login.defs"
+        ],
+        [
+            "2025-05-07 16:53:14.526404+00:00",
+            "wirpo-test",
+            "root",
+            "cat /etc/login.defs"
+        ],
+        [
+            "2025-05-07 16:53:14.523833+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c \"cat /etc/login.defs\""
+        ]
+    ]
+}

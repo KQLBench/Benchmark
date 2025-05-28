@@ -1,0 +1,34 @@
+{
+    "technique_id": "T1548.001",
+    "question_id": "db55f666-7cba-46c6-9fe6-205a05c3242c",
+    "context": "On Linux systems, critical file permission changes are recorded via Syslog. An elevated shell performed a sequence of commands to set group execution rights and enable the SetGID flag on a target file.",
+    "objective": "Detect when a file has had its group ID bit set by an elevated process and identify which file was modified.",
+    "technical_details": {
+        "command_analysis": "The red team test runs 'sudo chmod g+xs <file>' to add both the group execute bit and the SetGID flag to the specified file.",
+        "detection_approach": "Search Syslog entries for chmod operations that include the 'g+xs' pattern and extract the filename from the logged message."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question to lead the analyst to filter Syslog for permission changes involving 'g+xs', then ask for the file name that had its SetGID bit set.",
+    "prompt": "A Linux host’s Syslog contains records of an elevated shell executing a command that granted group execute rights and enabled the SetGID bit on a file. Investigate the logs and report the name of the file whose group ID bit was modified.",
+    "answer": [
+        "evilBinary"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "Syslog\n| where SourceSystem == \"Linux\"\n| where TimeGenerated >= ago(1d)\n| where SyslogMessage contains \"chmod g+xs\"\n| extend ModifiedFile = extract(@\"chmod\\s+g\\+xs\\s+([^\\s]+)\", 1, SyslogMessage)\n| where isnotempty(ModifiedFile)\n| project TimeGenerated, Computer, HostName, ModifiedFile, SyslogMessage",
+    "KQL_validation_message": "KQL query validation successful: The 'ModifiedFile' field in the query result shows '/tmp/evilBinary', directly matching the expected answer. The SyslogMessage also further confirms that activity was performed on this binary. Therefore, the results provide clear evidence of the activity related to 'evilBinary'.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "Computer",
+            "HostName",
+            "ModifiedFile",
+            "SyslogMessage"
+        ],
+        [
+            "2025-05-07 17:16:38.999185+00:00",
+            "wirpo-test",
+            "wirpo-test",
+            "/tmp/evilBinary",
+            "    root : PWD=/tmp   USER=root   COMMAND=/usr/bin/chmod g+xs /tmp/evilBinary"
+        ]
+    ]
+}

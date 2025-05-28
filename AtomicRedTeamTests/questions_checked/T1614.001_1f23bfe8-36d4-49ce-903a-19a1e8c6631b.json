@@ -1,0 +1,32 @@
+{
+    "technique_id": "T1614.001",
+    "question_id": "1f23bfe8-36d4-49ce-903a-19a1e8c6631b",
+    "context": "A Windows host where an adversary ran a PowerShell script to enumerate various system configuration settings such as UI language, user language preferences, system locale, current culture, UI culture, and time zone.",
+    "objective": "Detect execution of the PowerShell cmdlet used to retrieve the system locale.",
+    "technical_details": {
+        "command_analysis": "The script builds a hash table with entries like UILanguage = Get-WinUILanguageOverride, SystemLocale = Get-WinSystemLocale, CurrentCulture = [System.Globalization.CultureInfo]::CurrentCulture.Name, and then outputs each key-value pair.",
+        "detection_approach": "Query DeviceProcessEvents for PowerShell processes where the command line includes the Get-WinSystemLocale cmdlet to spot attempts to enumerate the system locale."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Consider which process event table and fields capture the full PowerShell command line, then filter for the specific cmdlet that retrieves system locale.",
+    "prompt": "On a Windows device, an attacker ran a PowerShell script to collect system settings including UI language and locale. Identify which cmdlet in the command line was used to obtain the system locale.",
+    "answer": [
+        "Get-WinSystemLocale"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where FileName in (\"powershell.exe\", \"pwsh.exe\")\n| where ProcessCommandLine has \"Get-WinSystemLocale\"\n| project TimeGenerated, DeviceName, AccountName, ProcessCommandLine",
+    "KQL_validation_message": "KQL query validation successful: The ProcessCommandLine field in the query results shows a PowerShell command which includes 'Get-WinSystemLocale', matching the expected answer. This indicates that the command in question was indeed executed, which provides the evidence needed to detect the activity described.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "AccountName",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 17:03:38.564590+00:00",
+            "windows-vm",
+            "wipro",
+            "\"powershell.exe\" & {$info = @{\n  UILanguage     = Get-WinUILanguageOverride\n  UserLanguages  = (Get-WinUserLanguageList).LanguageTag -join ', '\n  SystemLocale   = Get-WinSystemLocale\n  CurrentCulture = [System.Globalization.CultureInfo]::CurrentCulture.Name\n  CurrentUICulture = [System.Globalization.CultureInfo]::CurrentUICulture.Name\n  TimeZone       = (Get-TimeZone).Id\n}\n$info.GetEnumerator() | ForEach-Object { \\\"\"$($_.Name): $($_.Value)\\\"\" }}"
+        ]
+    ]
+}

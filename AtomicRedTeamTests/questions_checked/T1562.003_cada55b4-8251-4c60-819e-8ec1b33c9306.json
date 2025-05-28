@@ -1,0 +1,74 @@
+{
+    "technique_id": "T1562.003",
+    "question_id": "cada55b4-8251-4c60-819e-8ec1b33c9306",
+    "context": "On a Linux host, attackers may disable shell history to cover their tracks and then run a payload without leaving entries in ~/.bash_history. DeviceProcessEvents records capture each executed command line.",
+    "objective": "Detect when a user disables shell history collection and determine which command was executed immediately afterward.",
+    "technical_details": {
+        "command_analysis": "Identify process events where the command line first sets HISTSIZE to zero and then trace the next process spawned by the same session or parent to capture the follow-up command.",
+        "detection_approach": "Query DeviceProcessEvents for ProcessCommandLine containing “export HISTSIZE=0”, then correlate by InitiatingProcessId or session to the subsequent event to reveal the executed command."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Ask specifically for the command run after history disabling; answer must be the exact command name.",
+    "prompt": "During a Linux engagement, an operator exported HISTSIZE=0 to turn off shell history and then ran another utility. Using the DeviceProcessEvents table, identify the exact command executed immediately after the history was disabled. What was the command?",
+    "answer": [
+        "whoami"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "let linuxDevices = DeviceInfo\n| where OSPlatform == \"Linux\"\n| project DeviceId, DeviceName;\n\nlet histDisabled = DeviceProcessEvents\n| where ProcessCommandLine contains \"export HISTSIZE=0\"\n| join kind=inner linuxDevices on DeviceId\n| extend SessionId = InitiatingProcessSessionId\n| project DeviceId, DeviceName, SessionId, DisableTime = ProcessCreationTime, ExportProcessId = ProcessId, Account = strcat(InitiatingProcessAccountName, \"@\", InitiatingProcessAccountDomain);\n\nlet processFlows = DeviceProcessEvents\n| extend SessionId = InitiatingProcessSessionId, ParentProcessId = InitiatingProcessId\n| project DeviceId, SessionId, ExecTime = ProcessCreationTime, ParentProcessId, CommandLine = ProcessCommandLine;\n\nhistDisabled\n| join kind=inner processFlows on DeviceId, SessionId\n| where ExecTime > DisableTime and ParentProcessId == ExportProcessId\n| summarize NextExecTime = min(ExecTime), NextCommand = arg_min(ExecTime, CommandLine) by DeviceName, DeviceId, Account, DisableTime\n| order by DisableTime desc",
+    "KQL_validation_message": "KQL query validation successful: Upon examining the query results, several entries in the CommandLine field include the command 'whoami', either by itself or within compound shell commands (e.g., 'sh -c ... whoami ...'). This matches the detection question which expected the command 'whoami' to be found. The structure provides adequate fields to correlate the activity, including device and account details as well as timestamps. Thus, the results provide the evidence required to answer the detection question.",
+    "KQL_query_results": [
+        [
+            "DeviceName",
+            "DeviceId",
+            "Account",
+            "DisableTime",
+            "NextExecTime",
+            "NextCommand",
+            "CommandLine"
+        ],
+        [
+            "wirpo-test",
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd",
+            "root@wirpo-test",
+            "2025-05-07 17:03:23.610000+00:00",
+            "2025-05-07 17:03:23.615203+00:00",
+            "2025-05-07 17:03:23.615203+00:00",
+            "groups"
+        ],
+        [
+            "wirpo-test",
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd",
+            "root@wirpo-test",
+            "2025-05-07 17:03:23.605874+00:00",
+            "2025-05-07 17:03:23.608191+00:00",
+            "2025-05-07 17:03:23.608191+00:00",
+            "whoami"
+        ],
+        [
+            "wirpo-test",
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd",
+            "root@wirpo-test",
+            "2025-05-07 17:03:23.602970+00:00",
+            "2025-05-07 17:03:23.605874+00:00",
+            "2025-05-07 17:03:23.605874+00:00",
+            "sh -c 'echo $HISTSIZE; export HISTSIZE=0; echo \"runnning some commands to populate the history\"; whoami; groups; if [ $(echo $HISTSIZE) -eq 0 ]; then echo \"\\\\$HISTSIZE is zero\"; else HIST_LENGTH=$(wc -l $HISTFILE); echo \"\\\\$HISTSIZE is not zero, history size is $HIST_LENGTH\";  fi'"
+        ],
+        [
+            "wirpo-test",
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd",
+            "root@wirpo-test",
+            "2025-05-07 17:02:54.991946+00:00",
+            "2025-05-07 17:02:54.993542+00:00",
+            "2025-05-07 17:02:54.993542+00:00",
+            ""
+        ],
+        [
+            "wirpo-test",
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd",
+            "root@wirpo-test",
+            "2025-05-07 17:02:54.991359+00:00",
+            "2025-05-07 17:02:54.991946+00:00",
+            "2025-05-07 17:02:54.991946+00:00",
+            "sh -c \"export HISTSIZE=0; whoami\""
+        ]
+    ]
+}

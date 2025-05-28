@@ -1,0 +1,100 @@
+{
+    "technique_id": "T1562.004",
+    "question_id": "7784c64e-ed0b-4b65-bf63-c86db229fd56",
+    "context": "An adversary on a Linux host used iptables-save to back up current firewall rules and then flushed all rules to effectively disable iptables.",
+    "objective": "Determine the filename used to store the backup of the iptables rules before they were flushed.",
+    "technical_details": {
+        "command_analysis": "Look for a process execution where FileName equals 'iptables-save' and inspect the ProcessCommandLine for a redirection operator ('>') and its target.",
+        "detection_approach": "Query DeviceProcessEvents for entries with FileName 'iptables-save', then parse the ProcessCommandLine field to extract the filename following the '>' operator."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question to ask which filename was specified as the backup target in the iptables-save command.",
+    "prompt": "On a Linux system where an attacker may disable iptables by saving the current rules and then flushing them, examine process execution logs to identify the specific filename that received the rules backup. What file name was used?",
+    "answer": [
+        "iptables.rules"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where ProcessCommandLine contains \"iptables-save\" and ProcessCommandLine contains \">\"\n| extend BackupFile = extract(@\"iptables-save\\s*>\\s*'?([^\\s']+)'?\", 1, ProcessCommandLine)\n| where isnotempty(BackupFile)\n| project TimeGenerated, DeviceName, AccountDomain, AccountName, BackupFile, ProcessCommandLine",
+    "KQL_validation_message": "KQL query validation successful: The expected answer 'iptables.rules' refers to a file, and the query results include several entries where the 'BackupFile' column holds the value '/tmp/iptables.rules;'. This matches the expected answer (ignoring the '/tmp/' path and ';'). Each result also shows related process command lines that reference saving iptables data to 'iptables.rules', providing clear evidence linking the logs to the expected activity. Thus, the required information is present.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "AccountDomain",
+            "AccountName",
+            "BackupFile",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 16:51:22.973588+00:00",
+            "wirpo-test",
+            "wirpo-test",
+            "root",
+            "/tmp/iptables.rules;",
+            "sh -c \"iptables-save > /tmp/iptables.rules; iptables -F\""
+        ],
+        [
+            "2025-05-07 16:51:22.977273+00:00",
+            "wirpo-test",
+            "wirpo-test",
+            "root",
+            "/tmp/iptables.rules;",
+            "sh -c \"iptables-save > /tmp/iptables.rules; iptables -F\""
+        ],
+        [
+            "2025-05-07 16:51:22.989303+00:00",
+            "wirpo-test",
+            "wirpo-test",
+            "root",
+            "/tmp/iptables.rules;",
+            "sh -c \"iptables-save > /tmp/iptables.rules; iptables -F\""
+        ],
+        [
+            "2025-05-07 16:51:28.687827+00:00",
+            "wirpo-test",
+            "wirpo-test",
+            "root",
+            "/tmp/iptables.rules;",
+            "sh -c 'iptables-save > /tmp/iptables.rules; if echo \"$(iptables -L)\" | grep -q \"DROP .*dpt:ftp\"; then echo \"Rule found\"; else echo \"Rule not found. Setting it...\"; iptables -A OUTPUT -p tcp --dport 21 -j DROP; fi'"
+        ],
+        [
+            "2025-05-07 16:51:28.688577+00:00",
+            "wirpo-test",
+            "wirpo-test",
+            "root",
+            "/tmp/iptables.rules;",
+            "sh -c 'iptables-save > /tmp/iptables.rules; if echo \"$(iptables -L)\" | grep -q \"DROP .*dpt:ftp\"; then echo \"Rule found\"; else echo \"Rule not found. Setting it...\"; iptables -A OUTPUT -p tcp --dport 21 -j DROP; fi'"
+        ],
+        [
+            "2025-05-07 16:51:28.693088+00:00",
+            "wirpo-test",
+            "wirpo-test",
+            "root",
+            "/tmp/iptables.rules;",
+            "sh -c 'iptables-save > /tmp/iptables.rules; if echo \"$(iptables -L)\" | grep -q \"DROP .*dpt:ftp\"; then echo \"Rule found\"; else echo \"Rule not found. Setting it...\"; iptables -A OUTPUT -p tcp --dport 21 -j DROP; fi'"
+        ],
+        [
+            "2025-05-07 16:51:28.693505+00:00",
+            "wirpo-test",
+            "wirpo-test",
+            "root",
+            "/tmp/iptables.rules;",
+            "sh -c 'iptables-save > /tmp/iptables.rules; if echo \"$(iptables -L)\" | grep -q \"DROP .*dpt:ftp\"; then echo \"Rule found\"; else echo \"Rule not found. Setting it...\"; iptables -A OUTPUT -p tcp --dport 21 -j DROP; fi'"
+        ],
+        [
+            "2025-05-07 16:51:28.693547+00:00",
+            "wirpo-test",
+            "wirpo-test",
+            "root",
+            "/tmp/iptables.rules;",
+            "sh -c 'iptables-save > /tmp/iptables.rules; if echo \"$(iptables -L)\" | grep -q \"DROP .*dpt:ftp\"; then echo \"Rule found\"; else echo \"Rule not found. Setting it...\"; iptables -A OUTPUT -p tcp --dport 21 -j DROP; fi'"
+        ],
+        [
+            "2025-05-07 16:51:28.699275+00:00",
+            "wirpo-test",
+            "wirpo-test",
+            "root",
+            "/tmp/iptables.rules;",
+            "sh -c 'iptables-save > /tmp/iptables.rules; if echo \"$(iptables -L)\" | grep -q \"DROP .*dpt:ftp\"; then echo \"Rule found\"; else echo \"Rule not found. Setting it...\"; iptables -A OUTPUT -p tcp --dport 21 -j DROP; fi'"
+        ]
+    ]
+}

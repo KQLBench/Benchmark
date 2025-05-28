@@ -1,0 +1,17 @@
+{
+    "technique_id": "T1090.001",
+    "question_id": "b8223ea9-4be2-44a6-b50a-9657a3d4e72a",
+    "context": "A registry key alteration technique was executed to configure a port proxy on a Windows system. This modification establishes a proxy at a specific registry location and is expected to reflect in the system's port proxy settings.",
+    "objective": "Determine the specifics of the proxy port setup created by the registry key modification, including its listening port, connection port, and address.",
+    "technical_details": {
+        "command_analysis": "The execution command uses 'netsh interface portproxy add v4tov4' to configure the port proxy, with parameters specifying listening port and address and connection details.",
+        "detection_approach": "Analysis should focus on registry modification events captured under 'DeviceRegistryEvents' and network-related data within 'DeviceNetworkEvents' to identify the new proxy configuration."
+    },
+    "thinking_how_to_phrase_question_and_answer": "The question asks the analyst to find out about specific parameters (listening port, connection port, or address), which tie back to the altered registry key and associated proxy setup. The answer will be one of the entered values during execution or observed in network traffic.",
+    "prompt": "Analyze the system logs for changes that indicate the addition of a port proxy configuration via registry key alteration. Identify which port number was set to listen.",
+    "answer": [
+        "1337"
+    ],
+    "difficulty": "difficult",
+    "KQL_query": "union\n  (\n      // ❶  Process execution evidence ― the netsh command itself\n      DeviceProcessEvents\n      | where FileName =~ \"netsh.exe\"\n      | where ProcessCommandLine has_all (\"interface\",\n                                          \"portproxy\",\n                                          \"add\",\n                                          \"v4tov4\")\n      | project Timestamp,\n                DeviceName,\n                EvidenceType = \"Process\",\n                ActorAccount = InitiatingProcessAccountName,\n                FileName,\n                ProcessCommandLine,\n                InitiatingProcessParentFileName,\n                RegistryKey = \"\"\n  ),\n  (\n      // ❷  Registry modification evidence ― the key/value created by netsh\n      DeviceRegistryEvents\n      | where RegistryKey startswith\n              @\"HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\PortProxy\\v4tov4\"\n      | project Timestamp,\n                DeviceName,\n                EvidenceType = \"Registry\",\n                ActorAccount = InitiatingProcessAccountName,\n                FileName       = \"\",\n                ProcessCommandLine = \"\",\n                InitiatingProcessParentFileName = \"\",\n                RegistryKey,\n                RegistryValueName,\n                RegistryValueData\n  )\n  | sort by Timestamp desc"
+}

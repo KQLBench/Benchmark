@@ -1,0 +1,83 @@
+{
+    "technique_id": "T1560.001",
+    "question_id": "7af2b51e-ad1c-498c-aca8-d3290c19535a",
+    "context": "On Linux systems, adversaries may use built-in compression utilities to bundle sensitive data into archives before exfiltration.",
+    "objective": "Detect instances where a process invoked the native tar utility with gzip compression flags against a directory or file.",
+    "technical_details": {
+        "command_analysis": "Focus on the process command line for the tar utility invoked with -cvzf flags and capture the name of the archive created.",
+        "detection_approach": "Query the DeviceProcessEvents table for ProcessCommandLine entries containing 'tar' alongside '-cvzf' to isolate legitimate or malicious compression activities."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question to guide the analyst to explore process execution logs, filter for tar commands with gzip flags, and extract the archive filename; the answer should be the actual file name produced.",
+    "prompt": "A Linux host may have undergone automated data collection and compression right before sensitive information is exfiltrated. Using process execution logs, determine which archive file name was created when the tar utility was run with gzip compression.",
+    "answer": [
+        "data.tar.gz"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where ProcessCommandLine has \"tar\" and ProcessCommandLine has \"-cvzf\"\n| extend ArchiveName = extract(@\"-cvzf\\s+(\\S+)\", 1, ProcessCommandLine)\n| where isnotempty(ArchiveName)\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, ProcessCommandLine, ArchiveName",
+    "KQL_validation_message": "KQL query validation successful: The expected answer is 'data.tar.gz'. In the query results, both the 'ProcessCommandLine' and 'ArchiveName' fields contain either a variable or a direct reference to 'data.tar.gz', such as '$HOME/data.tar.gz' and '/root/data.tar.gz'. Since these are canonical forms that resolve to 'data.tar.gz', the evidence needed to answer the detection question (regarding the presence or activity of 'data.tar.gz') is present in the results, fulfilling the expected answer.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "ProcessCommandLine",
+            "ArchiveName"
+        ],
+        [
+            "2025-05-07 16:25:08.297214+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c \"tar -cvzf $HOME/data.tar.gz $HOME/$USERNAME\"",
+            "$HOME/data.tar.gz"
+        ],
+        [
+            "2025-05-07 16:25:08.298437+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c \"tar -cvzf $HOME/data.tar.gz $HOME/$USERNAME\"",
+            "$HOME/data.tar.gz"
+        ],
+        [
+            "2025-05-07 16:25:08.299458+00:00",
+            "wirpo-test",
+            "root",
+            "tar -cvzf /root/data.tar.gz /root/",
+            "/root/data.tar.gz"
+        ],
+        [
+            "2025-05-07 16:25:08.303317+00:00",
+            "wirpo-test",
+            "root",
+            "tar -cvzf /root/data.tar.gz /root/",
+            "/root/data.tar.gz"
+        ],
+        [
+            "2025-05-07 16:35:46.791492+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c \"tar -cvzf $HOME/data.tar.gz $HOME/$USERNAME\"",
+            "$HOME/data.tar.gz"
+        ],
+        [
+            "2025-05-07 16:35:46.792699+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c \"tar -cvzf $HOME/data.tar.gz $HOME/$USERNAME\"",
+            "$HOME/data.tar.gz"
+        ],
+        [
+            "2025-05-07 16:35:46.792899+00:00",
+            "wirpo-test",
+            "root",
+            "tar -cvzf /root/data.tar.gz /root/",
+            "/root/data.tar.gz"
+        ],
+        [
+            "2025-05-07 16:35:46.794264+00:00",
+            "wirpo-test",
+            "root",
+            "tar -cvzf /root/data.tar.gz /root/",
+            "/root/data.tar.gz"
+        ]
+    ]
+}

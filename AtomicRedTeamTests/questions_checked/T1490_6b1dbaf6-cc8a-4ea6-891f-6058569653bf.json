@@ -1,0 +1,32 @@
+{
+    "technique_id": "T1490",
+    "question_id": "6b1dbaf6-cc8a-4ea6-891f-6058569653bf",
+    "context": "On Windows hosts, adversaries may delete backup files en masse to disrupt recovery, resembling ransomware cleanup activity. Logs will show a process deletion command targeting multiple backup extensions under the C: drive.",
+    "objective": "Discover the exact command line executed to remove various backup file types from the C: drive.",
+    "technical_details": {
+        "command_analysis": "Search process creation records for the Windows 'del' utility invoked with switches and multiple file patterns (e.g., .VHD, .bak, .bkf, etc.).",
+        "detection_approach": "Use KQL against DeviceProcessEvents to filter on ProcessCommandLine containing 'del' and typical backup file extensions under C:\\, then extract the full command line."
+    },
+    "thinking_how_to_phrase_question_and_answer": "We need a question that leads the analyst to search process events for a bulk deletion of backup files, and to report back the exact command string that was logged.",
+    "prompt": "An attacker obtained elevated rights on a Windows system and ran a deletion command that attempted to remove various backup file types across the C: drive, generating numerous “access denied” errors. What was the full command line used?",
+    "answer": [
+        "del /s /f /q c:\\*.VHD c:\\*.bac c:\\*.bak c:\\*.wbcat c:\\*.bkf c:\\Backup*.* c:\\backup*.* c:\\*.set c:\\*.win c:\\*.dsk"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "let backupPatterns = dynamic([\"c:\\\\*.vhd\",\"c:\\\\*.bac\",\"c:\\\\*.bak\",\"c:\\\\*.wbcat\",\"c:\\\\*.bkf\",\"c:\\\\backup*.*\",\"c:\\\\Backup*.*\",\"c:\\\\*.set\",\"c:\\\\*.win\",\"c:\\\\*.dsk\"]);\nDeviceProcessEvents\n| where FileName =~ \"cmd.exe\"\n| where ProcessCommandLine has \"del \"\n| where ProcessCommandLine has \"/s\" and ProcessCommandLine has \"/f\" and ProcessCommandLine has \"/q\"\n| where ProcessCommandLine has_any (backupPatterns)\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, ProcessCommandLine",
+    "KQL_validation_message": "KQL query validation successful: The query results include a row where 'ProcessCommandLine' contains the exact command 'del /s /f /q c:\\*.VHD c:\\*.bac c:\\*.bak c:\\*.wbcat c:\\*.bkf c:\\Backup*.* c:\\backup*.* c:\\*.set c:\\*.win c:\\*.dsk', which matches the activity described in the expected answers. The columns also provide relevant context (user, hostname, time), fully supporting the detection requirement.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 17:05:46.594782+00:00",
+            "windows-vm",
+            "wipro",
+            "\"cmd.exe\" /c del /s /f /q c:\\*.VHD c:\\*.bac c:\\*.bak c:\\*.wbcat c:\\*.bkf c:\\Backup*.* c:\\backup*.* c:\\*.set c:\\*.win c:\\*.dsk"
+        ]
+    ]
+}

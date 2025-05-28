@@ -1,0 +1,44 @@
+{
+    "technique_id": "T1547",
+    "question_id": "5cb0b071-8a5a-412f-839d-116beb2ed9f7",
+    "context": "On a Windows endpoint, a native command-line utility was abused to install a driver without user awareness.",
+    "objective": "Detect instances where a system utility is invoked to add or install a driver and identify the specific tool used.",
+    "technical_details": {
+        "command_analysis": "Look for process creation events where the process name matches a known driver installation utility and command-line arguments include installation flags.",
+        "detection_approach": "Query process events for executions of a driver installer binary with indicators of driver addition (e.g., '-i -a')."
+    },
+    "thinking_how_to_phrase_question_and_answer": "We want to ask about the name of the abused utility by focusing on unusual driver installation activity and expect the analyst to return the exact executable name.",
+    "prompt": "A Windows host shows a process launching with install-driver switches, likely signaling malicious driver deployment. What is the name of the tool that was executed?",
+    "answer": [
+        "pnputil.exe"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "DeviceProcessEvents\n| where tolower(FileName) == \"pnputil.exe\"\n| where ProcessCommandLine contains \"-i\" and ProcessCommandLine contains \"-a\"\n| project ProcessCreationTime, DeviceName, DeviceId, InitiatingProcessAccountName, ProcessId, ProcessCommandLine",
+    "KQL_validation_message": "KQL query validation successful: Both records in the results show 'pnputil.exe' as the process name in the 'ProcessCommandLine' field, matching exactly with the expected answer. This evidence is sufficient to identify 'pnputil.exe' activity as required by the detection question.",
+    "KQL_query_results": [
+        [
+            "ProcessCreationTime",
+            "DeviceName",
+            "DeviceId",
+            "InitiatingProcessAccountName",
+            "ProcessId",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 16:22:14.460484+00:00",
+            "windows-vm",
+            "51a5c6755c43d60b18a177bfa334701b37f9171e",
+            "wipro",
+            1524,
+            "\"pnputil.exe\" -i -a C:\\Windows\\INF\\acpipmi.inf"
+        ],
+        [
+            "2025-05-07 16:32:58.635515+00:00",
+            "windows-vm",
+            "51a5c6755c43d60b18a177bfa334701b37f9171e",
+            "wipro",
+            9708,
+            "\"pnputil.exe\" -i -a C:\\Windows\\INF\\acpipmi.inf"
+        ]
+    ]
+}

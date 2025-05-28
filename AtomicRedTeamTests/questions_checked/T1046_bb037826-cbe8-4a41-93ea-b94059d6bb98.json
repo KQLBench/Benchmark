@@ -1,0 +1,17 @@
+{
+    "technique_id": "T1046",
+    "question_id": "bb037826-cbe8-4a41-93ea-b94059d6bb98",
+    "context": "A threat actor is suspected of using a tool designed to identify vulnerable web applications on a Windows machine. This activity could indicate reconnaissance efforts targeting potentially exploitable software.",
+    "objective": "Determine the specific function of the tool executed during the reconnaissance process.",
+    "technical_details": {
+        "command_analysis": "The WinPwn tool was executed using the 'fruit' function to identify low-hanging vulnerabilities in web applications. This is evident from the PowerShell command in the YAML.",
+        "detection_approach": "Search for events related to downloading and executing scripts, particularly focusing on the command fields that match the execution string provided."
+    },
+    "thinking_how_to_phrase_question_and_answer": "The question should focus on identifying the specific function used by the tool without providing any direct indication of the name. The answer must match the function name verbatim from the yaml.",
+    "prompt": "A reconnaissance tool was executed on a Windows system. Identify the specific function of the tool that was executed. The function has a name from something you can eat",
+    "answer": [
+        "fruit"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "let LookBack = 1d;   // widen/narrow as needed\n// ❶  PowerShell evidence ─ download & execution\nlet ProcWinPwn =\n    DeviceProcessEvents\n    | where Timestamp > ago(LookBack)\n          and FileName in~ (\"powershell.exe\", \"pwsh.exe\")\n          and ProcessCommandLine has_any (\n                \"WinPwn.ps1\",\n                \"S3cur3Th1sSh1t/WinPwn\",\n                \"fruit -noninteractive\")\n    | extend Evidence   = \"Process\",\n            Details    = ProcessCommandLine\n    | project\n        Timestamp,\n        DeviceName,\n        Evidence,\n        Actor      = InitiatingProcessAccountName,\n        Details,\n        InitiatingProcessParentFileName;\n\n// ❷  Network evidence ─ raw.githubusercontent.com request for WinPwn\nlet NetWinPwn =\n    DeviceNetworkEvents\n    | where Timestamp > ago(LookBack)\n          and RemoteUrl startswith\n              \"https://raw.githubusercontent.com/S3cur3Th1sSh1t/WinPwn\"\n    | extend Evidence   = \"Network\",\n            Details    = RemoteUrl\n    | project\n        Timestamp,\n        DeviceName,\n        Evidence,\n        Actor      = InitiatingProcessAccountName,\n        Details,\n        InitiatingProcessFileName,\n        InitiatingProcessCommandLine;\n\n// ❸  Combine and sort chronologically\nunion ProcWinPwn, NetWinPwn\n| sort by Timestamp asc"
+}

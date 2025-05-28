@@ -1,0 +1,50 @@
+{
+    "technique_id": "T1070.005",
+    "question_id": "4299eff5-90f1-4446-b2f3-7f4f5cfd5d62",
+    "context": "In a Windows environment, hidden administrative shares provide remote access to disk volumes. An attacker may remove these shares using built-in commands to hide their presence.",
+    "objective": "Determine which default administrative share names were deleted via the command prompt on the Windows host.",
+    "technical_details": {
+        "command_analysis": "The attacker ran commands of the form ‘net share <ShareName> /delete’ to remove administrative shares.",
+        "detection_approach": "Search DeviceProcessEvents for ProcessCommandLine entries containing ‘net share’ and ‘/delete’, then extract the share names acted upon."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Phrase the question to ask for the exact share names removed, expecting one-word share identifiers like ‘C$’.",
+    "prompt": "On a Windows system, an attacker used the command prompt to remove one or more default administrative shares. Which share names were deleted?",
+    "answer": [
+        "C$",
+        "IPC$",
+        "ADMIN$"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents | where TimeGenerated >= ago(30d) | where FileName == \"net.exe\" and ProcessCommandLine has \"share\" and ProcessCommandLine has \"/delete\" | parse ProcessCommandLine with * \"share \" DeletedShare \" /delete\" * | extend DeletedShare = toupper(DeletedShare) | where DeletedShare in (\"C$\",\"IPC$\",\"ADMIN$\") | project TimeGenerated, DeviceName, InitiatingProcessAccountName, DeletedShare, ProcessCommandLine",
+    "KQL_validation_message": "KQL query validation successful: Each expected answer (\"C$\", \"IPC$\", \"ADMIN$\") appears as a value under the 'DeletedShare' column in the query results. This matches exactly with the information needed to detect deletions of these specific administrative shares. The surrounding columns provide context (timestamp, affected device, user account, and the command line used), which contributes to the evidence. The results are well-structured to answer the detection question.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "DeletedShare",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 17:04:46.613787+00:00",
+            "windows-vm",
+            "wipro",
+            "C$",
+            "net  share C$ /delete"
+        ],
+        [
+            "2025-05-07 17:04:46.698571+00:00",
+            "windows-vm",
+            "wipro",
+            "IPC$",
+            "net  share IPC$ /delete"
+        ],
+        [
+            "2025-05-07 17:04:46.764163+00:00",
+            "windows-vm",
+            "wipro",
+            "ADMIN$",
+            "net  share ADMIN$ /delete"
+        ]
+    ]
+}

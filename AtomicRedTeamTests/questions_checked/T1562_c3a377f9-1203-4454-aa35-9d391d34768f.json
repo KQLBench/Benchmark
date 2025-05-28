@@ -1,0 +1,34 @@
+{
+    "technique_id": "T1562",
+    "question_id": "c3a377f9-1203-4454-aa35-9d391d34768f",
+    "context": "On a Linux host, an adversary attempted to disable persistent logging by stopping the system journal service.",
+    "objective": "Detect the moment when journal logging was turned off and determine which utility was called.",
+    "technical_details": {
+        "command_analysis": "The attacker ran a shell command that stopped the systemd-journald service using a standard service management tool.",
+        "detection_approach": "Search process execution events for invocations of service management commands targeting the systemd-journald service."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question around identifying which built-in utility was used to stop a logging service on Linux, and expect the answer to be the tool name.",
+    "prompt": "Review Linux process execution logs to find where the system journal service was stopped. Which utility was invoked to disable journal logging?",
+    "answer": [
+        "systemctl"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "DeviceProcessEvents\n| where FileName in (\"systemctl\", \"service\")\n| where ProcessCommandLine has \"systemd-journald\" and ProcessCommandLine has \"stop\"\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, FileName, ProcessCommandLine",
+    "KQL_validation_message": "KQL query validation successful: The results have a row with 'FileName' as 'systemctl', corroborated by the 'ProcessCommandLine' field containing a relevant command. This directly matches the expected answer, showing that the activity can be detected from the query results.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "FileName",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 17:14:44.021123+00:00",
+            "wirpo-test",
+            "root",
+            "systemctl",
+            "systemctl stop systemd-journald"
+        ]
+    ]
+}

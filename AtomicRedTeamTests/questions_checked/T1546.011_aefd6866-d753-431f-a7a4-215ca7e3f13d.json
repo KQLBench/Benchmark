@@ -1,0 +1,38 @@
+{
+    "technique_id": "T1546.011",
+    "question_id": "aefd6866-d753-431f-a7a4-215ca7e3f13d",
+    "context": "An adversary attempted to establish persistence by adding custom shim database files into the default Windows apppatch directory.",
+    "objective": "Determine the specific shim database file that was created in the C:\\Windows\\apppatch\\Custom folder.",
+    "technical_details": {
+        "command_analysis": "A PowerShell Copy-Item command copied a .sdb file from the Atomic Red Team folder into C:\\Windows\\apppatch\\Custom and its Custom64 subfolder.",
+        "detection_approach": "Examine file creation events in the DeviceFileEvents table, filtering on FolderPath for the apppatch\\Custom directory and its subdirectories to identify new .sdb files."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question to guide the analyst toward querying file creation logs for .sdb extensions in the apppatch\\Custom path without specifying exact KQL functions.",
+    "prompt": "On a Windows system, a process has introduced a new shim database into the default apppatch directory. Investigate file creation logs to reveal the database filename that appeared under C:\\Windows\\apppatch\\Custom.",
+    "answer": [
+        "T1546.011CompatDatabase.sdb"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceFileEvents\n| where ActionType == \"FileCreated\"\n| where FolderPath startswith @\"C:\\Windows\\apppatch\\Custom\"\n| where FileName endswith \".sdb\"\n| project TimeGenerated, DeviceName, FolderPath, FileName",
+    "KQL_validation_message": "KQL query validation successful: The query results include evidence of the file 'T1546.011CompatDatabase.sdb' being present in two folder paths. The 'FileName' column specifically matches the expected answer, and the full paths indicate locations likely to be related to suspicious application compatibility database activity (as described by MITRE ATT&CK technique T1546.011). Therefore, the results provide the required evidence for detection.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "FolderPath",
+            "FileName"
+        ],
+        [
+            "2025-05-07 17:18:28.271901+00:00",
+            "windows-vm",
+            "C:\\Windows\\apppatch\\Custom\\T1546.011CompatDatabase.sdb",
+            "T1546.011CompatDatabase.sdb"
+        ],
+        [
+            "2025-05-07 17:18:28.274592+00:00",
+            "windows-vm",
+            "C:\\Windows\\apppatch\\Custom\\Custom64\\T1546.011CompatDatabase.sdb",
+            "T1546.011CompatDatabase.sdb"
+        ]
+    ]
+}

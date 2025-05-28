@@ -1,0 +1,34 @@
+{
+    "technique_id": "T1217",
+    "question_id": "faab755e-4299-48ec-8202-fc7885eb6545",
+    "context": "Windows environment where an attacker may use PowerShell to harvest browser artifacts",
+    "objective": "Identify PowerShell activity that recursively searched user directories for browser bookmark files",
+    "technical_details": {
+        "command_analysis": "Uses Get-ChildItem with a filter of 'Bookmarks' across C:\\Users to list browser bookmark files",
+        "detection_approach": "Search DeviceProcessEvents for PowerShell executions containing both Get-ChildItem and the 'Bookmarks' filter"
+    },
+    "thinking_how_to_phrase_question_and_answer": "Focus on isolating the specific filename parameter used in the command to pinpoint what artifact was being targeted",
+    "prompt": "An attacker leveraged a PowerShell command on a Windows host to enumerate browser bookmark files across all user profiles. Examine the process execution logs to determine the exact filename that was being searched for.",
+    "answer": [
+        "Bookmarks"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "DeviceProcessEvents\n| where TimeGenerated > ago(7d)\n| where FileName in~ (\"powershell.exe\", \"pwsh.exe\")\n| where ProcessCommandLine has \"Get-ChildItem\"\n    and ProcessCommandLine has \"-Filter\"\n    and ProcessCommandLine has \"Bookmarks\"\n    and ProcessCommandLine has \"C:\\\\Users\"\n    and ProcessCommandLine has \"-Recurse\"\n| project TimeGenerated, DeviceName, AccountName, FileName, ProcessCommandLine",
+    "KQL_validation_message": "KQL query validation successful: The ProcessCommandLine field in the query results shows that powershell.exe was executed with a command to recursively search for files or items named 'Bookmarks' in the C:\\Users\\ directory. This directly matches the expected answer, as it indicates activity targeting 'Bookmarks'. Thus, the data is sufficient to determine that such activity occurred.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "AccountName",
+            "FileName",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 17:12:44.631165+00:00",
+            "windows-vm",
+            "wipro",
+            "powershell.exe",
+            "\"powershell.exe\" & {Get-ChildItem -Path C:\\Users\\ -Filter Bookmarks -Recurse -ErrorAction SilentlyContinue -Force}"
+        ]
+    ]
+}

@@ -1,0 +1,34 @@
+{
+    "technique_id": "T1053.005",
+    "question_id": "e16b3b75-dc9e-4cde-a23d-dfa2d0507b3b",
+    "context": "In a Windows environment, an attacker uses PowerShell to interact with WMI’s PS_ScheduledTask class and import an XML definition to create a new scheduled task upon user login.",
+    "objective": "Detect creation of a scheduled task via WMI Invoke-CimMethod using an XML import.",
+    "technical_details": {
+        "command_analysis": "The malicious command reads an XML file then calls Invoke-CimMethod -ClassName PS_ScheduledTask -NameSpace 'Root\\\\Microsoft\\\\Windows\\\\TaskScheduler' -MethodName RegisterByXml, passing the XML to register the task.",
+        "detection_approach": "Search process creation logs for PowerShell invocations containing Invoke-CimMethod with PS_ScheduledTask and RegisterByXml, then extract the XML filename from the command line."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question around uncovering the specific XML file used in the WMI-based task registration, ensuring the analyst queries process logs and parses command-line arguments.",
+    "prompt": "Investigate Windows process events for PowerShell activity that leverages WMI to register a scheduled task via XML import. What was the name of the XML file supplied to the RegisterByXml method?",
+    "answer": [
+        "T1053_005_WMI.xml"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where TimeGenerated >= ago(7d)\n| where FileName in~('powershell.exe','pwsh.exe')\n| where ProcessCommandLine has 'Invoke-CimMethod' and ProcessCommandLine has 'PS_ScheduledTask' and ProcessCommandLine has 'RegisterByXml'\n| extend XmlFile = extract(@\"([^ ]+\\.xml)\", 1, ProcessCommandLine)\n| project TimeGenerated, DeviceName, FileName, ProcessCommandLine, XmlFile",
+    "KQL_validation_message": "KQL query validation successful: The query results contain a row where the XmlFile field explicitly identifies \"T1053_005_WMI.xml\" as being read and used in a PowerShell command to register a scheduled task via WMI, which directly addresses the detection question concerning T1053_005_WMI.xml activity. Therefore, these results are sufficient to answer the detection question.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "FileName",
+            "ProcessCommandLine",
+            "XmlFile"
+        ],
+        [
+            "2025-05-07 17:12:01.611189+00:00",
+            "windows-vm",
+            "powershell.exe",
+            "\"powershell.exe\" & {$xml = [System.IO.File]::ReadAllText(\\\"\"C:\\AtomicRedTeam\\atomics\\T1053.005\\src\\T1053_005_WMI.xml\\\"\")\nInvoke-CimMethod -ClassName PS_ScheduledTask -NameSpace \\\"\"Root\\Microsoft\\Windows\\TaskScheduler\\\"\" -MethodName \\\"\"RegisterByXml\\\"\" -Arguments @{ Force = $true; Xml =$xml; }}",
+            "[System.IO.File]::ReadAllText(\\\"\"C:\\AtomicRedTeam\\atomics\\T1053.005\\src\\T1053_005_WMI.xml"
+        ]
+    ]
+}

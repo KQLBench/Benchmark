@@ -1,0 +1,50 @@
+{
+    "technique_id": "T1124",
+    "question_id": "1d5711d6-655c-4a47-ae9c-6503c74fa877",
+    "context": "On Windows, adversaries may use built-in PowerShell commands to gather basic system information, such as the current system time.",
+    "objective": "Detect and identify the exact PowerShell command used to display the system time based on process execution logs.",
+    "technical_details": {
+        "command_analysis": "The PowerShell ‘Get-Date’ cmdlet queries and outputs the local system time.",
+        "detection_approach": "Search DeviceProcessEvents for entries where the process name is powershell.exe and the command line includes the time-querying cmdlet."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Phrase the prompt to ask which PowerShell invocation was used to fetch the system clock, and expect the answer to match the cmdlet name exactly.",
+    "prompt": "Review Windows process execution logs for any PowerShell activity that retrieves the system clock. Which command was executed?",
+    "answer": [
+        "Get-Date"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "DeviceProcessEvents\n| where FileName == \"powershell.exe\"\n| where ProcessCommandLine contains \"Get-Date\"\n| project TimeGenerated, DeviceName, AccountName, ProcessCommandLine",
+    "KQL_validation_message": "KQL query validation successful: Each row in the query results' 'ProcessCommandLine' field contains either 'Get-Date' or a command that uses 'Get-Date' as part of a larger PowerShell command. As such, the presence of 'Get-Date' in multiple entries confirms that the query results contain the expected answer. The detection question is satisfied because 'Get-Date' is specifically being invoked.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "AccountName",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 16:27:13.968364+00:00",
+            "windows-vm",
+            "wipro",
+            "\"powershell.exe\" & {Get-Date}"
+        ],
+        [
+            "2025-05-07 16:37:53.448210+00:00",
+            "windows-vm",
+            "wipro",
+            "\"powershell.exe\" & {Get-Date}"
+        ],
+        [
+            "2025-05-07 16:50:32.632162+00:00",
+            "windows-vm",
+            "wipro",
+            "\"powershell.exe\" & {try{ \n  Set-Date -Date (Get-Date).AddDays(3)\n  Add-Content \\\"\"$env:APPDATA\\slipDays.bak\\\"\" 3\n}\ncatch {exit 1}}"
+        ],
+        [
+            "2025-05-07 17:24:25.368066+00:00",
+            "windows-vm",
+            "wipro",
+            "\"powershell.exe\" & {Remove-Item \\\"\"certutil-$(Get-Date -format yyyy_MM_dd)\\\"\" -Force -Recurse -ErrorAction Ignore}"
+        ]
+    ]
+}

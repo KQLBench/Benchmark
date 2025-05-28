@@ -1,0 +1,36 @@
+{
+    "technique_id": "T1048.003",
+    "question_id": "3ea1f938-f80a-4305-9aa8-431bc4867313",
+    "context": "On a Linux system, an adversary may spin up a simple HTTP server using python3’s standard library to stage data exfiltration.",
+    "objective": "Detect instances where python3 is used to launch an HTTP server on port 9090 in the /tmp directory.",
+    "technical_details": {
+        "command_analysis": "Review process creation records to identify python3 invocations that include the http.server module and port argument.",
+        "detection_approach": "Query the DeviceProcessEvents table for entries with FileName or ProcessCommandLine containing 'python3 -m http.server 9090' and a working directory of /tmp."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Ask the analyst to extract the exact command line used to start the HTTP service, matching it verbatim to the logged invocation.",
+    "prompt": "A Linux host briefly hosted an HTTP service under /tmp. Examine process creation logs to determine the exact python3 command that was used to start the server on port 9090.",
+    "answer": [
+        "python3 -m http.server 9090"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where TimeGenerated >= ago(7d)\n| where FileName has \"python3\"\n| where ProcessCommandLine has \"-m http.server\" and ProcessCommandLine has \"9090\"\n| where tostring(AdditionalFields) has \"/tmp\"\n| project TimeGenerated, DeviceName, AccountName, ProcessId, ProcessCommandLine, AdditionalFields",
+    "KQL_validation_message": "KQL query validation successful: In the results, the 'ProcessCommandLine' field includes the value 'python3 -m http.server 9090', which is the activity specified in the expected answers. The structure of the result has a header row and a single result row, demonstrating a 1:1 match with the expected answer. This provides clear evidence of the described activity in the detection question.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "AccountName",
+            "ProcessId",
+            "ProcessCommandLine",
+            "AdditionalFields"
+        ],
+        [
+            "2025-05-07 17:08:33.618259+00:00",
+            "wirpo-test",
+            "root",
+            22436,
+            "python3 -m http.server 9090",
+            "{\"InitiatingProcessPosixEffectiveUser\":{\"Name\":\"root\",\"DomainName\":\"wirpo-test\",\"LogonId\":0,\"PosixUserId\":0,\"PrimaryPosixGroup\":{\"Name\":\"root\",\"PosixGroupId\":0}},\"InitiatingProcessPosixEffectiveGroup\":{\"Name\":\"root\",\"PosixGroupId\":0},\"InitiatingProcessPosixProcessGroupId\":22405,\"InitiatingProcessPosixSessionId\":22405,\"InitiatingProcessCurrentWorkingDirectory\":\"/tmp\",\"InitiatingProcessPosixRealUser\":{\"Name\":\"root\",\"DomainName\":\"wirpo-test\",\"LogonId\":0,\"PosixUserId\":0,\"PrimaryPosixGroup\":{\"Name\":\"root\",\"PosixGroupId\":0}},\"ProcessPosixEffectiveUser\":{\"Name\":\"root\",\"DomainName\":\"wirpo-test\",\"LogonId\":0,\"PosixUserId\":0,\"PrimaryPosixGroup\":{\"Name\":\"root\",\"PosixGroupId\":0}},\"ProcessPosixEffectiveGroup\":{\"Name\":\"root\",\"PosixGroupId\":0},\"ProcessPosixProcessGroupId\":22405,\"ProcessPosixSessionId\":22405,\"ProcessCurrentWorkingDirectory\":\"/tmp\",\"ProcessPosixFilePermissions\":[\"OthersExecute\",\"OthersRead\",\"GroupExecute\",\"GroupRead\",\"UserExecute\",\"UserWrite\",\"UserRead\",\"UserAll\"],\"ProcessPosixFileUserOwner\":{\"Name\":\"root\",\"DomainName\":\"wirpo-test\",\"LogonId\":0,\"PosixUserId\":0,\"PrimaryPosixGroup\":{\"Name\":\"root\",\"PosixGroupId\":0}},\"ProcessPosixFileGroupOwner\":{\"Name\":\"root\",\"PosixGroupId\":0},\"InitiatingProcessPosixFilePermissions\":[\"OthersExecute\",\"OthersRead\",\"GroupExecute\",\"GroupRead\",\"UserExecute\",\"UserWrite\",\"UserRead\",\"UserAll\"],\"InitiatingProcessPosixUserOwner\":{\"Name\":\"root\",\"DomainName\":\"wirpo-test\",\"LogonId\":0,\"PosixUserId\":0,\"PrimaryPosixGroup\":{\"Name\":\"root\",\"PosixGroupId\":0}},\"InitiatingProcessPosixGroupOwner\":{\"Name\":\"root\",\"PosixGroupId\":0}}"
+        ]
+    ]
+}

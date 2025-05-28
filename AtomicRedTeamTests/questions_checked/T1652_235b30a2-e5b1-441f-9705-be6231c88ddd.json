@@ -1,0 +1,32 @@
+{
+    "technique_id": "T1652",
+    "question_id": "235b30a2-e5b1-441f-9705-be6231c88ddd",
+    "context": "In a Windows environment, a potential adversary listed all installed device drivers and their properties to scout loaded drivers.",
+    "objective": "Determine which utility was invoked to perform the driver enumeration.",
+    "technical_details": {
+        "command_analysis": "The command executed was the built-in Windows tool to query drivers with verbose (/v) and formatted list (/fo list) options, including signed driver info (/si).",
+        "detection_approach": "Search the DeviceProcessEvents table for ProcessCommandLine entries containing the driver enumeration utility name and its flags."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the query to capture the executable name used when the driver listing command was run; the answer is the tool name.",
+    "prompt": "Review process creation logs for an instance where a built-in Windows utility was used to enumerate installed device drivers with verbose list output. What is the name of that tool?",
+    "answer": [
+        "driverquery"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where TimeGenerated >= ago(7d)\n| where ProcessCommandLine has \"driverquery\" \n    and ProcessCommandLine has \"/v\" \n    and ProcessCommandLine has \"/fo\" \n    and ProcessCommandLine has \"list\" \n    and ProcessCommandLine has \"/si\"\n| project TimeGenerated, DeviceName, FileName, ProcessCommandLine",
+    "KQL_validation_message": "KQL query validation successful: The ProcessCommandLine field in the returned row explicitly shows 'driverquery /v /fo list' and 'driverquery /si /fo list' being executed in the same PowerShell invocation. This directly supports detection of 'driverquery' activity, answering the detection question. The result structure (column titles and values) confirms the query provided evidence of the targeted activity.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "FileName",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 17:07:15.132027+00:00",
+            "windows-vm",
+            "powershell.exe",
+            "\"powershell.exe\" & {driverquery /v /fo list\ndriverquery /si /fo list}"
+        ]
+    ]
+}

@@ -1,0 +1,41 @@
+{
+    "technique_id": "T1036.003",
+    "question_id": "a315bfff-7a98-403b-b442-2ea1b255e556",
+    "context": "On a Linux host, an attacker copies the shell binary to a temporary location and renames it to mimic the cron daemon before executing it.",
+    "objective": "Determine the filename the adversary assigned to the copied binary masquerading as the cron daemon.",
+    "technical_details": {
+        "command_analysis": "The malicious sequence copies /bin/sh to /tmp/crond and then executes that renamed binary with piped input.",
+        "detection_approach": "Query process creation logs for instances where a process named 'crond' originates from a non-standard directory (e.g., /tmp)."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Phrase the question to ask specifically for the filename of the masqueraded cron process; the answer should be that filename exactly as it appears in the logs.",
+    "prompt": "In a Linux environment, you observe a process labeled like the cron daemon but running from an unexpected path. Investigate creation events to uncover the actual filename used by this fake cron process.",
+    "answer": [
+        "crond"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where FileName == \"crond\"\n| where FolderPath startswith \"/tmp\"\n| project ProcessCreationTime, DeviceName, FileName, FolderPath, ProcessCommandLine",
+    "KQL_validation_message": "KQL query validation successful: The results show that the 'FileName' field contains 'crond' in two records, directly supporting the expected answer. Additional fields such as 'ProcessCreationTime', 'DeviceName', 'FolderPath', and 'ProcessCommandLine' provide further context, but the key identifier—'crond'—is clearly present, providing the necessary evidence for detection.",
+    "KQL_query_results": [
+        [
+            "ProcessCreationTime",
+            "DeviceName",
+            "FileName",
+            "FolderPath",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 17:06:51.848971+00:00",
+            "wirpo-test",
+            "crond",
+            "/tmp/crond",
+            "/tmp/crond"
+        ],
+        [
+            "2025-05-07 17:06:51.849834+00:00",
+            "wirpo-test",
+            "crond",
+            "/tmp/crond",
+            "/tmp/crond"
+        ]
+    ]
+}

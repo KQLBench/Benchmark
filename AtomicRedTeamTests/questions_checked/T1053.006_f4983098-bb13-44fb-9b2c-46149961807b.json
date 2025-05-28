@@ -1,0 +1,18 @@
+{
+    "technique_id": "T1053.006",
+    "question_id": "f4983098-bb13-44fb-9b2c-46149961807b",
+    "context": "On a Linux system, a test was executed that created a new systemd service unit along with a timer, and subsequently the timer was started and enabled. This corresponds to changes in system configurations recorded in log events that detail systemd actions.",
+    "objective": "Investigate the Linux log data to identify evidence of the newly created timer activation and determine the exact name of the systemd timer that was enabled.",
+    "technical_details": {
+        "command_analysis": "Review the log entries where systemctl commands are executed; focus on distinctions in timer operations.",
+        "detection_approach": "Search for log events related to systemd service and timer management to find the unique identifier for the timer."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Determine which newly created systemd timer was activated by analyzing the system logs. The answer must be exactly the timer's name as recorded in the test invocation.",
+    "prompt": "Examine the logs from the Linux system for events related to the systemd timer activation. Identify any records indicating that a new timer unit was started and enabled, and determine which timer name was used.",
+    "answer": [
+        "art-timer.timer"
+    ],
+    "KQL_query": "union\n(\n    DeviceFileEvents\n    | where Timestamp > ago(30d)\n    | where FolderPath startswith \"/etc/systemd/system\"\n        and (FileName endswith \".service\" or FileName endswith \".timer\")\n        and ActionType in (\"FileCreated\",\"FileModified\")\n    | project Timestamp, DeviceName, Account=InitiatingProcessAccountName, Path=strcat(FolderPath, \"/\", FileName), Details=\"\"\n),\n(\n    DeviceProcessEvents\n    | where Timestamp > ago(30d)\n    | where FileName == \"systemctl\"\n        and ProcessCommandLine has_any (\"start art-timer.timer\",\"enable art-timer.timer\",\"daemon-reload\")\n    | project Timestamp, DeviceName, Account=InitiatingProcessAccountName, Path=\"\", Details=ProcessCommandLine\n)\n| sort by Timestamp desc",
+    "KQL_query_clean": "Syslog\n| where SyslogMessage contains \"systemctl\"\n| where SyslogMessage contains \"enable\" or SyslogMessage contains \"start\"\n| where SyslogMessage contains \".timer\"\n| extend TimerName = extract(@\"(?i)([a-z0-9\\-]+\\.timer)\", 1, SyslogMessage)\n| where isnotempty(TimerName)\n| distinct TimeGenerated, Computer, SyslogMessage, TimerName\n| order by TimeGenerated desc",
+    "difficulty": "unknown"
+}

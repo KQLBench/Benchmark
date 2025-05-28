@@ -1,0 +1,236 @@
+{
+    "technique_id": "T1090.003",
+    "question_id": "5ff9d047-6e9c-4357-b39b-5cf89d9b59c7",
+    "context": "An attacker could use built-in service management to launch a Tor proxy on a Linux host, enabling anonymized network traffic.",
+    "objective": "Detect when the Tor proxy service is started on Debian/Ubuntu/FreeBSD systems by monitoring service or systemctl invocations.",
+    "technical_details": {
+        "command_analysis": "The execution invokes either “sudo systemctl start tor” or “service tor start” (with FreeBSD using sysrc to enable the service first).",
+        "detection_approach": "Search DeviceProcessEvents for process command lines that include service management tools starting “tor” and extract the service name argument."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Phrase the query to ask specifically which service name was initiated, and expect a single-word answer that exactly matches the service identifier.",
+    "prompt": "On a Linux endpoint, a command was executed to start a proxy service commonly used for onion routing. Identify the name of the service that was launched to enable this proxy functionality.",
+    "answer": [
+        "tor"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "let targetDistros = dynamic([\"Ubuntu\",\"Debian\",\"FreeBSD\"]);\nDeviceInfo\n| where OSPlatform == \"Linux\" and OSDistribution in (targetDistros)\n| project DeviceId\n| join kind=inner DeviceProcessEvents on DeviceId\n| where FileName in (\"systemctl\",\"service\",\"sysrc\")\n| where ProcessCommandLine matches regex @\"\\b(?:start|enable)\\b\\s+tor\\b\"\n| extend ServiceName = extract(@\"(?:start|enable)\\s+(\\w+)\", 1, ProcessCommandLine)\n| where ServiceName == \"tor\"\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, FileName, ProcessCommandLine, ServiceName",
+    "KQL_validation_message": "KQL query validation successful: The expected answer is 'tor,' and the query results show repeated entries where the 'ProcessCommandLine' column contains 'systemctl start tor' and the 'ServiceName' is 'tor.' This directly matches the expected answer, as it provides clear evidence that the 'tor' service was interacted with, specifically started, on the device. The results are structured as table rows with relevant fields supporting this detection.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "FileName",
+            "ProcessCommandLine",
+            "ServiceName"
+        ],
+        [
+            "2025-05-07 17:17:22.804044+00:00",
+            "wirpo-test",
+            "root",
+            "systemctl",
+            "systemctl start tor",
+            "tor"
+        ],
+        [
+            "2025-05-07 17:17:22.804044+00:00",
+            "wirpo-test",
+            "root",
+            "systemctl",
+            "systemctl start tor",
+            "tor"
+        ],
+        [
+            "2025-05-07 17:17:22.804044+00:00",
+            "wirpo-test",
+            "root",
+            "systemctl",
+            "systemctl start tor",
+            "tor"
+        ],
+        [
+            "2025-05-07 17:17:22.804044+00:00",
+            "wirpo-test",
+            "root",
+            "systemctl",
+            "systemctl start tor",
+            "tor"
+        ],
+        [
+            "2025-05-07 17:17:22.804044+00:00",
+            "wirpo-test",
+            "root",
+            "systemctl",
+            "systemctl start tor",
+            "tor"
+        ],
+        [
+            "2025-05-07 17:17:22.804044+00:00",
+            "wirpo-test",
+            "root",
+            "systemctl",
+            "systemctl start tor",
+            "tor"
+        ],
+        [
+            "2025-05-07 17:17:22.804044+00:00",
+            "wirpo-test",
+            "root",
+            "systemctl",
+            "systemctl start tor",
+            "tor"
+        ],
+        [
+            "2025-05-07 17:17:22.804044+00:00",
+            "wirpo-test",
+            "root",
+            "systemctl",
+            "systemctl start tor",
+            "tor"
+        ],
+        [
+            "2025-05-07 17:17:22.804044+00:00",
+            "wirpo-test",
+            "root",
+            "systemctl",
+            "systemctl start tor",
+            "tor"
+        ],
+        [
+            "2025-05-07 17:17:22.804044+00:00",
+            "wirpo-test",
+            "root",
+            "systemctl",
+            "systemctl start tor",
+            "tor"
+        ],
+        [
+            "2025-05-07 17:17:22.804044+00:00",
+            "wirpo-test",
+            "root",
+            "systemctl",
+            "systemctl start tor",
+            "tor"
+        ],
+        [
+            "2025-05-07 17:17:22.804044+00:00",
+            "wirpo-test",
+            "root",
+            "systemctl",
+            "systemctl start tor",
+            "tor"
+        ],
+        [
+            "2025-05-07 17:17:22.804044+00:00",
+            "wirpo-test",
+            "root",
+            "systemctl",
+            "systemctl start tor",
+            "tor"
+        ],
+        [
+            "2025-05-07 17:17:22.804044+00:00",
+            "wirpo-test",
+            "root",
+            "systemctl",
+            "systemctl start tor",
+            "tor"
+        ],
+        [
+            "2025-05-07 17:17:22.804044+00:00",
+            "wirpo-test",
+            "root",
+            "systemctl",
+            "systemctl start tor",
+            "tor"
+        ],
+        [
+            "2025-05-07 17:17:22.804044+00:00",
+            "wirpo-test",
+            "root",
+            "systemctl",
+            "systemctl start tor",
+            "tor"
+        ],
+        [
+            "2025-05-07 17:17:22.804044+00:00",
+            "wirpo-test",
+            "root",
+            "systemctl",
+            "systemctl start tor",
+            "tor"
+        ],
+        [
+            "2025-05-07 17:17:22.804044+00:00",
+            "wirpo-test",
+            "root",
+            "systemctl",
+            "systemctl start tor",
+            "tor"
+        ],
+        [
+            "2025-05-07 17:17:22.804044+00:00",
+            "wirpo-test",
+            "root",
+            "systemctl",
+            "systemctl start tor",
+            "tor"
+        ],
+        [
+            "2025-05-07 17:17:22.804044+00:00",
+            "wirpo-test",
+            "root",
+            "systemctl",
+            "systemctl start tor",
+            "tor"
+        ],
+        [
+            "2025-05-07 17:17:22.804044+00:00",
+            "wirpo-test",
+            "root",
+            "systemctl",
+            "systemctl start tor",
+            "tor"
+        ],
+        [
+            "2025-05-07 17:17:22.804044+00:00",
+            "wirpo-test",
+            "root",
+            "systemctl",
+            "systemctl start tor",
+            "tor"
+        ],
+        [
+            "2025-05-07 17:17:22.804044+00:00",
+            "wirpo-test",
+            "root",
+            "systemctl",
+            "systemctl start tor",
+            "tor"
+        ],
+        [
+            "2025-05-07 17:17:22.804044+00:00",
+            "wirpo-test",
+            "root",
+            "systemctl",
+            "systemctl start tor",
+            "tor"
+        ],
+        [
+            "2025-05-07 17:17:22.804044+00:00",
+            "wirpo-test",
+            "root",
+            "systemctl",
+            "systemctl start tor",
+            "tor"
+        ],
+        [
+            "2025-05-07 17:17:22.804044+00:00",
+            "wirpo-test",
+            "root",
+            "systemctl",
+            "systemctl start tor",
+            "tor"
+        ]
+    ]
+}

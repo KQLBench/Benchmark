@@ -1,0 +1,38 @@
+{
+    "technique_id": "T1546.004",
+    "question_id": "8fe2ccfd-f079-4c03-b1a9-bd9b362b67d4",
+    "context": "On a Linux system, an adversary may establish persistence by appending commands into any script under /etc/profile.d, causing malicious code to execute each time a user logs in.",
+    "objective": "Detect unauthorized modifications to system shell profile scripts that indicate persistence activity.",
+    "technical_details": {
+        "command_analysis": "The adversary uses a shell command to append a specific text string into /etc/profile.d/bash_completion.sh via echo and redirection.",
+        "detection_approach": "Search DeviceFileEvents for write or create actions where FolderPath contains '/etc/profile.d' and identify the specific FileName that was modified."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question to focus on identifying which profile script file under /etc/profile.d was altered, and provide its exact name as the answer.",
+    "prompt": "On Linux, review file events for changes in the system-wide shell profile directory. Determine the name of the script file in /etc/profile.d that shows evidence of an unauthorized append.",
+    "answer": [
+        "bash_completion.sh"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceFileEvents\n| where TimeGenerated >= ago(30d)\n| where FolderPath has \"/etc/profile.d\"\n| where ActionType in (\"FileCreated\", \"FileModified\")\n| summarize EventCount = count(), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated) by FileName\n| order by LastSeen desc",
+    "KQL_validation_message": "KQL query validation successful: The results contain a row with 'FileName' equal to 'bash_completion.sh', which matches the expected answer. The presence of this file, along with event counts and timestamps, provides the necessary evidence to answer the detection question regarding activity involving 'bash_completion.sh'.",
+    "KQL_query_results": [
+        [
+            "FileName",
+            "EventCount",
+            "FirstSeen",
+            "LastSeen"
+        ],
+        [
+            "bash_completion.sh",
+            3,
+            "2025-05-07 17:01:15.469391+00:00",
+            "2025-05-07 17:01:19.141966+00:00"
+        ],
+        [
+            "sedftkyCk",
+            1,
+            "2025-05-07 17:01:19.141593+00:00",
+            "2025-05-07 17:01:19.141593+00:00"
+        ]
+    ]
+}

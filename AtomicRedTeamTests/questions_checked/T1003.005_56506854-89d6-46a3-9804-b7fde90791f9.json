@@ -1,0 +1,50 @@
+{
+    "technique_id": "T1003.005",
+    "question_id": "56506854-89d6-46a3-9804-b7fde90791f9",
+    "context": "An adversary leverages the built-in Windows credential utility to enumerate stored credentials in the current user’s profile.",
+    "objective": "Detect when cmdkey.exe was used to list cached credentials on a Windows host.",
+    "technical_details": {
+        "command_analysis": "cmdkey.exe invoked with the \"/list\" switch indicates enumeration of stored credentials.",
+        "detection_approach": "Search process creation events for cmdkey.exe where the command line includes the list argument."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question so the analyst must pinpoint the exact full command invoking credential enumeration and retrieve it from process event logs.",
+    "prompt": "On Windows devices, identify the full command used when the built-in credential manager utility was invoked to list stored credentials. What was the exact command?",
+    "answer": [
+        "cmdkey /list"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "// Detect cmdkey.exe enumeration of stored credentials\nDeviceProcessEvents\n| where FileName == \"cmdkey.exe\"\n| where ProcessCommandLine has \"/list\"\n| project TimeGenerated, DeviceName, AccountDomain, AccountName, ProcessId, ProcessCommandLine, InitiatingProcessAccountDomain, InitiatingProcessAccountName",
+    "KQL_validation_message": "KQL query validation successful: The 'ProcessCommandLine' field in both returned results includes the execution of 'cmdkey.exe' with the '/list' argument (shown as '\"cmdkey.exe\" /list' and 'cmdkey.exe  /list'), which matches the expected answer of 'cmdkey /list'. This confirms that the information needed to detect this command's execution is present in the results.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "AccountDomain",
+            "AccountName",
+            "ProcessId",
+            "ProcessCommandLine",
+            "InitiatingProcessAccountDomain",
+            "InitiatingProcessAccountName"
+        ],
+        [
+            "2025-05-07 17:27:33.687226+00:00",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            12640,
+            "\"cmdkey.exe\" /list",
+            "windows-vm",
+            "wipro"
+        ],
+        [
+            "2025-05-07 17:27:43.172495+00:00",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            14264,
+            "cmdkey.exe  /list ",
+            "windows-vm",
+            "wipro"
+        ]
+    ]
+}

@@ -1,0 +1,64 @@
+{
+    "technique_id": "T1069.001",
+    "question_id": "69119e58-96db-4110-ad27-954e48f3bb13",
+    "context": "On Windows endpoints, attackers often use WMI via PowerShell to gather information about local groups for reconnaissance.",
+    "objective": "Detect when a PowerShell process invokes WMI to enumerate local groups on a system.",
+    "technical_details": {
+        "command_analysis": "Look for PowerShell process events where the command line includes the WMI cmdlet Get-WMIObject targeting Win32_Group.",
+        "detection_approach": "Search the DeviceProcessEvents (or DeviceEvents) table for powershell.exe executions with a ProcessCommandLine or InitiatingProcessCommandLine containing 'Get-WMIObject Win32_Group'."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question to ask exactly which command was used by the adversary to enumerate local groups via WMI.",
+    "prompt": "Review recent Windows process event logs for PowerShell activity that suggests local group enumeration through WMI. What exact command was executed?",
+    "answer": [
+        "Get-WMIObject Win32_Group"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where TimeGenerated >= ago(1d)\n| where FileName == \"powershell.exe\"\n| where ProcessCommandLine has \"Get-WMIObject\" and ProcessCommandLine has \"Win32_Group\"\n| project TimeGenerated, DeviceName, ProcessId, FileName, ProcessCommandLine, AccountDomain, AccountName, InitiatingProcessFileName, InitiatingProcessCommandLine",
+    "KQL_validation_message": "KQL query validation successful: Each row of the results includes the ProcessCommandLine value '\"powershell.exe\" & {Get-WMIObject Win32_Group}', which directly ties to the expected answer. The command being run is clearly visible, and thus these results provide 1:1 evidence to identify occurrences of 'Get-WMIObject Win32_Group' execution through PowerShell.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "ProcessId",
+            "FileName",
+            "ProcessCommandLine",
+            "AccountDomain",
+            "AccountName",
+            "InitiatingProcessFileName",
+            "InitiatingProcessCommandLine"
+        ],
+        [
+            "2025-05-07 16:16:05.929643+00:00",
+            "windows-vm",
+            1312,
+            "powershell.exe",
+            "\"powershell.exe\" & {Get-WMIObject Win32_Group}",
+            "windows-vm",
+            "wipro",
+            "powershell.exe",
+            "powershell  -Command \"Invoke-AtomicTest T1069.001 -TestGuids 69119e58-96db-4110-ad27-954e48f3bb13  -TimeoutSeconds 120 \""
+        ],
+        [
+            "2025-05-07 16:18:25.733276+00:00",
+            "windows-vm",
+            8652,
+            "powershell.exe",
+            "\"powershell.exe\" & {Get-WMIObject Win32_Group}",
+            "windows-vm",
+            "wipro",
+            "powershell.exe",
+            "powershell  -Command \"Invoke-AtomicTest T1069.001 -TestGuids 69119e58-96db-4110-ad27-954e48f3bb13  -TimeoutSeconds 120 \""
+        ],
+        [
+            "2025-05-07 16:29:26.182169+00:00",
+            "windows-vm",
+            9396,
+            "powershell.exe",
+            "\"powershell.exe\" & {Get-WMIObject Win32_Group}",
+            "windows-vm",
+            "wipro",
+            "powershell.exe",
+            "powershell  -Command \"Invoke-AtomicTest T1069.001 -TestGuids 69119e58-96db-4110-ad27-954e48f3bb13  -TimeoutSeconds 120 \""
+        ]
+    ]
+}

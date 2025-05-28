@@ -1,0 +1,28 @@
+{
+    "technique_id": "T1069.001",
+    "question_id": "a580462d-2c19-4bc7-8b9a-57a41b7d3ba4",
+    "context": "In a Windows environment where local group configurations may be probed by an attacker, process execution logs can reveal enumeration of permission groups.",
+    "objective": "Determine which local group was targeted by a PowerShell membership enumeration command.",
+    "technical_details": {
+        "command_analysis": "The test runs two PowerShell cmdlets: one to list all local groups and another to enumerate members of a specific group via the '-Name' parameter.",
+        "detection_approach": "Query process execution events for PowerShell invocations containing 'Get-LocalGroupMember' and extract the argument passed to '-Name'."
+    },
+    "thinking_how_to_phrase_question_and_answer": "What local group name was specified in the enumeration command?",
+    "prompt": "Investigate Windows process execution logs for a PowerShell cmdlet used to list group members. Look for entries where a group name is provided after a '-Name' flag and identify which group was queried.",
+    "answer": [
+        "Administrators"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "DeviceProcessEvents\n| where TimeGenerated >= ago(1d)\n| where FileName in (\"powershell.exe\", \"pwsh.exe\")\n| where ProcessCommandLine contains \"Get-LocalGroupMember\"\n| extend GroupName = extract(@\"(?i)-Name\\s+([^\\s]+)\", 1, ProcessCommandLine)\n| where isnotempty(GroupName)\n| summarize Count = count() by GroupName\n| sort by Count desc",
+    "KQL_validation_message": "KQL query validation successful: The structure of the query results is a table with columns 'GroupName' and 'Count'. The row ['\\\"\"Administrators\"\\\"', 3] shows that 'Administrators' is present as a group name (despite the extra quoting), aligning with the expected answer 'Administrators'. Therefore, the evidence needed is present in the query results.",
+    "KQL_query_results": [
+        [
+            "GroupName",
+            "Count"
+        ],
+        [
+            "\\\"\"Administrators\\\"\"}",
+            3
+        ]
+    ]
+}

@@ -1,0 +1,55 @@
+{
+    "technique_id": "T1217",
+    "question_id": "88ca025b-3040-44eb-9168-bd8af22b82fa",
+    "context": "An attacker executed a shell command on a Linux host to enumerate Google Chromium bookmark JSON files across user profiles.",
+    "objective": "Detect when someone searches for Chromium’s ‘Bookmarks’ files under .config and redirects the results to disk.",
+    "technical_details": {
+        "command_analysis": "A sh process runs 'find / -path \"*/.config/chromium/*/Bookmarks\"' and uses echo with output redirection to append each match to an output file.",
+        "detection_approach": "Query DeviceProcessEvents for a 'find' invocation targeting '.config/chromium' with command line arguments including 'Bookmarks' and a redirection operator to capture results."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Ask for the exact filename where the list of discovered bookmark files was saved, prompting analysts to pinpoint the redirection target inside the process command line.",
+    "prompt": "On Linux, review the process execution logs to uncover when Chromium’s bookmark JSON files were being located and the results persisted. Focus on shell commands that search under .config/chromium and write output to a file. What was the filename used to save the findings?",
+    "answer": [
+        "T1217-Chrome.txt"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where FileName in (\"sh\", \"bash\", \"dash\", \"find\")\n| where ProcessCommandLine has \"find\"\n    and ProcessCommandLine has \"-path\"\n    and ProcessCommandLine has \".config/chromium\"\n    and ProcessCommandLine has \"Bookmarks\"\n    and ProcessCommandLine has \"-exec echo\"\n| project TimeGenerated, DeviceName, AccountName, FileName, ProcessCommandLine\n| order by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: Within the 'ProcessCommandLine' fields of multiple results, the output file 'T1217-Chrome.txt' is explicitly mentioned as the destination for collected bookmark paths via the find command. This matches the expected answer, demonstrating both intent and action related to the detection question. The evidence in the log results is sufficient to verify activity concerning 'T1217-Chrome.txt'.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "AccountName",
+            "FileName",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 17:13:05.731501+00:00",
+            "wirpo-test",
+            "root",
+            "dash",
+            "sh -c 'find / -path \"*/.config/chromium/*/Bookmarks\" -exec echo {} >> /tmp/T1217-Chrome.txt \\;\ncat /tmp/T1217-Chrome.txt 2>/dev/null'"
+        ],
+        [
+            "2025-05-07 17:13:04.946959+00:00",
+            "wirpo-test",
+            "root",
+            "find",
+            "find / -path */.config/chromium/*/Bookmarks -exec echo {} ;"
+        ],
+        [
+            "2025-05-07 17:13:04.946768+00:00",
+            "wirpo-test",
+            "root",
+            "dash",
+            "sh -c 'find / -path \"*/.config/chromium/*/Bookmarks\" -exec echo {} >> /tmp/T1217-Chrome.txt \\;\ncat /tmp/T1217-Chrome.txt 2>/dev/null'"
+        ],
+        [
+            "2025-05-07 17:13:04.946137+00:00",
+            "wirpo-test",
+            "root",
+            "dash",
+            "sh -c 'find / -path \"*/.config/chromium/*/Bookmarks\" -exec echo {} >> /tmp/T1217-Chrome.txt \\;\ncat /tmp/T1217-Chrome.txt 2>/dev/null'"
+        ]
+    ]
+}

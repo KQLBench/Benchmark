@@ -1,0 +1,36 @@
+{
+    "technique_id": "T1614.001",
+    "question_id": "5d7057c9-2c8a-4026-91dd-13b5584daa69",
+    "context": "On a Linux system, an attacker or administrator reads the system locale settings by inspecting a configuration file under /etc.",
+    "objective": "Detect which utility was executed to access the locale configuration file.",
+    "technical_details": {
+        "command_analysis": "The test invokes the 'cat' command to read either /etc/locale.conf or /etc/default/locale.",
+        "detection_approach": "Search process execution or syslog entries for any invocation of the cat utility targeting a locale configuration file path."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Phrase the question to ask which tool or binary was used to perform the file read, expecting a single-word Unix utility name.",
+    "prompt": "A Linux host was probed by reading its locale configuration file to discover the system language. Identify which tool was invoked to perform that read operation.",
+    "answer": [
+        "cat"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "let localePaths = dynamic([\"/etc/locale.conf\",\"/etc/default/locale\"]);\nunion\n(\n    DeviceProcessEvents\n    | where FileName == \"cat\"\n    | where ProcessCommandLine has_any (localePaths)\n    | extend Device = DeviceName, CommandLine = ProcessCommandLine, Source = \"DeviceProcessEvents\", Account = InitiatingProcessAccountName\n),\n(\n    Syslog\n    | where ProcessName == \"cat\"\n    | where SyslogMessage has_any (localePaths)\n    | extend Device = HostName, CommandLine = SyslogMessage, Source = \"Syslog\", Account = \"\"\n)\n| project TimeGenerated, Device, Account, FileName, CommandLine, Source\n| sort by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: The expected answer is 'cat', and the query results show a record with 'cat' present as the 'FileName', with a related command 'cat /etc/locale.conf'. This provides direct evidence of the activity in question. The structure includes all relevant contextual fields (device, account, filename, commandline), ensuring the information is sufficient to answer the detection question.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "Device",
+            "Account",
+            "FileName",
+            "CommandLine",
+            "Source"
+        ],
+        [
+            "2025-05-07 17:03:51.842720+00:00",
+            "wirpo-test",
+            "root",
+            "cat",
+            "cat /etc/locale.conf",
+            "DeviceProcessEvents"
+        ]
+    ]
+}

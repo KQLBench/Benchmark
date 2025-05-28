@@ -1,0 +1,40 @@
+{
+    "technique_id": "T1562.004",
+    "question_id": "94be7646-25f6-467e-af23-585fb13000c8",
+    "context": "An adversary with administrative privileges on a Windows host uses PowerShell to modify firewall settings by adding a new rule.",
+    "objective": "Detect the invocation of the New-NetFirewallRule cmdlet used to create an inbound or outbound firewall rule.",
+    "technical_details": {
+        "command_analysis": "PowerShell launches New-NetFirewallRule with parameters such as -DisplayName, -Direction, -LocalPort, -Protocol, and -Action.",
+        "detection_approach": "Search DeviceProcessEvents for ProcessCommandLine entries containing the New-NetFirewallRule cmdlet to identify firewall rule creation attempts."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Focus on spotting a PowerShell-based firewall configuration change and pinpointing the exact commandlet name used.",
+    "prompt": "A Windows system’s process logs show a PowerShell execution that altered firewall settings. Which cmdlet was used to add this new rule?",
+    "answer": [
+        "New-NetFirewallRule"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "DeviceProcessEvents\n| where TimeGenerated >= ago(1d)\n| where ProcessCommandLine has \"New-NetFirewallRule\"\n| where FileName in (\"powershell.exe\", \"pwsh.exe\")\n| project TimeGenerated, DeviceName, AccountDomain, AccountName, FileName, ProcessCommandLine, ProcessId, InitiatingProcessFileName",
+    "KQL_validation_message": "KQL query validation successful: The 'ProcessCommandLine' field in the query results contains the PowerShell command 'New-NetFirewallRule', which matches the expected answer. This provides clear evidence that the expected activity (creation of a new firewall rule) was detected and logged in the returned query results. The other contextual fields (e.g., time, device, user, process) further support this detection.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "AccountDomain",
+            "AccountName",
+            "FileName",
+            "ProcessCommandLine",
+            "ProcessId",
+            "InitiatingProcessFileName"
+        ],
+        [
+            "2025-05-07 16:51:34.564550+00:00",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            "powershell.exe",
+            "\"powershell.exe\" & {New-NetFirewallRule -DisplayName \\\"\"New rule\\\"\" -Direction \\\"\"Inbound\\\"\" -LocalPort \\\"\"21\\\"\" -Protocol \\\"\"TCP\\\"\" -Action \\\"\"allow\\\"\"}",
+            2700,
+            "powershell.exe"
+        ]
+    ]
+}

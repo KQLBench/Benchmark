@@ -1,0 +1,26 @@
+{
+    "technique_id": "T1082",
+    "question_id": "cccb070c-df86-4216-a5bc-9fb60c74e27c",
+    "context": "On a Linux endpoint, a process sequence has been observed running commands like 'uname -a', 'cat /etc/os-release', and 'uptime', redirecting their output into a file under /tmp.",
+    "objective": "Determine the exact file name used as the temporary container for all gathered OS information.",
+    "technical_details": {
+        "command_analysis": "Shell invocations of 'uname', 'cat', and 'uptime' with output redirection (>>), targeting a file path in /tmp.",
+        "detection_approach": "Search DeviceProcessEvents or DeviceFileEvents for processes performing redirection into /tmp and extract the destination file name from those events."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Phrase the question to ask specifically for the name of the file created in /tmp to store the OS discovery output; the answer should be the filename itself.",
+    "prompt": "A Linux host was used to collect various system release files and kernel details, writing them into a single file under /tmp. What was the name of that output file?",
+    "answer": [
+        "T1082.txt"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "let timeFilter = ago(1d);\n\n// Case A: single shell invocation containing all three commands\nlet multi = DeviceProcessEvents\n| where TimeGenerated >= timeFilter\n| where ProcessCommandLine matches regex \">>\\\\s*/tmp/\\\\S+\"\n| where ProcessCommandLine contains \"uname -a\"\n  and ProcessCommandLine contains \"cat /etc/os-release\"\n  and ProcessCommandLine contains \"uptime\"\n| extend DestinationFile = extract(\">>\\\\s*(/tmp/\\\\S+)\", 1, ProcessCommandLine)\n| where isnotempty(DestinationFile)\n| distinct DestinationFile;\n\n// Case B: three separate invocations, one per command\nlet individual = DeviceProcessEvents\n| where TimeGenerated >= timeFilter\n| where ProcessCommandLine matches regex \">>\\\\s*/tmp/\\\\S+\"\n| extend DestinationFile = extract(\">>\\\\s*(/tmp/\\\\S+)\", 1, ProcessCommandLine)\n| where isnotempty(DestinationFile)\n| extend CmdType = case(\n    ProcessCommandLine contains \"uname -a\", \"uname\",\n    ProcessCommandLine contains \"cat /etc/os-release\", \"cat\",\n    ProcessCommandLine contains \"uptime\", \"uptime\",\n    \"\"\n  )\n| where CmdType != \"\"\n| summarize UniqueCmds = make_set(CmdType) by DestinationFile\n| where array_length(UniqueCmds) == 3;\n\n// Union both patterns and output the temp file(s)\nunion multi, individual\n| distinct DestinationFile",
+    "KQL_validation_message": "KQL query validation successful: The expected answer is 'T1082.txt', and the query results include a row with '/tmp/T1082.txt;'. Despite the presence of the '/tmp/' directory and the semicolon, the filename 'T1082.txt' is clearly present within the value. Therefore, these results confirm evidence of the activity described and directly meet the detection criteria.",
+    "KQL_query_results": [
+        [
+            "DestinationFile"
+        ],
+        [
+            "/tmp/T1082.txt;"
+        ]
+    ]
+}

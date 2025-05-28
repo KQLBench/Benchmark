@@ -1,0 +1,266 @@
+{
+    "technique_id": "T1078.003",
+    "question_id": "02a91c34-8a5b-4bed-87af-501103eb5357",
+    "context": "In a Linux environment, an adversary attempt was simulated where a new local user account named 'art' is created using built-in utilities. Relevant events are emitted to Syslog and process monitoring logs.",
+    "objective": "Detect the creation of a local user by uncovering which system command was used to add the account.",
+    "technical_details": {
+        "command_analysis": "The attack uses standard Linux account management utilities, invoking a process that includes a useradd command with specific flags to create the new user.",
+        "detection_approach": "Search the Syslog (or DeviceProcessEvents) for entries indicating execution of user management commands, then isolate the exact command name used to create the account."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Formulate a question that asks which command-line tool was executed to add the new account, expecting the tool name as the answer.",
+    "prompt": "On a Linux host, review account management activity in Syslog or process event logs to pinpoint which command was executed to create a new local user. What was the name of the tool invoked?",
+    "answer": [
+        "useradd"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "let SysEntries = Syslog\n| where (ProcessName in (\"useradd\",\"adduser\") or SyslogMessage has_any (\"useradd\",\"adduser\"))\n      and SyslogMessage matches regex @\"\\b(useradd|adduser)\\b.*\\bart\\b\"\n| project TimeGenerated, Host=HostName, CommandLine=SyslogMessage, SourceTable=\"Syslog\";\nlet ProcEntries = DeviceProcessEvents\n| where (FileName in (\"useradd\",\"adduser\") or ProcessCommandLine has_any (\"useradd\",\"adduser\"))\n      and ProcessCommandLine matches regex @\"\\b(useradd|adduser)\\b.*\\bart\\b\"\n| project TimeGenerated, Host=DeviceName, CommandLine=ProcessCommandLine, SourceTable=\"DeviceProcessEvents\";\nSysEntries\n| union ProcEntries\n| sort by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: The expected answer is the presence of 'useradd' activity. The 'CommandLine' values in the results include direct usage of the 'useradd' command in various forms, such as 'useradd --shell /bin/bash ...', 'useradd --create-home ...', and in more complex shell invocations with useradd as a component. These results clearly support detection and verification of user account creation via the 'useradd' command, exactly matching the detection question requirements.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "Host",
+            "CommandLine",
+            "SourceTable"
+        ],
+        [
+            "2025-05-07 17:15:59.918752+00:00",
+            "wirpo-test",
+            "bash -c 'useradd --shell /bin/bash --create-home --password ********* passwd -1 art) art; usermod --lock art; usermod --expiredate \"1\" art; usermod --unlock art; usermod --expiredate \"99999\" art; su -c whoami art'",
+            "DeviceProcessEvents"
+        ],
+        [
+            "2025-05-07 17:15:59.878234+00:00",
+            "wirpo-test",
+            "bash -c 'useradd --shell /bin/bash --create-home --password ********* passwd -1 art) art; usermod --lock art; usermod --expiredate \"1\" art; usermod --unlock art; usermod --expiredate \"99999\" art; su -c whoami art'",
+            "DeviceProcessEvents"
+        ],
+        [
+            "2025-05-07 17:15:59.837931+00:00",
+            "wirpo-test",
+            "bash -c 'useradd --shell /bin/bash --create-home --password ********* passwd -1 art) art; usermod --lock art; usermod --expiredate \"1\" art; usermod --unlock art; usermod --expiredate \"99999\" art; su -c whoami art'",
+            "DeviceProcessEvents"
+        ],
+        [
+            "2025-05-07 17:15:59.779864+00:00",
+            "wirpo-test",
+            "bash -c 'useradd --shell /bin/bash --create-home --password ********* passwd -1 art) art; usermod --lock art; usermod --expiredate \"1\" art; usermod --unlock art; usermod --expiredate \"99999\" art; su -c whoami art'",
+            "DeviceProcessEvents"
+        ],
+        [
+            "2025-05-07 17:15:59.772854+00:00",
+            "wirpo-test",
+            "useradd --shell /bin/bash --create-home --password ********** art",
+            "DeviceProcessEvents"
+        ],
+        [
+            "2025-05-07 17:15:59.771676+00:00",
+            "wirpo-test",
+            "bash -c 'useradd --shell /bin/bash --create-home --password ********* passwd -1 art) art; usermod --lock art; usermod --expiredate \"1\" art; usermod --unlock art; usermod --expiredate \"99999\" art; su -c whoami art'",
+            "DeviceProcessEvents"
+        ],
+        [
+            "2025-05-07 17:15:59.754883+00:00",
+            "wirpo-test",
+            "bash -c 'useradd --shell /bin/bash --create-home --password ********* passwd -1 art) art; usermod --lock art; usermod --expiredate \"1\" art; usermod --unlock art; usermod --expiredate \"99999\" art; su -c whoami art'",
+            "DeviceProcessEvents"
+        ],
+        [
+            "2025-05-07 17:15:59.752623+00:00",
+            "wirpo-test",
+            "bash -c 'useradd --shell /bin/bash --create-home --password ********* passwd -1 art) art; usermod --lock art; usermod --expiredate \"1\" art; usermod --unlock art; usermod --expiredate \"99999\" art; su -c whoami art'",
+            "DeviceProcessEvents"
+        ],
+        [
+            "2025-05-07 17:15:58.394563+00:00",
+            "wirpo-test",
+            "useradd --shell /bin/bash --create-home --password ********** art",
+            "DeviceProcessEvents"
+        ],
+        [
+            "2025-05-07 17:15:58.391814+00:00",
+            "wirpo-test",
+            "useradd --shell /bin/bash --create-home --password ********** art",
+            "DeviceProcessEvents"
+        ],
+        [
+            "2025-05-07 17:15:58.389068+00:00",
+            "wirpo-test",
+            "useradd --shell /bin/bash --create-home --password ********** art",
+            "DeviceProcessEvents"
+        ],
+        [
+            "2025-05-07 17:15:58.386364+00:00",
+            "wirpo-test",
+            "useradd --shell /bin/bash --create-home --password ********** art",
+            "DeviceProcessEvents"
+        ],
+        [
+            "2025-05-07 17:15:58.383515+00:00",
+            "wirpo-test",
+            "useradd --shell /bin/bash --create-home --password ********** art",
+            "DeviceProcessEvents"
+        ],
+        [
+            "2025-05-07 17:15:58.379524+00:00",
+            "wirpo-test",
+            "useradd --shell /bin/bash --create-home --password ********** art",
+            "DeviceProcessEvents"
+        ],
+        [
+            "2025-05-07 17:15:58.376514+00:00",
+            "wirpo-test",
+            "useradd --shell /bin/bash --create-home --password ********** art",
+            "DeviceProcessEvents"
+        ],
+        [
+            "2025-05-07 17:15:58.260694+00:00",
+            "wirpo-test",
+            "useradd --shell /bin/bash --create-home --password ********** art",
+            "DeviceProcessEvents"
+        ],
+        [
+            "2025-05-07 17:15:58.254381+00:00",
+            "wirpo-test",
+            "bash -c 'password=********* passwd -1 art); ([ \"$(uname)\" = 'Linux' ] && useradd --shell /bin/bash --create-home --password ********* art) || (pw useradd art -g wheel -s /bin/sh && (echo $password | pw mod user testuser1 -h 0)); su art -c \"whoami; exit\"'",
+            "DeviceProcessEvents"
+        ],
+        [
+            "2025-05-07 17:15:58.253611+00:00",
+            "wirpo-test",
+            "bash -c 'password=********* passwd -1 art); ([ \"$(uname)\" = 'Linux' ] && useradd --shell /bin/bash --create-home --password ********* art) || (pw useradd art -g wheel -s /bin/sh && (echo $password | pw mod user testuser1 -h 0)); su art -c \"whoami; exit\"'",
+            "DeviceProcessEvents"
+        ],
+        [
+            "2025-05-07 17:15:58.234497+00:00",
+            "wirpo-test",
+            "bash -c 'password=********* passwd -1 art); ([ \"$(uname)\" = 'Linux' ] && useradd --shell /bin/bash --create-home --password ********* art) || (pw useradd art -g wheel -s /bin/sh && (echo $password | pw mod user testuser1 -h 0)); su art -c \"whoami; exit\"'",
+            "DeviceProcessEvents"
+        ],
+        [
+            "2025-05-07 17:15:58.231395+00:00",
+            "wirpo-test",
+            "bash -c 'password=********* passwd -1 art); ([ \"$(uname)\" = 'Linux' ] && useradd --shell /bin/bash --create-home --password ********* art) || (pw useradd art -g wheel -s /bin/sh && (echo $password | pw mod user testuser1 -h 0)); su art -c \"whoami; exit\"'",
+            "DeviceProcessEvents"
+        ],
+        [
+            "2025-05-07 17:01:59.179076+00:00",
+            "wirpo-test",
+            "bash -c '[ \"$(uname)\" = 'FreeBSD' ] && pw useradd art -g wheel -s /bin/csh || useradd -s /bin/bash art; cat /etc/passwd |grep ^art; chsh -s /bin/sh art; cat /etc/passwd |grep ^art'",
+            "DeviceProcessEvents"
+        ],
+        [
+            "2025-05-07 17:01:59.175315+00:00",
+            "wirpo-test",
+            "bash -c '[ \"$(uname)\" = 'FreeBSD' ] && pw useradd art -g wheel -s /bin/csh || useradd -s /bin/bash art; cat /etc/passwd |grep ^art; chsh -s /bin/sh art; cat /etc/passwd |grep ^art'",
+            "DeviceProcessEvents"
+        ],
+        [
+            "2025-05-07 17:01:59.155312+00:00",
+            "wirpo-test",
+            "bash -c '[ \"$(uname)\" = 'FreeBSD' ] && pw useradd art -g wheel -s /bin/csh || useradd -s /bin/bash art; cat /etc/passwd |grep ^art; chsh -s /bin/sh art; cat /etc/passwd |grep ^art'",
+            "DeviceProcessEvents"
+        ],
+        [
+            "2025-05-07 17:01:59.150397+00:00",
+            "wirpo-test",
+            "bash -c '[ \"$(uname)\" = 'FreeBSD' ] && pw useradd art -g wheel -s /bin/csh || useradd -s /bin/bash art; cat /etc/passwd |grep ^art; chsh -s /bin/sh art; cat /etc/passwd |grep ^art'",
+            "DeviceProcessEvents"
+        ],
+        [
+            "2025-05-07 17:01:59.134651+00:00",
+            "wirpo-test",
+            "bash -c '[ \"$(uname)\" = 'FreeBSD' ] && pw useradd art -g wheel -s /bin/csh || useradd -s /bin/bash art; cat /etc/passwd |grep ^art; chsh -s /bin/sh art; cat /etc/passwd |grep ^art'",
+            "DeviceProcessEvents"
+        ],
+        [
+            "2025-05-07 17:01:59.122578+00:00",
+            "wirpo-test",
+            "bash -c '[ \"$(uname)\" = 'FreeBSD' ] && pw useradd art -g wheel -s /bin/csh || useradd -s /bin/bash art; cat /etc/passwd |grep ^art; chsh -s /bin/sh art; cat /etc/passwd |grep ^art'",
+            "DeviceProcessEvents"
+        ],
+        [
+            "2025-05-07 17:01:59.107458+00:00",
+            "wirpo-test",
+            "bash -c '[ \"$(uname)\" = 'FreeBSD' ] && pw useradd art -g wheel -s /bin/csh || useradd -s /bin/bash art; cat /etc/passwd |grep ^art; chsh -s /bin/sh art; cat /etc/passwd |grep ^art'",
+            "DeviceProcessEvents"
+        ],
+        [
+            "2025-05-07 17:01:59.085139+00:00",
+            "wirpo-test",
+            "bash -c '[ \"$(uname)\" = 'FreeBSD' ] && pw useradd art -g wheel -s /bin/csh || useradd -s /bin/bash art; cat /etc/passwd |grep ^art; chsh -s /bin/sh art; cat /etc/passwd |grep ^art'",
+            "DeviceProcessEvents"
+        ],
+        [
+            "2025-05-07 17:01:58.873246+00:00",
+            "wirpo-test",
+            "bash -c '[ \"$(uname)\" = 'FreeBSD' ] && pw useradd art -g wheel -s /bin/csh || useradd -s /bin/bash art; cat /etc/passwd |grep ^art; chsh -s /bin/sh art; cat /etc/passwd |grep ^art'",
+            "DeviceProcessEvents"
+        ],
+        [
+            "2025-05-07 17:01:58.868146+00:00",
+            "wirpo-test",
+            "bash -c '[ \"$(uname)\" = 'FreeBSD' ] && pw useradd art -g wheel -s /bin/csh || useradd -s /bin/bash art; cat /etc/passwd |grep ^art; chsh -s /bin/sh art; cat /etc/passwd |grep ^art'",
+            "DeviceProcessEvents"
+        ],
+        [
+            "2025-05-07 17:01:58.858222+00:00",
+            "wirpo-test",
+            "bash -c '[ \"$(uname)\" = 'FreeBSD' ] && pw useradd art -g wheel -s /bin/csh || useradd -s /bin/bash art; cat /etc/passwd |grep ^art; chsh -s /bin/sh art; cat /etc/passwd |grep ^art'",
+            "DeviceProcessEvents"
+        ],
+        [
+            "2025-05-07 17:01:25.763498+00:00",
+            "wirpo-test",
+            "useradd --create-home --shell /bin/bash art",
+            "DeviceProcessEvents"
+        ],
+        [
+            "2025-05-07 17:01:25.750974+00:00",
+            "wirpo-test",
+            "useradd --create-home --shell /bin/bash art",
+            "DeviceProcessEvents"
+        ],
+        [
+            "2025-05-07 17:01:25.747079+00:00",
+            "wirpo-test",
+            "useradd --create-home --shell /bin/bash art",
+            "DeviceProcessEvents"
+        ],
+        [
+            "2025-05-07 17:01:25.742373+00:00",
+            "wirpo-test",
+            "useradd --create-home --shell /bin/bash art",
+            "DeviceProcessEvents"
+        ],
+        [
+            "2025-05-07 17:01:25.737395+00:00",
+            "wirpo-test",
+            "useradd --create-home --shell /bin/bash art",
+            "DeviceProcessEvents"
+        ],
+        [
+            "2025-05-07 17:01:25.733190+00:00",
+            "wirpo-test",
+            "useradd --create-home --shell /bin/bash art",
+            "DeviceProcessEvents"
+        ],
+        [
+            "2025-05-07 17:01:25.726971+00:00",
+            "wirpo-test",
+            "useradd --create-home --shell /bin/bash art",
+            "DeviceProcessEvents"
+        ],
+        [
+            "2025-05-07 17:01:25.549237+00:00",
+            "wirpo-test",
+            "useradd --create-home --shell /bin/bash art",
+            "DeviceProcessEvents"
+        ],
+        [
+            "2025-05-07 17:01:25.539080+00:00",
+            "wirpo-test",
+            "bash -c 'useradd --create-home --shell /bin/bash art; su -l art -c \"echo 'echo \\\"Atomic Red Team was here... T1546.004\\\" >> /home/art/art.txt' >> /home/art/.bash_logout; exit\"'",
+            "DeviceProcessEvents"
+        ]
+    ]
+}

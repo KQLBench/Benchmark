@@ -1,0 +1,38 @@
+{
+    "technique_id": "T1112",
+    "question_id": "d88a3d3b-d016-4939-a745-03638aafd21b",
+    "context": "On a Windows host, a registry modification occurred under the CurrentUser Internet Settings to configure a system proxy. This behavior aligns with tactics seen in certain malware installers tampering with proxy configurations.",
+    "objective": "Determine the exact proxy server address that was written into the registry.",
+    "technical_details": {
+        "command_analysis": "The attacker used a command prompt utility to add a REG_SZ value named ProxyServer under HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings, specifying the proxy endpoint.",
+        "detection_approach": "Search registry event logs for value creations or modifications where RegistryKey matches the Internet Settings path and RegistryValueName equals ProxyServer, then inspect the RegistryValueData for the configured server address."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Phrase the question to prompt extraction of the proxy address string from the registry value data; expect the answer to exactly match that data.",
+    "prompt": "Investigate Windows registry events to identify any newly set ProxyServer entry under the user Internet Settings hive. What proxy server address was configured?",
+    "answer": [
+        "proxy.atomic-test.com:8080"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "let proxyRegPath = @\"Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\";\nlet regEvents = DeviceRegistryEvents\n| where RegistryKey has proxyRegPath\n  and RegistryValueName == \"ProxyServer\"\n  and isnotempty(RegistryValueData);\nlet devEvents = DeviceEvents\n| where RegistryKey has proxyRegPath\n  and RegistryValueName == \"ProxyServer\"\n  and isnotempty(RegistryValueData);\nregEvents\n| union devEvents\n| project TimeGenerated, DeviceName, InitiatingProcessFileName, InitiatingProcessCommandLine, RegistryKey, RegistryValueName, RegistryValueData\n| sort by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: The expected answer sought is 'proxy.atomic-test.com:8080', which is a proxy server address. The query results show a record with 'RegistryValueData' field explicitly set to 'proxy.atomic-test.com:8080'. This, combined with other supporting fields like 'RegistryValueName' being 'ProxyServer' and process information, provides sufficient evidence to detect the activity described in the expected answers.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessFileName",
+            "InitiatingProcessCommandLine",
+            "RegistryKey",
+            "RegistryValueName",
+            "RegistryValueData"
+        ],
+        [
+            "2025-05-07 16:42:46.320650+00:00",
+            "windows-vm",
+            "reg.exe",
+            "reg  add \"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\" /v ProxyServer /t REG_SZ /d \"proxy.atomic-test.com:8080\" /f",
+            "HKEY_CURRENT_USER\\S-1-5-21-4034913605-1276698442-3985778739-500\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings",
+            "ProxyServer",
+            "proxy.atomic-test.com:8080"
+        ]
+    ]
+}

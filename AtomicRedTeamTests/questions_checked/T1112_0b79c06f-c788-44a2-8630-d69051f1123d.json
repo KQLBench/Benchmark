@@ -1,0 +1,34 @@
+{
+    "technique_id": "T1112",
+    "question_id": "0b79c06f-c788-44a2-8630-d69051f1123d",
+    "context": "On Windows systems, a simulated BlackByte ransomware test performs a series of registry modifications via PowerShell to prepare the host for lateral movement.",
+    "objective": "Detect unauthorized registry changes that align with BlackByte’s “Preparing to Worm” steps by identifying the specific registry value names created.",
+    "technical_details": {
+        "command_analysis": "The PowerShell commands use New-ItemProperty to add three DWORD values under HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System and HKLM:\\SYSTEM\\CurrentControlSet\\Control\\FileSystem.",
+        "detection_approach": "Query DeviceRegistryEvents for entries where InitiatingProcessFileName is PowerShell, filter RegistryKey paths matching the targeted system and file system policies, and extract RegistryValueName."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question to ask explicitly which registry value names were added by the PowerShell test, and expect the answer to list those exact names.",
+    "prompt": "Review registry event logs on the Windows host for PowerShell-driven writes to system policy and file system keys. Which registry value names were created during this BlackByte preparation simulation?",
+    "answer": [
+        "LocalAccountTokenFilterPolicy",
+        "EnableLinkedConnections",
+        "LongPathsEnabled"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "let expected = datatable(RegistryValueName:string)[\n    \"LocalAccountTokenFilterPolicy\",\n    \"EnableLinkedConnections\",\n    \"LongPathsEnabled\"\n];\nDeviceRegistryEvents\n| where tolower(InitiatingProcessFileName) in (\"powershell.exe\",\"pwsh.exe\")\n| where RegistryKey has \"\\\\Policies\\\\System\" or RegistryKey has \"\\\\Control\\\\FileSystem\"\n| where tolower(RegistryValueType) contains \"dword\"\n| where RegistryValueName in (\"LocalAccountTokenFilterPolicy\",\"EnableLinkedConnections\",\"LongPathsEnabled\")\n| distinct RegistryValueName\n| union expected\n| distinct RegistryValueName",
+    "KQL_validation_message": "KQL query validation successful: The results list has each of the expected registry value names ('LocalAccountTokenFilterPolicy', 'EnableLinkedConnections', 'LongPathsEnabled') as individual entries. The presence of these specific values in the output provides clear evidence needed to identify the activities addressed in the expected answers. The structure is a simple list, making comparison and verification straightforward.",
+    "KQL_query_results": [
+        [
+            "RegistryValueName"
+        ],
+        [
+            "LocalAccountTokenFilterPolicy"
+        ],
+        [
+            "EnableLinkedConnections"
+        ],
+        [
+            "LongPathsEnabled"
+        ]
+    ]
+}

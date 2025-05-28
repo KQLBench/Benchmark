@@ -1,0 +1,29 @@
+{
+    "technique_id": "T1547.014",
+    "question_id": "deff4586-0517-49c2-981d-bbea24d48d71",
+    "context": "An adversary is simulating persistence on a Windows host by creating an Active Setup entry under HKLM:\\SOFTWARE\\Microsoft\\Active Setup\\Installed Components and immediately invoking runonce.exe to force a payload. This behavior generates registry events that Windows Defender for Endpoint captures in the DeviceRegistryEvents table.",
+    "objective": "Detect when a new Active Setup component is registered and identify the specific registry key name used by the attacker.",
+    "technical_details": {
+        "command_analysis": "A PowerShell command sequence creates a registry key named “atomic_test” under the Active Setup Installed Components path, sets default and StubPath values to point at calc.exe, then runs runonce.exe /AlternateShellStartup to apply it immediately.",
+        "detection_approach": "Query DeviceRegistryEvents for registry operations where RegistryKey contains 'Active Setup\\Installed Components' and RegistryValueName matches either '(Default)' or 'StubPath', then inspect the RegistryKey or RegistryValueData to extract the new component name."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Phrase the question around identifying the persistence mechanism via Active Setup and ask specifically which component name was registered. The answer is the one-word registry key name.",
+    "prompt": "Windows registry events show that a new key under the Active Setup Installed Components branch was added to launch a payload immediately via runonce.exe. Which component name was created?",
+    "answer": [
+        "atomic_test"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceRegistryEvents\n| where TimeGenerated >= ago(1d)\n| where RegistryKey has \"SOFTWARE\\\\Microsoft\\\\Active Setup\\\\Installed Components\"\n| where RegistryValueName in (\"(Default)\", \"StubPath\")\n| extend ComponentName = extract(@\"Installed Components\\\\([^\\\\]+)$\", 1, RegistryKey)\n| where isnotempty(ComponentName)\n| summarize by ComponentName",
+    "KQL_validation_message": "KQL query validation successful: The query returned three rows: one is a column header ('ComponentName'), the second is an unrelated value ('{C9E9A340-D1F1-11D0-821E-444553540600}'), and the third is the exact expected answer 'atomic_test'. This means the query is effective and the results can be directly used to confirm or detect the activity described in the expected answers.",
+    "KQL_query_results": [
+        [
+            "ComponentName"
+        ],
+        [
+            "{C9E9A340-D1F1-11D0-821E-444553540600}"
+        ],
+        [
+            "atomic_test"
+        ]
+    ]
+}

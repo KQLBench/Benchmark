@@ -1,0 +1,38 @@
+{
+    "technique_id": "T1555",
+    "question_id": "afe369c2-b42e-447f-98a3-fb1f4e2b8552",
+    "context": "In a Windows environment, a PowerShell session downloads and executes an external script intended to extract stored Wi-Fi credentials.",
+    "objective": "Identify the name of the downloaded script file used in this activity.",
+    "technical_details": {
+        "command_analysis": "The attacker runs PowerShell with IEX and Net.WebClient to download a .ps1 module, then invokes a function to dump Wi-Fi credentials non-interactively.",
+        "detection_approach": "Query process execution events (e.g., DeviceProcessEvents) for PowerShell commands containing ‘DownloadString’ and subsequent ‘wificreds’ invocation; extract the script filename from the command line."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Phrase the question to lead the analyst to search process events for PowerShell download and execution activity, then pull out the script file name exactly as seen in the log.",
+    "prompt": "On a Windows host, an external PowerShell script is fetched and run to harvest local Wi-Fi credentials. Investigate the process execution logs to find out what script file name was downloaded and invoked.",
+    "answer": [
+        "WinPwn.ps1"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where FileName in (\"powershell.exe\", \"pwsh.exe\")\n    and tolower(ProcessCommandLine) contains \"downloadstring\"\n    and tolower(ProcessCommandLine) contains \".ps1\"\n| extend ScriptName = extract(@\"(?i)([\\w\\.-]+\\.ps1)\", 1, ProcessCommandLine)\n| where isnotempty(ScriptName)\n| summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Invocations = count() by ScriptName\n| sort by FirstSeen desc",
+    "KQL_validation_message": "KQL query validation successful: The expected answer is 'WinPwn.ps1', and the query results include a row where 'ScriptName' is 'WinPwn.ps1', along with the relevant data (FirstSeen, LastSeen, Invocations). This allows for detection and investigation relating to activity involving 'WinPwn.ps1', so the results provide the needed information to answer the detection question.",
+    "KQL_query_results": [
+        [
+            "ScriptName",
+            "FirstSeen",
+            "LastSeen",
+            "Invocations"
+        ],
+        [
+            "Invoke-Seatbelt.ps1",
+            "2025-05-07 16:55:58.422367+00:00",
+            "2025-05-07 16:55:58.422367+00:00",
+            1
+        ],
+        [
+            "WinPwn.ps1",
+            "2025-05-07 16:23:05.768042+00:00",
+            "2025-05-07 17:09:15.750449+00:00",
+            9
+        ]
+    ]
+}

@@ -1,0 +1,128 @@
+{
+    "technique_id": "T1490",
+    "question_id": "cf21060a-80b3-4238-a595-22525de4ab81",
+    "context": "On Windows hosts, attackers may disable the Windows Recovery Console at boot to prevent system repair and hinder incident response. Recent telemetry suggests the built-in BCDEdit utility was used to alter boot recovery settings.",
+    "objective": "Locate and identify the exact command line invocation that disabled the recovery console option.",
+    "technical_details": {
+        "command_analysis": "The attacker used bcdedit.exe with the \"/set {default} recoveryenabled no\" parameter to turn off recovery. This appears as a second invocation following an initial bootstatuspolicy modification.",
+        "detection_approach": "Query DeviceProcessEvents (or DeviceRegistryEvents if available) for InitiatingProcessFileName equals \"bcdedit.exe\" and inspect the ProcessCommandLine (or InitiatingProcessCommandLine) field to extract each /set operation."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question to direct the analyst to retrieve the second BCDEdit command that disabled recovery; the expected answer is the exact full command string.",
+    "prompt": "While investigating a Windows endpoint where boot repair options have unexpectedly been turned off, search your logs for BCDEdit modifying recovery settings. What was the command executed to disable the recovery console?",
+    "answer": [
+        "bcdedit.exe /set {default} recoveryenabled no"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "union(\n  DeviceProcessEvents\n  | where TimeGenerated >= ago(30d)\n  | where tolower(FileName) == \"bcdedit.exe\"\n        and ProcessCommandLine has \"/set\"\n        and ProcessCommandLine has \"{default}\"\n        and ProcessCommandLine has \"recoveryenabled no\"\n  | extend CommandLine = ProcessCommandLine\n  | project TimeGenerated, DeviceName, DeviceId, CommandLine\n),(\n  DeviceRegistryEvents\n  | where TimeGenerated >= ago(30d)\n  | where tolower(InitiatingProcessFileName) == \"bcdedit.exe\"\n        and InitiatingProcessCommandLine has \"/set\"\n        and InitiatingProcessCommandLine has \"{default}\"\n        and InitiatingProcessCommandLine has \"recoveryenabled no\"\n  | extend CommandLine = InitiatingProcessCommandLine\n  | project TimeGenerated, DeviceName, DeviceId, CommandLine\n)\n| sort by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: The CommandLine column in the results contains repeated exact matches for the expected command. The context, including timestamps and identical device information, supports identifying the described activity. Thus, the results definitively provide the necessary evidence for the detection question, with a clear 1:1 correspondence.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "DeviceId",
+            "CommandLine"
+        ],
+        [
+            "2025-05-07 17:05:17.244725+00:00",
+            "windows-vm",
+            "51a5c6755c43d60b18a177bfa334701b37f9171e",
+            "bcdedit.exe  /set {default} recoveryenabled no"
+        ],
+        [
+            "2025-05-07 17:05:17.243689+00:00",
+            "windows-vm",
+            "51a5c6755c43d60b18a177bfa334701b37f9171e",
+            "bcdedit.exe  /set {default} recoveryenabled no"
+        ],
+        [
+            "2025-05-07 17:05:17.242885+00:00",
+            "windows-vm",
+            "51a5c6755c43d60b18a177bfa334701b37f9171e",
+            "bcdedit.exe  /set {default} recoveryenabled no"
+        ],
+        [
+            "2025-05-07 17:05:17.242262+00:00",
+            "windows-vm",
+            "51a5c6755c43d60b18a177bfa334701b37f9171e",
+            "bcdedit.exe  /set {default} recoveryenabled no"
+        ],
+        [
+            "2025-05-07 17:05:17.242118+00:00",
+            "windows-vm",
+            "51a5c6755c43d60b18a177bfa334701b37f9171e",
+            "bcdedit.exe  /set {default} recoveryenabled no"
+        ],
+        [
+            "2025-05-07 17:05:17.242067+00:00",
+            "windows-vm",
+            "51a5c6755c43d60b18a177bfa334701b37f9171e",
+            "bcdedit.exe  /set {default} recoveryenabled no"
+        ],
+        [
+            "2025-05-07 17:05:17.241968+00:00",
+            "windows-vm",
+            "51a5c6755c43d60b18a177bfa334701b37f9171e",
+            "bcdedit.exe  /set {default} recoveryenabled no"
+        ],
+        [
+            "2025-05-07 17:05:17.241936+00:00",
+            "windows-vm",
+            "51a5c6755c43d60b18a177bfa334701b37f9171e",
+            "bcdedit.exe  /set {default} recoveryenabled no"
+        ],
+        [
+            "2025-05-07 17:05:17.241907+00:00",
+            "windows-vm",
+            "51a5c6755c43d60b18a177bfa334701b37f9171e",
+            "bcdedit.exe  /set {default} recoveryenabled no"
+        ],
+        [
+            "2025-05-07 17:05:17.241844+00:00",
+            "windows-vm",
+            "51a5c6755c43d60b18a177bfa334701b37f9171e",
+            "bcdedit.exe  /set {default} recoveryenabled no"
+        ],
+        [
+            "2025-05-07 17:05:17.241751+00:00",
+            "windows-vm",
+            "51a5c6755c43d60b18a177bfa334701b37f9171e",
+            "bcdedit.exe  /set {default} recoveryenabled no"
+        ],
+        [
+            "2025-05-07 17:05:17.239618+00:00",
+            "windows-vm",
+            "51a5c6755c43d60b18a177bfa334701b37f9171e",
+            "bcdedit.exe  /set {default} recoveryenabled no"
+        ],
+        [
+            "2025-05-07 17:05:17.239277+00:00",
+            "windows-vm",
+            "51a5c6755c43d60b18a177bfa334701b37f9171e",
+            "bcdedit.exe  /set {default} recoveryenabled no"
+        ],
+        [
+            "2025-05-07 17:05:17.237628+00:00",
+            "windows-vm",
+            "51a5c6755c43d60b18a177bfa334701b37f9171e",
+            "bcdedit.exe  /set {default} recoveryenabled no"
+        ],
+        [
+            "2025-05-07 17:05:17.237299+00:00",
+            "windows-vm",
+            "51a5c6755c43d60b18a177bfa334701b37f9171e",
+            "bcdedit.exe  /set {default} recoveryenabled no"
+        ],
+        [
+            "2025-05-07 17:05:17.235250+00:00",
+            "windows-vm",
+            "51a5c6755c43d60b18a177bfa334701b37f9171e",
+            "bcdedit.exe  /set {default} recoveryenabled no"
+        ],
+        [
+            "2025-05-07 17:05:17.232367+00:00",
+            "windows-vm",
+            "51a5c6755c43d60b18a177bfa334701b37f9171e",
+            "bcdedit.exe  /set {default} recoveryenabled no"
+        ]
+    ]
+}

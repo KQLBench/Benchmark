@@ -1,0 +1,92 @@
+{
+    "technique_id": "T1548.001",
+    "question_id": "3fb46e17-f337-4c14-9f9a-a471946533e2",
+    "context": "On a Linux host, process execution logs reveal activity consistent with an attacker enumerating privileged files.",
+    "objective": "Identify the exact command used to list files with the setgid bit set.",
+    "technical_details": {
+        "command_analysis": "The suspicious command uses the 'find' utility to scan '/usr/bin' and filter by the setgid permission bit '-perm -2000'.",
+        "detection_approach": "Query DeviceProcessEvents or Syslog for entries where the command line contains both 'find' and '-perm -2000'. Review Linux shell executions for this pattern."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question to ask for the full 'find' command that was issued to locate setgid files, and expect the verbatim command string as the answer.",
+    "prompt": "A Linux system shows a shell invocation that appears to be searching for files with elevated group permissions. Using the available process execution logs, determine exactly what command was run.",
+    "answer": [
+        "find /usr/bin -perm -2000"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "let dpe = DeviceProcessEvents\n| where ProcessCommandLine contains \"find\" and ProcessCommandLine contains \"/usr/bin\" and ProcessCommandLine contains \"-perm -2000\"\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, ProcessCommandLine;\nlet sys = Syslog\n| where SyslogMessage contains \"find\" and SyslogMessage contains \"/usr/bin\" and SyslogMessage contains \"-perm -2000\"\n| project TimeGenerated, DeviceName = HostName, InitiatingProcessAccountName = \"\", ProcessCommandLine = SyslogMessage;\ndpe\n| union sys\n| sort by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: The process command lines from the query results include an entry with 'find /usr/bin -perm -2000', which matches the expected answer. Additionally, related variations (such as 'sh -c \"find /usr/bin -perm -2000\"') are also present, further demonstrating that the query is capturing the relevant activity. The structure contains fields necessary to attribute the activity, including time, device, user, and command line. Therefore, these results provide sufficient evidence.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 17:16:39.232983+00:00",
+            "wirpo-test",
+            "root",
+            "find /usr/bin -perm -2000"
+        ],
+        [
+            "2025-05-07 17:16:39.232659+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c \"find /usr/bin -perm -2000\""
+        ],
+        [
+            "2025-05-07 17:16:39.230966+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c \"find /usr/bin -perm -2000\""
+        ],
+        [
+            "2025-05-07 17:03:00.149665+00:00",
+            "wirpo-test",
+            "root",
+            "find /usr/bin/crontab /usr/bin/ssh-agent /usr/bin/expiry /usr/bin/chage /usr/sbin/unix_chkpwd /usr/sbin/pam_extrausers_chkpwd /usr/lib/x86_64-linux-gnu/utempter/utempter -perm -2000 -type f -exec ls -la {} ;"
+        ],
+        [
+            "2025-05-07 17:03:00.145858+00:00",
+            "wirpo-test",
+            "root",
+            "find /usr/bin/crontab /usr/bin/ssh-agent /usr/bin/expiry /usr/bin/chage /usr/sbin/unix_chkpwd /usr/sbin/pam_extrausers_chkpwd /usr/lib/x86_64-linux-gnu/utempter/utempter -perm -2000 -type f -exec ls -la {} ;"
+        ],
+        [
+            "2025-05-07 17:03:00.142248+00:00",
+            "wirpo-test",
+            "root",
+            "find /usr/bin/crontab /usr/bin/ssh-agent /usr/bin/expiry /usr/bin/chage /usr/sbin/unix_chkpwd /usr/sbin/pam_extrausers_chkpwd /usr/lib/x86_64-linux-gnu/utempter/utempter -perm -2000 -type f -exec ls -la {} ;"
+        ],
+        [
+            "2025-05-07 17:03:00.137351+00:00",
+            "wirpo-test",
+            "root",
+            "find /usr/bin/crontab /usr/bin/ssh-agent /usr/bin/expiry /usr/bin/chage /usr/sbin/unix_chkpwd /usr/sbin/pam_extrausers_chkpwd /usr/lib/x86_64-linux-gnu/utempter/utempter -perm -2000 -type f -exec ls -la {} ;"
+        ],
+        [
+            "2025-05-07 17:03:00.135440+00:00",
+            "wirpo-test",
+            "root",
+            "find /usr/bin/crontab /usr/bin/ssh-agent /usr/bin/expiry /usr/bin/chage /usr/sbin/unix_chkpwd /usr/sbin/pam_extrausers_chkpwd /usr/lib/x86_64-linux-gnu/utempter/utempter -perm -2000 -type f -exec ls -la {} ;"
+        ],
+        [
+            "2025-05-07 17:03:00.131513+00:00",
+            "wirpo-test",
+            "root",
+            "find /usr/bin/crontab /usr/bin/ssh-agent /usr/bin/expiry /usr/bin/chage /usr/sbin/unix_chkpwd /usr/sbin/pam_extrausers_chkpwd /usr/lib/x86_64-linux-gnu/utempter/utempter -perm -2000 -type f -exec ls -la {} ;"
+        ],
+        [
+            "2025-05-07 17:03:00.127405+00:00",
+            "wirpo-test",
+            "root",
+            "find /usr/bin/crontab /usr/bin/ssh-agent /usr/bin/expiry /usr/bin/chage /usr/sbin/unix_chkpwd /usr/sbin/pam_extrausers_chkpwd /usr/lib/x86_64-linux-gnu/utempter/utempter -perm -2000 -type f -exec ls -la {} ;"
+        ],
+        [
+            "2025-05-07 17:03:00.123860+00:00",
+            "wirpo-test",
+            "root",
+            "find /usr/bin/crontab /usr/bin/ssh-agent /usr/bin/expiry /usr/bin/chage /usr/sbin/unix_chkpwd /usr/sbin/pam_extrausers_chkpwd /usr/lib/x86_64-linux-gnu/utempter/utempter -perm -2000 -type f -exec ls -la {} ;"
+        ]
+    ]
+}

@@ -1,0 +1,47 @@
+{
+    "technique_id": "T1548.002",
+    "question_id": "251c5936-569f-42f4-9ac2-87a173b9e9b8",
+    "context": "Threat actors frequently disable Windows User Account Control (UAC) to suppress elevation prompts. Malware families such as MedusaLocker, Purple Fox, and Avaddon have been observed modifying the ConsentPromptBehaviorAdmin registry value to achieve this.",
+    "objective": "Detect when the UAC admin consent prompt setting is disabled by a registry write and determine the value applied.",
+    "technical_details": {
+        "command_analysis": "A PowerShell sequence queried the existing ConsentPromptBehaviorAdmin value and then applied a new DWORD value of 0 via Set-ItemProperty.",
+        "detection_approach": "Inspect DeviceRegistryEvents for RegistryKey and RegistryValueName matching the UAC policy path and key, and examine RegistryValueData for changes indicating prompt suppression."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Identify registry write events for the ConsentPromptBehaviorAdmin key and extract the new value to confirm suppression.",
+    "prompt": "On a Windows host, sift through registry modification events targeting HKLM\\\\SOFTWARE\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Policies\\\\System\\\\ConsentPromptBehaviorAdmin. What new value was written to disable the admin consent prompt?",
+    "answer": [
+        "0"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceRegistryEvents\n| where RegistryKey has \"SOFTWARE\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Policies\\\\System\"\n    and RegistryValueName == \"ConsentPromptBehaviorAdmin\"\n    and RegistryValueData == \"0\"\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, InitiatingProcessFileName, InitiatingProcessCommandLine, RegistryKey, RegistryValueData\n| order by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: The expected answer is ['0'], suggesting that we want to detect events where the registry value data is 0. The query results include two rows (besides the header) with detailed registry modification activities, and both have the RegistryValueData set to '0'. This matches exactly what is needed for the detection, providing sufficient evidence to answer the detection question.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "InitiatingProcessFileName",
+            "InitiatingProcessCommandLine",
+            "RegistryKey",
+            "RegistryValueData"
+        ],
+        [
+            "2025-05-07 16:36:59.065007+00:00",
+            "windows-vm",
+            "wipro",
+            "powershell.exe",
+            "\"powershell.exe\" & {$orgValue =(Get-ItemProperty HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System -Name ConsentPromptBehaviorAdmin).ConsentPromptBehaviorAdmin\nSet-ItemProperty HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System -Name ConsentPromptBehaviorAdmin -Value 0 -Type Dword -Force}",
+            "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+            "0"
+        ],
+        [
+            "2025-05-07 16:26:18.288554+00:00",
+            "windows-vm",
+            "wipro",
+            "powershell.exe",
+            "\"powershell.exe\" & {$orgValue =(Get-ItemProperty HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System -Name ConsentPromptBehaviorAdmin).ConsentPromptBehaviorAdmin\nSet-ItemProperty HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System -Name ConsentPromptBehaviorAdmin -Value 0 -Type Dword -Force}",
+            "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+            "0"
+        ]
+    ]
+}

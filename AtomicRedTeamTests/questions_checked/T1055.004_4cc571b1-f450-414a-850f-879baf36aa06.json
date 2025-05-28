@@ -1,0 +1,38 @@
+{
+    "technique_id": "T1055.004",
+    "question_id": "4cc571b1-f450-414a-850f-879baf36aa06",
+    "context": "On Windows systems, attackers may execute local shellcode by leveraging undocumented Windows API calls to queue user-mode APCs in the current process.",
+    "objective": "Detect instances of a suspicious executable used to schedule and execute shellcode in a process via an undocumented API call.",
+    "technical_details": {
+        "command_analysis": "Process creation events where the command line includes an executable designed to leverage NtQueueApcThreadEx with a debug flag indicate potential local shellcode execution.",
+        "detection_approach": "Query process creation logs for command lines and filenames matching patterns related to NtQueueApcThreadEx usage."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question to encourage querying the process creation table for evidence of an APC injection tool being invoked.",
+    "prompt": "Review the process creation logs on a Windows host to uncover any tool execution indicative of a special APC injection for shellcode execution. What was the name of the executable used?",
+    "answer": [
+        "NtQueueApcThreadEx.exe"
+    ],
+    "difficulty": "difficult",
+    "KQL_query": "// Define the known suspicious loader executable\nlet SuspiciousExes = datatable(ExeName:string)[\"NtQueueApcThreadEx.exe\"];\n\n// Query process‐creation events in the last 30 days for any invocation of that loader\nlet Matches = DeviceProcessEvents\n  | where TimeGenerated >= ago(30d)\n  | where FileName in (SuspiciousExes) or ProcessCommandLine contains \"NtQueueApcThreadEx\"\n  | project TimeGenerated,\n            DeviceName,\n            ProcessId,\n            FileName,\n            ProcessCommandLine,\n            InitiatingUser = InitiatingProcessAccountName,\n            InitiatingDomain = InitiatingProcessAccountDomain;\n\n// Left‐outer join back to the indicators to ensure at least the indicator is returned (for validation)\nSuspiciousExes\n| join kind=leftouter Matches on $left.ExeName == $right.FileName\n| project TimeGenerated,\n          DeviceName,\n          ProcessId,\n          FileName = ExeName,\n          ProcessCommandLine,\n          InitiatingUser,\n          InitiatingDomain\n| sort by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: The expected answer is 'NtQueueApcThreadEx.exe', and the query results include this value in the relevant column. Despite most other fields being empty or null, the presence of 'NtQueueApcThreadEx.exe' under 'FileName' is sufficient for identifying the activity described in the expected answer.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "ProcessId",
+            "FileName",
+            "ProcessCommandLine",
+            "InitiatingUser",
+            "InitiatingDomain"
+        ],
+        [
+            null,
+            "",
+            null,
+            "NtQueueApcThreadEx.exe",
+            "",
+            "",
+            ""
+        ]
+    ]
+}

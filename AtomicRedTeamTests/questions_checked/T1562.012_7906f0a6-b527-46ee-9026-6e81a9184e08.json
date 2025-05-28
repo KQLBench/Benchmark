@@ -1,0 +1,38 @@
+{
+    "technique_id": "T1562.012",
+    "question_id": "7906f0a6-b527-46ee-9026-6e81a9184e08",
+    "context": "An attacker on a Linux system may attempt to silence all auditing by running a system tool that controls the audit daemon. This action should be captured in process execution logs or syslog records.",
+    "objective": "Identify when the audit subsystem was disabled and determine the exact command used to stop auditing.",
+    "technical_details": {
+        "command_analysis": "The adversary invokes the audit control utility with an argument that sets auditing to off.",
+        "detection_approach": "Search process execution or syslog events for the audit control command being run with parameters that disable the audit system."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Focus on how to ask for the exact command line that stopped the audit service, and ensure the answer matches what was observed in the logs.",
+    "prompt": "On a Linux host, auditing has been turned off. Review process execution or syslog data to determine which command was executed to disable the audit subsystem.",
+    "answer": [
+        "auditctl -e 0"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "(DeviceProcessEvents\n | where FileName == \"auditctl\" and ProcessCommandLine contains \"-e 0\"\n | project TimeGenerated, DeviceName, Account = InitiatingProcessAccountName, CommandLine = ProcessCommandLine\n)\n| union (\n    Syslog\n    | where ProcessName == \"auditctl\" and SyslogMessage contains \"-e 0\"\n    | project TimeGenerated, DeviceName = HostName, Account = \"\", CommandLine = SyslogMessage\n)\n| sort by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: The results include rows where the 'CommandLine' field is 'auditctl -e 0', which matches the expected answer. Additionally, relevant metadata such as timestamp, device name, and account are present. This provides comprehensive evidence to detect the specific activity described by the expected answer.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "Account",
+            "CommandLine"
+        ],
+        [
+            "2025-05-07 16:37:29.658147+00:00",
+            "wirpo-test",
+            "root",
+            "auditctl -e 0"
+        ],
+        [
+            "2025-05-07 16:26:49.128035+00:00",
+            "wirpo-test",
+            "root",
+            "auditctl -e 0"
+        ]
+    ]
+}

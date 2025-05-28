@@ -1,0 +1,83 @@
+{
+    "technique_id": "T1082",
+    "question_id": "034fe21c-3186-49dd-8d5d-128b35f181c7",
+    "context": "A Linux host has been used to enumerate loaded kernel modules via common utilities. The system’s process execution logs contain entries for these commands.",
+    "objective": "Detect when a user or script listed kernel modules and specifically filtered for modules containing the string “vmw” to identify virtualization-related drivers.",
+    "technical_details": {
+        "command_analysis": "The test ran three commands in sequence: one to list modules via lsmod, another via kmod list, and a third that grepped for “vmw” in /proc/modules.",
+        "detection_approach": "Search the Linux process execution or syslog tables for events where the shell executed commands matching module enumeration patterns, then isolate the specific grep invocation."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question to ask exactly which command was used to filter kernel modules for vmw entries, and expect the full command string as the answer.",
+    "prompt": "Using Linux process execution logs, identify the specific command that was used to filter loaded kernel modules for entries containing “vmw.” What was that full command?",
+    "answer": [
+        "grep vmw /proc/modules"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "let ModuleList = DeviceProcessEvents\n| where FileName in ('lsmod','kmod')\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, FileName, ProcessCommandLine;\nlet GrepVMW = DeviceProcessEvents\n| where FileName == 'grep'\n| where ProcessCommandLine has 'vmw' and ProcessCommandLine has '/proc/modules'\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, FileName, ProcessCommandLine;\nModuleList\n| union GrepVMW\n| sort by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: Among the query results, there is a row with 'ProcessCommandLine' equal to 'grep vmw /proc/modules'. This directly matches the expected answer, confirming that the dataset includes evidence of this activity. Since a 1:1 relationship between expected answer and result is sought, and that entry is present, the results contain the needed information to answer the detection question.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "FileName",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-08 06:55:30.056308+00:00",
+            "flurin-monitoring.xv2g1ire1j0ehkxrurr1ew43qg.xx.internal.cloudapp.net",
+            "root",
+            "kmod",
+            "depmod 6.11.0-1014-azure"
+        ],
+        [
+            "2025-05-08 06:55:29.362747+00:00",
+            "flurin-monitoring.xv2g1ire1j0ehkxrurr1ew43qg.xx.internal.cloudapp.net",
+            "root",
+            "kmod",
+            "depmod -a -F /boot/System.map-6.11.0-1014-azure 6.11.0-1014-azure"
+        ],
+        [
+            "2025-05-08 06:13:52.265729+00:00",
+            "wirpo-test.kwmmtajk0tqubd0oengdi0zqgf.gvxx.internal.cloudapp.net",
+            "root",
+            "kmod",
+            "depmod 6.11.0-1014-azure"
+        ],
+        [
+            "2025-05-07 16:56:14.827824+00:00",
+            "wirpo-test",
+            "root",
+            "kmod",
+            "lsmod"
+        ],
+        [
+            "2025-05-07 16:56:14.795846+00:00",
+            "wirpo-test",
+            "root",
+            "kmod",
+            "lsmod"
+        ],
+        [
+            "2025-05-07 16:56:06.426968+00:00",
+            "wirpo-test",
+            "root",
+            "grep",
+            "grep vmw /proc/modules"
+        ],
+        [
+            "2025-05-07 16:56:06.421232+00:00",
+            "wirpo-test",
+            "root",
+            "kmod",
+            "kmod list"
+        ],
+        [
+            "2025-05-07 16:56:06.409533+00:00",
+            "wirpo-test",
+            "root",
+            "kmod",
+            "lsmod"
+        ]
+    ]
+}

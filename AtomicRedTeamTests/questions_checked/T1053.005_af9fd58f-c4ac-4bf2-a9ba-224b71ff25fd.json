@@ -1,0 +1,41 @@
+{
+    "technique_id": "T1053.005",
+    "question_id": "af9fd58f-c4ac-4bf2-a9ba-224b71ff25fd",
+    "context": "An adversary uses native PowerShell cmdlets on Windows to register a scheduled task, avoiding the typical schtasks.exe utility.",
+    "objective": "Detect the creation of a scheduled task via PowerShell cmdlets and identify its name.",
+    "technical_details": {
+        "command_analysis": "Monitor PowerShell command lines for New-ScheduledTaskAction, New-ScheduledTaskTrigger, New-ScheduledTaskPrincipal, New-ScheduledTaskSettingsSet, New-ScheduledTask, and Register-ScheduledTask parameters.",
+        "detection_approach": "Search DeviceProcessEvents for powershell.exe process launches where the command line includes Register-ScheduledTask and extract the TaskName argument."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Ask which task name was specified when invoking PowerShell’s Register-ScheduledTask cmdlet, requiring examination of process command-line details.",
+    "prompt": "On a Windows host, find any scheduled task that was registered using PowerShell native cmdlets instead of schtasks.exe. What was the name given to the new task?",
+    "answer": [
+        "AtomicTask"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where TimeGenerated >= ago(1d)\n| where FileName in ('powershell.exe','PowerShell.exe')\n| where ProcessCommandLine contains 'Register-ScheduledTask'\n| extend TaskName = extract('(?i)-TaskName +([^ ]+)', 1, ProcessCommandLine)\n| where isnotempty(TaskName)\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, TaskName, ProcessCommandLine",
+    "KQL_validation_message": "KQL query validation successful: The expected answer specifies 'AtomicTask'. In the query results, the second data row (excluding the header) has 'TaskName' field value '\"AtomicTask\"', which matches the expected answer, indicating that the necessary information is present to identify the relevant activity.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "TaskName",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 17:12:06.921939+00:00",
+            "windows-vm",
+            "wipro",
+            "\\\"\"T1053_005_WMI\\\"\"",
+            "\"powershell.exe\" & {Unregister-ScheduledTask -TaskName \\\"\"T1053_005_WMI\\\"\" -confirm:$false >$null 2>&1}"
+        ],
+        [
+            "2025-05-07 17:12:22.029783+00:00",
+            "windows-vm",
+            "wipro",
+            "\\\"\"AtomicTask\\\"\"",
+            "\"powershell.exe\" & {Unregister-ScheduledTask -TaskName \\\"\"AtomicTask\\\"\" -confirm:$false >$null 2>&1}"
+        ]
+    ]
+}

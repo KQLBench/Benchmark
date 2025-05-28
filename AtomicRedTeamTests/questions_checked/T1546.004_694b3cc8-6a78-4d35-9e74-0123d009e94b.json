@@ -1,0 +1,74 @@
+{
+    "technique_id": "T1546.004",
+    "question_id": "694b3cc8-6a78-4d35-9e74-0123d009e94b",
+    "context": "On a Linux host, an adversary establishes persistence by modifying the system-wide shell startup file so that malicious code runs at each user login.",
+    "objective": "Determine the exact command used to append text to the system shell profile.",
+    "technical_details": {
+        "command_analysis": "A shell process invokes echo to append a configured string into /etc/profile.",
+        "detection_approach": "Search process execution or file modification logs for events where a command line includes redirection (>> ) to /etc/profile."
+    },
+    "thinking_how_to_phrase_question_and_answer": "We need to ask what command line was observed that performed the append action, ensuring the answer matches exactly what was run.",
+    "prompt": "On Linux systems, an attacker may gain persistence by appending instructions to the global shell profile. Investigate process or file modification events to find evidence of text being added to /etc/profile, and identify the exact command invocation that carried out this change.",
+    "answer": [
+        "echo '# Hello from Atomic Red Team T1546.004' >> /etc/profile"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "let linuxHosts = DeviceInfo\n| where OSPlatform contains \"Linux\"\n| distinct DeviceId;\n\nunion DeviceProcessEvents, DeviceFileEvents\n| where DeviceId in (linuxHosts)\n| where ProcessCommandLine has \">> /etc/profile\" or InitiatingProcessCommandLine has \">> /etc/profile\"\n| project TimeGenerated, DeviceName, ProcessCommandLine, InitiatingProcessCommandLine, FileName, FolderPath, ActionType\n| sort by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: In the query results, the 'ProcessCommandLine' and 'InitiatingProcessCommandLine' fields for the event at '2025-05-07 17:01:22.906290+00:00' and '2025-05-07 17:01:23.235069+00:00' include the command 'echo '# Hello from Atomic Red Team T1546.004' >> /etc/profile', as invoked by 'sh -c'. This directly corresponds to the expected answer. The relevant fields and an exact or near-exact match to the command are present, allowing identification of the described activity.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "ProcessCommandLine",
+            "InitiatingProcessCommandLine",
+            "FileName",
+            "FolderPath",
+            "ActionType"
+        ],
+        [
+            "2025-05-07 17:01:23.235069+00:00",
+            "wirpo-test",
+            "",
+            "sh -c \"echo '# Hello from Atomic Red Team T1546.004' >> /etc/profile\"",
+            "profile",
+            "/etc/profile",
+            "FileCreated"
+        ],
+        [
+            "2025-05-07 17:01:22.906290+00:00",
+            "wirpo-test",
+            "sh -c \"echo '# Hello from Atomic Red Team T1546.004' >> /etc/profile\"",
+            "",
+            "dash",
+            "/usr/bin/dash",
+            "ProcessCreated"
+        ],
+        [
+            "2025-05-07 17:01:15.791763+00:00",
+            "wirpo-test",
+            "",
+            "sh -c \"echo '# Atomic Red Team was here... T1546.004' >> /etc/profile.d/bash_completion.sh\"",
+            "bash_completion.sh",
+            "/etc/profile.d/bash_completion.sh",
+            "FileCreated"
+        ],
+        [
+            "2025-05-07 17:01:15.469391+00:00",
+            "wirpo-test",
+            "",
+            "sh -c \"echo '# Atomic Red Team was here... T1546.004' >> /etc/profile.d/bash_completion.sh\"",
+            "bash_completion.sh",
+            "/etc/profile.d/bash_completion.sh",
+            "FileCreated"
+        ],
+        [
+            "2025-05-07 17:01:15.459464+00:00",
+            "wirpo-test",
+            "sh -c \"echo '# Atomic Red Team was here... T1546.004' >> /etc/profile.d/bash_completion.sh\"",
+            "pwsh -Command \"Invoke-AtomicTest T1546.004 -TestGuids 8fe2ccfd-f079-4c03-b1a9-bd9b362b67d4  -TimeoutSeconds 120 \"",
+            "dash",
+            "/usr/bin/dash",
+            "ProcessCreated"
+        ]
+    ]
+}

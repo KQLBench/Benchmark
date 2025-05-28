@@ -1,0 +1,41 @@
+{
+    "technique_id": "T1518.001",
+    "question_id": "23b91cd2-c99c-4002-9e41-317c63e024a2",
+    "context": "An attacker on a Linux endpoint attempted to identify which security agents or monitoring daemons were present by scanning running processes.",
+    "objective": "Determine the exact name of the security software process that was discovered by this reconnaissance activity.",
+    "technical_details": {
+        "command_analysis": "The adversary invoked a shell process that executed “ps aux” piped into a regex filter for known security agent binaries.",
+        "detection_approach": "Review process execution logs (e.g., DeviceProcessEvents or Syslog) for invocations of ps or egrep containing any of the targeted agent names, then extract the matched process name."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Phrase the question to ask which specific agent name was found by the grep operation in the process records. The answer should be the exact process name string.",
+    "prompt": "On a Linux host, a command was run to list all processes and filter for common security or monitoring agents. Review the process logs and identify which agent name was actually observed.",
+    "answer": [
+        "auditbeat"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "// Detect shell-based reconnaissance for known Linux security agents or monitoring daemons\n// by looking for ps/pgrep pipelines or grep/egrep invocations that reference those agent names\nlet agentPattern = @\"(?i)\\b(auditbeat|falco|ossec|wazuh|sysmon|snort|suricata|zeek)\\b\";\nDeviceProcessEvents\n| where TimeGenerated >= ago(1d)\n// limit to shell interpreters or common filtering binaries\n| where FileName in~ (\"bash\",\"sh\",\"dash\",\"zsh\",\"grep\",\"egrep\",\"pgrep\")\n// require that the command line actually mentions one of our targets\n| where ProcessCommandLine matches regex agentPattern\n// extract exactly which agent name was queried\n| extend DiscoveredAgent = tolower(extract(agentPattern, 1, ProcessCommandLine))\n| where isnotempty(DiscoveredAgent)\n// summarize results\n| summarize\n    Occurrences = count(),\n    FirstSeen = min(TimeGenerated),\n    LastSeen = max(TimeGenerated),\n    Devices = make_set(DeviceName)\n  by DiscoveredAgent\n| order by Occurrences desc",
+    "KQL_validation_message": "KQL query validation successful: Within the returned dataset, \"auditbeat\" appears as a value in the 'DiscoveredAgent' column. This matches the expected answer and indicates that the evidence needed (the presence of 'auditbeat' as a discovered agent) is present in the query results. The tabular structure also provides context by including other relevant columns such as Occurrences, FirstSeen, LastSeen, and Devices, but the key answer ('auditbeat') is present as required.",
+    "KQL_query_results": [
+        [
+            "DiscoveredAgent",
+            "Occurrences",
+            "FirstSeen",
+            "LastSeen",
+            "Devices"
+        ],
+        [
+            "auditbeat",
+            5,
+            "2025-05-07 17:18:43.167695+00:00",
+            "2025-05-07 17:18:43.172784+00:00",
+            "[\"wirpo-test\"]"
+        ],
+        [
+            "wazuh",
+            3,
+            "2025-05-07 17:18:40.979307+00:00",
+            "2025-05-07 17:18:40.980070+00:00",
+            "[\"wirpo-test\"]"
+        ]
+    ]
+}

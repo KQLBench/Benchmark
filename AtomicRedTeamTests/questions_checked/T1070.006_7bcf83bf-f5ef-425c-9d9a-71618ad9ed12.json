@@ -1,0 +1,36 @@
+{
+    "technique_id": "T1070.006",
+    "question_id": "7bcf83bf-f5ef-425c-9d9a-71618ad9ed12",
+    "context": "On Windows systems, adversaries may manipulate the system clock to disrupt event log timelines, complicating forensic analysis. A PowerShell script was observed adjusting the system date and persisting the adjustment value.",
+    "objective": "Determine the exact value used to slip the system time via PowerShell.",
+    "technical_details": {
+        "command_analysis": "The PowerShell command leveraged Set-Date with an AddDays parameter and then logged the days_to_modify value into a file named slipDays.bak in the user’s AppData folder.",
+        "detection_approach": "Search the DeviceProcessEvents table for PowerShell executions containing both ‘Set-Date’ and ‘Add-Content’ referencing slipDays.bak, and extract the numeric argument passed to AddDays."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Consider how to filter process events for PowerShell time-slip activity and capture the parameter value indicating the number of days shifted.",
+    "prompt": "On a Windows host, suspicious PowerShell activity adjusted the system clock and recorded a value. What numeric value was used to slip the system date?",
+    "answer": [
+        "3"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where FileName == \"powershell.exe\"\n| where ProcessCommandLine has \"Set-Date\" and ProcessCommandLine has \"Add-Content\" and ProcessCommandLine has \"slipDays.bak\"\n| extend SlippedDays = toint(extract(@\"AddDays\\((-?\\d+)\\)\", 1, ProcessCommandLine))\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, ProcessId, SlippedDays, ProcessCommandLine\n| sort by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: The expected answer was ['3']. In the results table, under the column 'SlippedDays', the value is 3 in the first (and only) row. This matches the expected answer directly, confirming that the results contain the needed evidence to answer the detection question.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "ProcessId",
+            "SlippedDays",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 16:50:32.632162+00:00",
+            "windows-vm",
+            "wipro",
+            4552,
+            3,
+            "\"powershell.exe\" & {try{ \n  Set-Date -Date (Get-Date).AddDays(3)\n  Add-Content \\\"\"$env:APPDATA\\slipDays.bak\\\"\" 3\n}\ncatch {exit 1}}"
+        ]
+    ]
+}

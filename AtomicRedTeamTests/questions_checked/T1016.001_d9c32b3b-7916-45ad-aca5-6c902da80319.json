@@ -1,0 +1,55 @@
+{
+    "technique_id": "T1016.001",
+    "question_id": "d9c32b3b-7916-45ad-aca5-6c902da80319",
+    "context": "In a Windows environment, an analyst is investigating potential misuse of PowerShell to probe network connectivity on port 445.",
+    "objective": "Detect when a PowerShell cmdlet was used to test outbound SMB (TCP 445) connectivity.",
+    "technical_details": {
+        "command_analysis": "Review process execution logs for powershell.exe invocations containing connectivity test parameters.",
+        "detection_approach": "Query DeviceProcessEvents where ProcessCommandLine includes references to Test-NetConnection and the SMB port."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Phrase the question to ask specifically which PowerShell utility was executed, and expect the exact cmdlet name as the answer.",
+    "prompt": "An analyst notices a PowerShell process on a Windows host that appears to be checking SMB connectivity. Which PowerShell cmdlet was executed to perform this outbound port 445 test?",
+    "answer": [
+        "Test-NetConnection"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "union DeviceProcessEvents, DeviceEvents\n| where FileName in (\"powershell.exe\",\"pwsh.exe\",\"powershell_ise.exe\")\n| where ProcessCommandLine has \"Test-NetConnection\"\n| where (ProcessCommandLine has \"-Port\" and ProcessCommandLine has \"445\") or ProcessCommandLine has \"-CommonTCPPort\"\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, FileName, ProcessCommandLine",
+    "KQL_validation_message": "KQL query validation successful: The 'ProcessCommandLine' field in the results includes clear text usage of 'Test-NetConnection' within the invoked PowerShell commands. This directly matches the expected answer, showing evidence that the 'Test-NetConnection' command was executed. Therefore, these results provide the data necessary to answer the detection question about the use of 'Test-NetConnection'.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "FileName",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 16:23:25.595580+00:00",
+            "windows-vm",
+            "wipro",
+            "powershell.exe",
+            "\"powershell.exe\" & {Test-NetConnection -CommonTCPPort SMB -ComputerName 8.8.8.8}"
+        ],
+        [
+            "2025-05-07 16:24:24.963555+00:00",
+            "windows-vm",
+            "wipro",
+            "powershell.exe",
+            "\"powershell.exe\" & {Test-NetConnection -CommonTCPPort HTTP -ComputerName www.google.com}"
+        ],
+        [
+            "2025-05-07 16:34:06.658137+00:00",
+            "windows-vm",
+            "wipro",
+            "powershell.exe",
+            "\"powershell.exe\" & {Test-NetConnection -CommonTCPPort SMB -ComputerName 8.8.8.8}"
+        ],
+        [
+            "2025-05-07 16:35:06.870276+00:00",
+            "windows-vm",
+            "wipro",
+            "powershell.exe",
+            "\"powershell.exe\" & {Test-NetConnection -CommonTCPPort HTTP -ComputerName www.google.com}"
+        ]
+    ]
+}

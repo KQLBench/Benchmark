@@ -1,0 +1,330 @@
+{
+    "technique_id": "T1082",
+    "question_id": "31dad7ad-2286-4c02-ae92-274418c85fec",
+    "context": "On a Linux host, adversaries may enumerate virtualization environments by probing hardware details exposed through system interfaces and utilities.",
+    "objective": "Detect execution of tools commonly used to fingerprint virtual machines via hardware interrogation.",
+    "technical_details": {
+        "command_analysis": "The attacker runs commands to read DMI information or hardware identifiers (e.g., via dmidecode, lscpu, lspci, or sysfs files) to confirm VM presence.",
+        "detection_approach": "Search process creation logs for executions of known virtualization-detection utilities or reads from virtualization-specific system files."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question to prompt searching process events for hardware inspection utilities on Linux; the answer should be the specific tool name found in the logs.",
+    "prompt": "While investigating process creation logs on a Linux device, you observe a privileged hardware interrogation step used to reveal virtualization details. Which utility was invoked?",
+    "answer": [
+        "dmidecode"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "let linuxDevices = DeviceInfo\n| where OSPlatform == \"Linux\"\n| distinct DeviceId;\n\nlinuxDevices\n| join kind=inner (\n    DeviceProcessEvents\n    | where FileName in (\"dmidecode\",\"lscpu\",\"lspci\",\"virt-what\",\"systemd-detect-virt\")\n        or ProcessCommandLine contains \"/sys/class/dmi/id\"\n        or ProcessCommandLine contains \"/sys/devices/virtual/dmi/id\"\n) on DeviceId\n| project DetectionTime = ProcessCreationTime,\n          DeviceName,\n          ToolName = FileName,\n          CommandLine = ProcessCommandLine,\n          InitiatingProcessAccountDomain,\n          InitiatingProcessAccountName,\n          ProcessId,\n          DeviceId",
+    "KQL_validation_message": "KQL query validation successful: Within the query results, several rows have 'ToolName' with the value 'dmidecode' and command lines (like '/sbin/dmidecode -s system-family' and 'dmidecode') that show activity matching the expected answer. Therefore, these results do contain the required information to identify usage of 'dmidecode'.",
+    "KQL_query_results": [
+        [
+            "DetectionTime",
+            "DeviceName",
+            "ToolName",
+            "CommandLine",
+            "InitiatingProcessAccountDomain",
+            "InitiatingProcessAccountName",
+            "ProcessId",
+            "DeviceId"
+        ],
+        [
+            "2025-05-07 20:28:07.688101+00:00",
+            "flurin-monitoring.xv2g1ire1j0ehkxrurr1ew43qg.xx.internal.cloudapp.net",
+            "systemd-detect-virt",
+            "systemd-detect-virt --quiet --container",
+            "flurin-monitoring",
+            "root",
+            3361290,
+            "3060c91967030a8baebf261e7aea8087f1b00bb9"
+        ],
+        [
+            "2025-05-08 06:13:57.483636+00:00",
+            "wirpo-test.kwmmtajk0tqubd0oengdi0zqgf.gvxx.internal.cloudapp.net",
+            "systemd-detect-virt",
+            "systemd-detect-virt --quiet --container",
+            "wirpo-test",
+            "root",
+            63429,
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd"
+        ],
+        [
+            "2025-05-08 06:14:05.671262+00:00",
+            "wirpo-test.kwmmtajk0tqubd0oengdi0zqgf.gvxx.internal.cloudapp.net",
+            "systemd-detect-virt",
+            "/usr/bin/systemd-detect-virt --vm --quiet",
+            "wirpo-test",
+            "root",
+            64303,
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd"
+        ],
+        [
+            "2025-05-08 06:14:05.675306+00:00",
+            "wirpo-test.kwmmtajk0tqubd0oengdi0zqgf.gvxx.internal.cloudapp.net",
+            "systemd-detect-virt",
+            "/usr/bin/systemd-detect-virt --container --quiet",
+            "wirpo-test",
+            "root",
+            64304,
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd"
+        ],
+        [
+            "2025-05-08 07:22:37.193121+00:00",
+            "flurin-monitoring.xv2g1ire1j0ehkxrurr1ew43qg.xx.internal.cloudapp.net",
+            "systemd-detect-virt",
+            "systemd-detect-virt --quiet --container",
+            "flurin-monitoring",
+            "root",
+            3430370,
+            "3060c91967030a8baebf261e7aea8087f1b00bb9"
+        ],
+        [
+            "2025-05-08 09:28:14.876225+00:00",
+            "flurin-monitoring.xv2g1ire1j0ehkxrurr1ew43qg.xx.internal.cloudapp.net",
+            "dmidecode",
+            "/sbin/dmidecode -s system-family",
+            "flurin-monitoring",
+            "root",
+            3442944,
+            "3060c91967030a8baebf261e7aea8087f1b00bb9"
+        ],
+        [
+            "2025-05-07 16:17:48.796713+00:00",
+            "wirpo-test",
+            "systemd-detect-virt",
+            "systemd-detect-virt --quiet --container",
+            "wirpo-test",
+            "root",
+            3829,
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd"
+        ],
+        [
+            "2025-05-07 16:27:42.622201+00:00",
+            "wirpo-test",
+            "dmidecode",
+            "/sbin/dmidecode -s system-family",
+            "wirpo-test",
+            "root",
+            7980,
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd"
+        ],
+        [
+            "2025-05-07 16:56:59.039891+00:00",
+            "wirpo-test",
+            "bash",
+            "bash -c 'if [ -f /sys/class/dmi/id/bios_version ]; then cat /sys/class/dmi/id/bios_version | grep -i amazon; fi; if [ -f /sys/class/dmi/id/product_name ]; then cat /sys/class/dmi/id/product_name | grep -i \"Droplet\\\\|HVM\\\\|VirtualBox\\\\|VMware\"; fi; if [ -f /sys/class/dmi/id/chassis_vendor ]; then cat /sys/class/dmi/id/chassis_vendor | grep -i \"Xen\\\\|Bochs\\\\|QEMU\"; fi; if [ -x \"$(command -v dmidecode)\" ]; then sudo dmidecode | grep -i \"microsoft\\\\|vmware\\\\|virtualbox\\\\|quemu\\\\|domu\"; fi; if [ -f /proc/scsi/scsi ]; then cat /proc/scsi/scsi | grep -i \"vmware\\\\|vbox\"; fi; if [ -f /proc/ide/hd0/model ]; then cat /proc/ide/hd0/model | grep -i \"vmware\\\\|vbox\\\\|qemu\\\\|virtual\"; fi; if [ -x \"$(command -v lspci)\" ]; then sudo lspci | grep -i \"vmware\\\\|virtualbox\"; fi; if [ -x \"$(command -v lscpu)\" ]; then sudo lscpu | grep -i \"Xen\\\\|KVM\\\\|Microsoft\"; fi'",
+            "wirpo-test",
+            "root",
+            15098,
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd"
+        ],
+        [
+            "2025-05-07 16:56:59.040000+00:00",
+            "wirpo-test",
+            "bash",
+            "bash -c 'if [ -f /sys/class/dmi/id/bios_version ]; then cat /sys/class/dmi/id/bios_version | grep -i amazon; fi; if [ -f /sys/class/dmi/id/product_name ]; then cat /sys/class/dmi/id/product_name | grep -i \"Droplet\\\\|HVM\\\\|VirtualBox\\\\|VMware\"; fi; if [ -f /sys/class/dmi/id/chassis_vendor ]; then cat /sys/class/dmi/id/chassis_vendor | grep -i \"Xen\\\\|Bochs\\\\|QEMU\"; fi; if [ -x \"$(command -v dmidecode)\" ]; then sudo dmidecode | grep -i \"microsoft\\\\|vmware\\\\|virtualbox\\\\|quemu\\\\|domu\"; fi; if [ -f /proc/scsi/scsi ]; then cat /proc/scsi/scsi | grep -i \"vmware\\\\|vbox\"; fi; if [ -f /proc/ide/hd0/model ]; then cat /proc/ide/hd0/model | grep -i \"vmware\\\\|vbox\\\\|qemu\\\\|virtual\"; fi; if [ -x \"$(command -v lspci)\" ]; then sudo lspci | grep -i \"vmware\\\\|virtualbox\"; fi; if [ -x \"$(command -v lscpu)\" ]; then sudo lscpu | grep -i \"Xen\\\\|KVM\\\\|Microsoft\"; fi'",
+            "wirpo-test",
+            "root",
+            15100,
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd"
+        ],
+        [
+            "2025-05-07 16:56:59.040000+00:00",
+            "wirpo-test",
+            "bash",
+            "bash -c 'if [ -f /sys/class/dmi/id/bios_version ]; then cat /sys/class/dmi/id/bios_version | grep -i amazon; fi; if [ -f /sys/class/dmi/id/product_name ]; then cat /sys/class/dmi/id/product_name | grep -i \"Droplet\\\\|HVM\\\\|VirtualBox\\\\|VMware\"; fi; if [ -f /sys/class/dmi/id/chassis_vendor ]; then cat /sys/class/dmi/id/chassis_vendor | grep -i \"Xen\\\\|Bochs\\\\|QEMU\"; fi; if [ -x \"$(command -v dmidecode)\" ]; then sudo dmidecode | grep -i \"microsoft\\\\|vmware\\\\|virtualbox\\\\|quemu\\\\|domu\"; fi; if [ -f /proc/scsi/scsi ]; then cat /proc/scsi/scsi | grep -i \"vmware\\\\|vbox\"; fi; if [ -f /proc/ide/hd0/model ]; then cat /proc/ide/hd0/model | grep -i \"vmware\\\\|vbox\\\\|qemu\\\\|virtual\"; fi; if [ -x \"$(command -v lspci)\" ]; then sudo lspci | grep -i \"vmware\\\\|virtualbox\"; fi; if [ -x \"$(command -v lscpu)\" ]; then sudo lscpu | grep -i \"Xen\\\\|KVM\\\\|Microsoft\"; fi'",
+            "wirpo-test",
+            "root",
+            15101,
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd"
+        ],
+        [
+            "2025-05-07 16:56:59.046158+00:00",
+            "wirpo-test",
+            "cat",
+            "cat /sys/class/dmi/id/bios_version",
+            "wirpo-test",
+            "root",
+            15100,
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd"
+        ],
+        [
+            "2025-05-07 16:56:59.050000+00:00",
+            "wirpo-test",
+            "bash",
+            "bash -c 'if [ -f /sys/class/dmi/id/bios_version ]; then cat /sys/class/dmi/id/bios_version | grep -i amazon; fi; if [ -f /sys/class/dmi/id/product_name ]; then cat /sys/class/dmi/id/product_name | grep -i \"Droplet\\\\|HVM\\\\|VirtualBox\\\\|VMware\"; fi; if [ -f /sys/class/dmi/id/chassis_vendor ]; then cat /sys/class/dmi/id/chassis_vendor | grep -i \"Xen\\\\|Bochs\\\\|QEMU\"; fi; if [ -x \"$(command -v dmidecode)\" ]; then sudo dmidecode | grep -i \"microsoft\\\\|vmware\\\\|virtualbox\\\\|quemu\\\\|domu\"; fi; if [ -f /proc/scsi/scsi ]; then cat /proc/scsi/scsi | grep -i \"vmware\\\\|vbox\"; fi; if [ -f /proc/ide/hd0/model ]; then cat /proc/ide/hd0/model | grep -i \"vmware\\\\|vbox\\\\|qemu\\\\|virtual\"; fi; if [ -x \"$(command -v lspci)\" ]; then sudo lspci | grep -i \"vmware\\\\|virtualbox\"; fi; if [ -x \"$(command -v lscpu)\" ]; then sudo lscpu | grep -i \"Xen\\\\|KVM\\\\|Microsoft\"; fi'",
+            "wirpo-test",
+            "root",
+            15102,
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd"
+        ],
+        [
+            "2025-05-07 16:56:59.050000+00:00",
+            "wirpo-test",
+            "bash",
+            "bash -c 'if [ -f /sys/class/dmi/id/bios_version ]; then cat /sys/class/dmi/id/bios_version | grep -i amazon; fi; if [ -f /sys/class/dmi/id/product_name ]; then cat /sys/class/dmi/id/product_name | grep -i \"Droplet\\\\|HVM\\\\|VirtualBox\\\\|VMware\"; fi; if [ -f /sys/class/dmi/id/chassis_vendor ]; then cat /sys/class/dmi/id/chassis_vendor | grep -i \"Xen\\\\|Bochs\\\\|QEMU\"; fi; if [ -x \"$(command -v dmidecode)\" ]; then sudo dmidecode | grep -i \"microsoft\\\\|vmware\\\\|virtualbox\\\\|quemu\\\\|domu\"; fi; if [ -f /proc/scsi/scsi ]; then cat /proc/scsi/scsi | grep -i \"vmware\\\\|vbox\"; fi; if [ -f /proc/ide/hd0/model ]; then cat /proc/ide/hd0/model | grep -i \"vmware\\\\|vbox\\\\|qemu\\\\|virtual\"; fi; if [ -x \"$(command -v lspci)\" ]; then sudo lspci | grep -i \"vmware\\\\|virtualbox\"; fi; if [ -x \"$(command -v lscpu)\" ]; then sudo lscpu | grep -i \"Xen\\\\|KVM\\\\|Microsoft\"; fi'",
+            "wirpo-test",
+            "root",
+            15103,
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd"
+        ],
+        [
+            "2025-05-07 16:56:59.052019+00:00",
+            "wirpo-test",
+            "cat",
+            "cat /sys/class/dmi/id/product_name",
+            "wirpo-test",
+            "root",
+            15102,
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd"
+        ],
+        [
+            "2025-05-07 16:56:59.050000+00:00",
+            "wirpo-test",
+            "bash",
+            "bash -c 'if [ -f /sys/class/dmi/id/bios_version ]; then cat /sys/class/dmi/id/bios_version | grep -i amazon; fi; if [ -f /sys/class/dmi/id/product_name ]; then cat /sys/class/dmi/id/product_name | grep -i \"Droplet\\\\|HVM\\\\|VirtualBox\\\\|VMware\"; fi; if [ -f /sys/class/dmi/id/chassis_vendor ]; then cat /sys/class/dmi/id/chassis_vendor | grep -i \"Xen\\\\|Bochs\\\\|QEMU\"; fi; if [ -x \"$(command -v dmidecode)\" ]; then sudo dmidecode | grep -i \"microsoft\\\\|vmware\\\\|virtualbox\\\\|quemu\\\\|domu\"; fi; if [ -f /proc/scsi/scsi ]; then cat /proc/scsi/scsi | grep -i \"vmware\\\\|vbox\"; fi; if [ -f /proc/ide/hd0/model ]; then cat /proc/ide/hd0/model | grep -i \"vmware\\\\|vbox\\\\|qemu\\\\|virtual\"; fi; if [ -x \"$(command -v lspci)\" ]; then sudo lspci | grep -i \"vmware\\\\|virtualbox\"; fi; if [ -x \"$(command -v lscpu)\" ]; then sudo lscpu | grep -i \"Xen\\\\|KVM\\\\|Microsoft\"; fi'",
+            "wirpo-test",
+            "root",
+            15104,
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd"
+        ],
+        [
+            "2025-05-07 16:56:59.050000+00:00",
+            "wirpo-test",
+            "bash",
+            "bash -c 'if [ -f /sys/class/dmi/id/bios_version ]; then cat /sys/class/dmi/id/bios_version | grep -i amazon; fi; if [ -f /sys/class/dmi/id/product_name ]; then cat /sys/class/dmi/id/product_name | grep -i \"Droplet\\\\|HVM\\\\|VirtualBox\\\\|VMware\"; fi; if [ -f /sys/class/dmi/id/chassis_vendor ]; then cat /sys/class/dmi/id/chassis_vendor | grep -i \"Xen\\\\|Bochs\\\\|QEMU\"; fi; if [ -x \"$(command -v dmidecode)\" ]; then sudo dmidecode | grep -i \"microsoft\\\\|vmware\\\\|virtualbox\\\\|quemu\\\\|domu\"; fi; if [ -f /proc/scsi/scsi ]; then cat /proc/scsi/scsi | grep -i \"vmware\\\\|vbox\"; fi; if [ -f /proc/ide/hd0/model ]; then cat /proc/ide/hd0/model | grep -i \"vmware\\\\|vbox\\\\|qemu\\\\|virtual\"; fi; if [ -x \"$(command -v lspci)\" ]; then sudo lspci | grep -i \"vmware\\\\|virtualbox\"; fi; if [ -x \"$(command -v lscpu)\" ]; then sudo lscpu | grep -i \"Xen\\\\|KVM\\\\|Microsoft\"; fi'",
+            "wirpo-test",
+            "root",
+            15105,
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd"
+        ],
+        [
+            "2025-05-07 16:56:59.059267+00:00",
+            "wirpo-test",
+            "cat",
+            "cat /sys/class/dmi/id/chassis_vendor",
+            "wirpo-test",
+            "root",
+            15104,
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd"
+        ],
+        [
+            "2025-05-07 16:56:59.060000+00:00",
+            "wirpo-test",
+            "bash",
+            "bash -c 'if [ -f /sys/class/dmi/id/bios_version ]; then cat /sys/class/dmi/id/bios_version | grep -i amazon; fi; if [ -f /sys/class/dmi/id/product_name ]; then cat /sys/class/dmi/id/product_name | grep -i \"Droplet\\\\|HVM\\\\|VirtualBox\\\\|VMware\"; fi; if [ -f /sys/class/dmi/id/chassis_vendor ]; then cat /sys/class/dmi/id/chassis_vendor | grep -i \"Xen\\\\|Bochs\\\\|QEMU\"; fi; if [ -x \"$(command -v dmidecode)\" ]; then sudo dmidecode | grep -i \"microsoft\\\\|vmware\\\\|virtualbox\\\\|quemu\\\\|domu\"; fi; if [ -f /proc/scsi/scsi ]; then cat /proc/scsi/scsi | grep -i \"vmware\\\\|vbox\"; fi; if [ -f /proc/ide/hd0/model ]; then cat /proc/ide/hd0/model | grep -i \"vmware\\\\|vbox\\\\|qemu\\\\|virtual\"; fi; if [ -x \"$(command -v lspci)\" ]; then sudo lspci | grep -i \"vmware\\\\|virtualbox\"; fi; if [ -x \"$(command -v lscpu)\" ]; then sudo lscpu | grep -i \"Xen\\\\|KVM\\\\|Microsoft\"; fi'",
+            "wirpo-test",
+            "root",
+            15106,
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd"
+        ],
+        [
+            "2025-05-07 16:56:59.060000+00:00",
+            "wirpo-test",
+            "bash",
+            "bash -c 'if [ -f /sys/class/dmi/id/bios_version ]; then cat /sys/class/dmi/id/bios_version | grep -i amazon; fi; if [ -f /sys/class/dmi/id/product_name ]; then cat /sys/class/dmi/id/product_name | grep -i \"Droplet\\\\|HVM\\\\|VirtualBox\\\\|VMware\"; fi; if [ -f /sys/class/dmi/id/chassis_vendor ]; then cat /sys/class/dmi/id/chassis_vendor | grep -i \"Xen\\\\|Bochs\\\\|QEMU\"; fi; if [ -x \"$(command -v dmidecode)\" ]; then sudo dmidecode | grep -i \"microsoft\\\\|vmware\\\\|virtualbox\\\\|quemu\\\\|domu\"; fi; if [ -f /proc/scsi/scsi ]; then cat /proc/scsi/scsi | grep -i \"vmware\\\\|vbox\"; fi; if [ -f /proc/ide/hd0/model ]; then cat /proc/ide/hd0/model | grep -i \"vmware\\\\|vbox\\\\|qemu\\\\|virtual\"; fi; if [ -x \"$(command -v lspci)\" ]; then sudo lspci | grep -i \"vmware\\\\|virtualbox\"; fi; if [ -x \"$(command -v lscpu)\" ]; then sudo lscpu | grep -i \"Xen\\\\|KVM\\\\|Microsoft\"; fi'",
+            "wirpo-test",
+            "root",
+            15107,
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd"
+        ],
+        [
+            "2025-05-07 16:56:59.060000+00:00",
+            "wirpo-test",
+            "bash",
+            "bash -c 'if [ -f /sys/class/dmi/id/bios_version ]; then cat /sys/class/dmi/id/bios_version | grep -i amazon; fi; if [ -f /sys/class/dmi/id/product_name ]; then cat /sys/class/dmi/id/product_name | grep -i \"Droplet\\\\|HVM\\\\|VirtualBox\\\\|VMware\"; fi; if [ -f /sys/class/dmi/id/chassis_vendor ]; then cat /sys/class/dmi/id/chassis_vendor | grep -i \"Xen\\\\|Bochs\\\\|QEMU\"; fi; if [ -x \"$(command -v dmidecode)\" ]; then sudo dmidecode | grep -i \"microsoft\\\\|vmware\\\\|virtualbox\\\\|quemu\\\\|domu\"; fi; if [ -f /proc/scsi/scsi ]; then cat /proc/scsi/scsi | grep -i \"vmware\\\\|vbox\"; fi; if [ -f /proc/ide/hd0/model ]; then cat /proc/ide/hd0/model | grep -i \"vmware\\\\|vbox\\\\|qemu\\\\|virtual\"; fi; if [ -x \"$(command -v lspci)\" ]; then sudo lspci | grep -i \"vmware\\\\|virtualbox\"; fi; if [ -x \"$(command -v lscpu)\" ]; then sudo lscpu | grep -i \"Xen\\\\|KVM\\\\|Microsoft\"; fi'",
+            "wirpo-test",
+            "root",
+            15108,
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd"
+        ],
+        [
+            "2025-05-07 16:56:59.108599+00:00",
+            "wirpo-test",
+            "dmidecode",
+            "dmidecode",
+            "wirpo-test",
+            "root",
+            15109,
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd"
+        ],
+        [
+            "2025-05-07 16:56:59.110000+00:00",
+            "wirpo-test",
+            "bash",
+            "bash -c 'if [ -f /sys/class/dmi/id/bios_version ]; then cat /sys/class/dmi/id/bios_version | grep -i amazon; fi; if [ -f /sys/class/dmi/id/product_name ]; then cat /sys/class/dmi/id/product_name | grep -i \"Droplet\\\\|HVM\\\\|VirtualBox\\\\|VMware\"; fi; if [ -f /sys/class/dmi/id/chassis_vendor ]; then cat /sys/class/dmi/id/chassis_vendor | grep -i \"Xen\\\\|Bochs\\\\|QEMU\"; fi; if [ -x \"$(command -v dmidecode)\" ]; then sudo dmidecode | grep -i \"microsoft\\\\|vmware\\\\|virtualbox\\\\|quemu\\\\|domu\"; fi; if [ -f /proc/scsi/scsi ]; then cat /proc/scsi/scsi | grep -i \"vmware\\\\|vbox\"; fi; if [ -f /proc/ide/hd0/model ]; then cat /proc/ide/hd0/model | grep -i \"vmware\\\\|vbox\\\\|qemu\\\\|virtual\"; fi; if [ -x \"$(command -v lspci)\" ]; then sudo lspci | grep -i \"vmware\\\\|virtualbox\"; fi; if [ -x \"$(command -v lscpu)\" ]; then sudo lscpu | grep -i \"Xen\\\\|KVM\\\\|Microsoft\"; fi'",
+            "wirpo-test",
+            "root",
+            15110,
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd"
+        ],
+        [
+            "2025-05-07 16:56:59.155365+00:00",
+            "wirpo-test",
+            "lspci",
+            "lspci",
+            "wirpo-test",
+            "root",
+            15115,
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd"
+        ],
+        [
+            "2025-05-07 17:32:58.772373+00:00",
+            "wirpo-test.kwmmtajk0tqubd0oengdi0zqgf.gvxx.internal.cloudapp.net",
+            "systemd-detect-virt",
+            "systemd-detect-virt --quiet --container",
+            "wirpo-test",
+            "root",
+            4681,
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd"
+        ],
+        [
+            "2025-05-07 17:33:57.477677+00:00",
+            "wirpo-test.kwmmtajk0tqubd0oengdi0zqgf.gvxx.internal.cloudapp.net",
+            "systemd-detect-virt",
+            "/usr/bin/systemd-detect-virt --vm --quiet",
+            "wirpo-test",
+            "root",
+            7368,
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd"
+        ],
+        [
+            "2025-05-07 17:33:57.482277+00:00",
+            "wirpo-test.kwmmtajk0tqubd0oengdi0zqgf.gvxx.internal.cloudapp.net",
+            "systemd-detect-virt",
+            "/usr/bin/systemd-detect-virt --container --quiet",
+            "wirpo-test",
+            "root",
+            7369,
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd"
+        ],
+        [
+            "2025-05-07 17:33:57.653759+00:00",
+            "wirpo-test.kwmmtajk0tqubd0oengdi0zqgf.gvxx.internal.cloudapp.net",
+            "systemd-detect-virt",
+            "/usr/bin/systemd-detect-virt --vm --quiet",
+            "wirpo-test",
+            "root",
+            7374,
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd"
+        ],
+        [
+            "2025-05-07 17:33:57.658325+00:00",
+            "wirpo-test.kwmmtajk0tqubd0oengdi0zqgf.gvxx.internal.cloudapp.net",
+            "systemd-detect-virt",
+            "/usr/bin/systemd-detect-virt --container --quiet",
+            "wirpo-test",
+            "root",
+            7375,
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd"
+        ],
+        [
+            "2025-05-07 17:43:50.623199+00:00",
+            "wirpo-test.kwmmtajk0tqubd0oengdi0zqgf.gvxx.internal.cloudapp.net",
+            "dmidecode",
+            "/sbin/dmidecode -s system-family",
+            "wirpo-test",
+            "root",
+            9155,
+            "fb6b637ef27fbc2135d92746d4f2f703f3c4c5fd"
+        ]
+    ]
+}

@@ -1,0 +1,38 @@
+{
+    "technique_id": "T1070",
+    "question_id": "b4115c7a-0e92-47f0-a61e-17e7218b2435",
+    "context": "An adversary may try to hide file changes by deleting the USN change journal on a Windows host.",
+    "objective": "Determine the exact command line invoked to delete the USN journal.",
+    "technical_details": {
+        "command_analysis": "Inspect process creation logs for fsutil invocations targeting the USN journal deletion.",
+        "detection_approach": "Query DeviceProcessEvents for ProcessCommandLine entries containing fsutil and usn deletejournal to extract the full command."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Identify which log table captures process starts, then filter for the fsutil tool and its usn deletejournal operation to reveal the invoked command line.",
+    "prompt": "A suspicious actor appears to have removed the USN change journal on a Windows workstation. Investigate process start records to find out exactly which command was used to delete the journal. What was the full command line invoked?",
+    "answer": [
+        "fsutil usn deletejournal /D C:\\\\"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where ProcessCommandLine has \"fsutil\" and ProcessCommandLine has \"usn deletejournal\"\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, ProcessCommandLine\n| sort by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: The expected answer is 'fsutil usn deletejournal /D C:\\\\'. The query result contains two relevant ProcessCommandLine entries: 'fsutil  usn deletejournal /D C:' and '\"cmd.exe\" /c fsutil usn deletejournal /D C:'. Both show evidence of the target command being executed (with and without quoting and extra spaces), meeting the requirement to detect this activity. The differences in double backslash and quoting are trivial, and the detection logic should recognize these as matching the expected command usage.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 16:33:44.790228+00:00",
+            "windows-vm",
+            "wipro",
+            "fsutil  usn deletejournal /D C:"
+        ],
+        [
+            "2025-05-07 16:33:44.730248+00:00",
+            "windows-vm",
+            "wipro",
+            "\"cmd.exe\" /c fsutil usn deletejournal /D C:"
+        ]
+    ]
+}

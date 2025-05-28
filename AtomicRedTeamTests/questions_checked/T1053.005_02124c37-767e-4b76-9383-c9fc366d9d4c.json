@@ -1,0 +1,55 @@
+{
+    "technique_id": "T1053.005",
+    "question_id": "02124c37-767e-4b76-9383-c9fc366d9d4c",
+    "context": "An attacker abused the Windows Event Viewer file association to achieve persistence by modifying a user registry key and creating a scheduled task that launches a payload when MSC files are opened.",
+    "objective": "Identify the malicious payload file that was registered under the MSC file association via registry modification.",
+    "technical_details": {
+        "command_analysis": "A reg add operation altered the default value of HKCU\\Software\\Classes\\mscfile\\shell\\open\\command to point to the payload binary.",
+        "detection_approach": "Query DeviceRegistryEvents for registry value set actions on the MSC file association key and inspect the RegistryValueData field."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Phrase the question to ask specifically which executable was set in the hacked registry key. The answer should be the file name of that payload.",
+    "prompt": "On Windows, review recent registry changes to detect when the MSC file association was hijacked by a reg add operation. What executable file was configured as the default command under HKCU\\Software\\Classes\\mscfile\\shell\\open\\command?",
+    "answer": [
+        "calc.exe"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceRegistryEvents\n| where RegistryKey has \"mscfile\"\n| where RegistryKey has \"shell\"\n| where RegistryKey has \"open\"\n| where RegistryKey has \"command\"\n| where ActionType == \"RegistryValueSet\"\n| where RegistryValueName in (\"\", \"(Default)\")\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, InitiatingProcessFileName, RegistryValueData",
+    "KQL_validation_message": "KQL query validation successful: The expected answer is 'calc.exe'. By analyzing the query results, specifically the 'RegistryValueData' column, there are two records with the value 'c:\\windows\\System32\\calc.exe'. This matches the expected answer. The structure and columns present (TimeGenerated, DeviceName, InitiatingProcessAccountName, InitiatingProcessFileName, RegistryValueData) provide enough context to confirm the detection of 'calc.exe' related activity.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "InitiatingProcessFileName",
+            "RegistryValueData"
+        ],
+        [
+            "2025-05-07 16:26:24.150784+00:00",
+            "windows-vm",
+            "wipro",
+            "reg.exe",
+            "C:\\Windows\\System32\\cmd.exe"
+        ],
+        [
+            "2025-05-07 16:37:04.855131+00:00",
+            "windows-vm",
+            "wipro",
+            "reg.exe",
+            "C:\\Windows\\System32\\cmd.exe"
+        ],
+        [
+            "2025-05-07 17:11:55.723639+00:00",
+            "windows-vm",
+            "wipro",
+            "reg.exe",
+            "c:\\windows\\System32\\calc.exe"
+        ],
+        [
+            "2025-05-07 17:12:08.291844+00:00",
+            "windows-vm",
+            "wipro",
+            "reg.exe",
+            "c:\\windows\\System32\\calc.exe"
+        ]
+    ]
+}

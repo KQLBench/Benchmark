@@ -1,0 +1,40 @@
+{
+    "technique_id": "T1057",
+    "question_id": "11ba69ee-902e-4a0f-b3b6-418aed7d7ddb",
+    "context": "An analyst suspects that on a Windows endpoint, an attacker used a built-in command-line utility combined with a filter to locate a particular process before moving on to more intrusive actions.",
+    "objective": "Determine which specific process name was the focus of the attacker’s enumeration activity.",
+    "technical_details": {
+        "command_analysis": "The adversary invoked a native Windows tool and piped its output into a string-matching command to search for a process by name.",
+        "detection_approach": "Query process creation or command line logs for entries where the built-in utility and filter are used, then extract the target process name parameter from the command line."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question around identifying the argument passed to the string-matching command; the answer should be the exact process name used by the attacker.",
+    "prompt": "On a Windows device, review the process execution logs to find instances where a built-in listing tool was piped into a string filter. Identify the process name that the attacker was searching for.",
+    "answer": [
+        "lsass"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "DeviceProcessEvents\n| where TimeGenerated >= ago(7d)\n| where (ProcessCommandLine contains \"tasklist\" and ProcessCommandLine contains \"findstr\") or ProcessCommandLine contains \"get-process\"\n| extend TasklistTarget = extract(@\"(?i)tasklist\\s*\\|\\s*findstr\\s+(/\\S+\\s+)?(\\S+)\", 2, ProcessCommandLine)\n| extend GetProcWithName = extract(@\"(?i)get-process\\s+-name\\s+(\\S+)\", 1, ProcessCommandLine)\n| extend GetProcSimple   = extract(@\"(?i)get-process\\s+(\\S+)\",           1, ProcessCommandLine)\n| extend TargetProcessName = coalesce(TasklistTarget, GetProcWithName, GetProcSimple)\n| where isnotempty(TargetProcessName)\n| summarize Count = count() by TargetProcessName\n| order by Count desc",
+    "KQL_validation_message": "KQL query validation successful: The expected answer 'lsass' appears as a row in the results with a count value, indicating it is present among the detected items. The format of the query results aligns with the structure (process names and their counts), and the specific process of interest is included, so the query provides the necessary evidence for this detection.",
+    "KQL_query_results": [
+        [
+            "TargetProcessName",
+            "Count"
+        ],
+        [
+            "lsass",
+            2
+        ],
+        [
+            ">",
+            2
+        ],
+        [
+            "\\\"\"*calc\\\"\"",
+            1
+        ],
+        [
+            "svchost)[0].Id",
+            1
+        ]
+    ]
+}

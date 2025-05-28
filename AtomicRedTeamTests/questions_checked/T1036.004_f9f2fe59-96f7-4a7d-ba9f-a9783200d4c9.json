@@ -1,0 +1,32 @@
+{
+    "technique_id": "T1036.004",
+    "question_id": "f9f2fe59-96f7-4a7d-ba9f-a9783200d4c9",
+    "context": "On a Windows endpoint, security monitoring has flagged the use of schtasks to schedule a potentially malicious PowerShell script.",
+    "objective": "Determine the exact PowerShell script file that was registered for recurring execution via schtasks.",
+    "technical_details": {
+        "command_analysis": "Search process creation logs for instances of schtasks.exe with a \"/create\" operation and examine the \"/tr\" parameter.",
+        "detection_approach": "Use DeviceProcessEvents to find ProcessCommandLine entries containing \"schtasks /create\" and parse out the referenced .ps1 file name."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Design the question to guide an analyst toward querying scheduled task creation events and extracting the script name from the task trigger argument.",
+    "prompt": "Analyze Windows process events for any schtasks.exe commands that created a new task invoking PowerShell. What is the name of the .ps1 script specified to run?",
+    "answer": [
+        "T1036.004_NonExistingScript.ps1"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where TimeGenerated >= ago(7d)\n| where FileName has_cs \"schtasks.exe\" and ProcessCommandLine has_cs \"/create\" and ProcessCommandLine has_cs \".ps1\"\n| extend ScriptName = extract(\"/tr\\\\s+\\\".*?([A-Za-z0-9._-]+\\\\.ps1)\", 1, ProcessCommandLine)\n| where isnotempty(ScriptName)\n| summarize FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated), Count = count() by ScriptName\n| order by LastSeen desc",
+    "KQL_validation_message": "KQL query validation successful: The query results list 'T1036.004_NonExistingScript.ps1' under the 'ScriptName' column, which matches the expected answer exactly. The presence of 'FirstSeen', 'LastSeen', and 'Count' columns further contextualizes the activity. Therefore, these results provide evidence needed to identify the activities described in the expected answers.",
+    "KQL_query_results": [
+        [
+            "ScriptName",
+            "FirstSeen",
+            "LastSeen",
+            "Count"
+        ],
+        [
+            "T1036.004_NonExistingScript.ps1",
+            "2025-05-07 16:51:46.613162+00:00",
+            "2025-05-07 16:51:46.613162+00:00",
+            1
+        ]
+    ]
+}

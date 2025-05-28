@@ -1,0 +1,44 @@
+{
+    "technique_id": "T1007",
+    "question_id": "f4b26bce-4c2c-46c0-bcc5-fce062d38bef",
+    "context": "A Linux host has been observed making calls to list its services potentially as part of reconnaissance activity.",
+    "objective": "Detect when a process on Linux enumerates system services and determine the exact command used.",
+    "technical_details": {
+        "command_analysis": "The built-in bash command executes either “service -e” on FreeBSD or “systemctl --type=service” on Linux; monitoring process command lines will reveal which variant was invoked.",
+        "detection_approach": "Search process event logs for invocations of systemctl or service commands initiated by bash to identify the exact service enumeration command."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question to ask specifically which service-listing command was run; the answer must match the full command line as observed.",
+    "prompt": "An analyst suspects a user or script ran a service enumeration command on a Linux system. Review process events to find the service-listing invocation and specify the full command that was executed.",
+    "answer": [
+        "systemctl --type=service"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "// Detect Linux service enumeration via systemctl or service initiated by bash\nDeviceProcessEvents\n| where InitiatingProcessFileName == \"bash\"\n// Match systemctl --type=service or service -e\n| where (FileName == \"systemctl\" and ProcessCommandLine has \"--type=service\")\n    or (FileName == \"service\" and ProcessCommandLine has \"-e\")\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, FileName, ProcessCommandLine, InitiatingProcessCommandLine\n| sort by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: The query results contain the column 'ProcessCommandLine' with the value 'systemctl --type=service', which exactly matches the expected answer. Furthermore, the context (root user, command invocation, timestamps) is all present, making these results sufficient to answer the detection question.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "FileName",
+            "ProcessCommandLine",
+            "InitiatingProcessCommandLine"
+        ],
+        [
+            "2025-05-07 16:31:12.613847+00:00",
+            "wirpo-test",
+            "root",
+            "systemctl",
+            "systemctl --type=service",
+            "bash -c 'if [ \"$(uname)\" = 'FreeBSD' ]; then service -e; else systemctl --type=service; fi;'"
+        ],
+        [
+            "2025-05-07 16:20:06.977447+00:00",
+            "wirpo-test",
+            "root",
+            "systemctl",
+            "systemctl --type=service",
+            "bash -c 'if [ \"$(uname)\" = 'FreeBSD' ]; then service -e; else systemctl --type=service; fi;'"
+        ]
+    ]
+}

@@ -1,0 +1,181 @@
+{
+    "technique_id": "T1082",
+    "question_id": "fcbdd43f-f4ad-42d5-98f3-0218097e2720",
+    "context": "On a Linux host, a shell was used to enumerate all environment variables and display PATH information.",
+    "objective": "Determine which command was executed to list environment variables via a shell.",
+    "technical_details": {
+        "command_analysis": "The ‘env’ command was invoked through a shell to dump the current environment variables.",
+        "detection_approach": "Review process execution logs for shell invocations where environment enumeration tools are called to list variables."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Phrase the question to ask specifically what command line was used to enumerate environment variables, with the expectation that the answer matches the exact command from the logs.",
+    "prompt": "A user‐space process on a Linux device invoked a shell to capture and display the system’s environment variables and path. Which exact command was used to perform this discovery?",
+    "answer": [
+        "env"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "DeviceProcessEvents\n| where TimeGenerated >= ago(1d)\n| where FileName == \"env\"\n| where InitiatingProcessFileName in (\"bash\", \"sh\", \"zsh\", \"ksh\", \"dash\")\n| project TimeGenerated, DeviceName, InitiatingProcessFileName, ProcessId, ProcessCommandLine",
+    "KQL_validation_message": "KQL query validation successful: The expected answer was ['env'], indicating interest in occurrences of the 'env' command. The query results include several rows where 'env' is clearly the process command (under 'ProcessCommandLine'), such as 'env', 'env LC_ALL=C.UTF-8 unattended-upgrade --help', and commands starting with '/usr/bin/env ...'. These results definitively show that activity related to the 'env' command is present, matching the expected answer. There is a clear 1:1 mapping between the expected answer and the evidence present in the results.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessFileName",
+            "ProcessId",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 22:49:54.770165+00:00",
+            "wirpo-test.kwmmtajk0tqubd0oengdi0zqgf.gvxx.internal.cloudapp.net",
+            "dash",
+            29325,
+            "env LC_ALL=C.UTF-8 unattended-upgrade --help"
+        ],
+        [
+            "2025-05-08 08:07:23.619817+00:00",
+            "wirpo-test.kwmmtajk0tqubd0oengdi0zqgf.gvxx.internal.cloudapp.net",
+            "dash",
+            72839,
+            "/usr/bin/env bash /var/lib/waagent/Microsoft.Azure.Monitor.AzureMonitorLinuxAgent-1.33.2/./shim.sh -enable"
+        ],
+        [
+            "2025-05-08 08:07:29.946966+00:00",
+            "wirpo-test.kwmmtajk0tqubd0oengdi0zqgf.gvxx.internal.cloudapp.net",
+            "dash",
+            73765,
+            "/usr/bin/env bash /var/lib/waagent/Microsoft.CPlat.Core.RunCommandLinux-1.0.5/bin/run-command-shim enable"
+        ],
+        [
+            "2025-05-08 09:52:03.043644+00:00",
+            "flurin-monitoring.xv2g1ire1j0ehkxrurr1ew43qg.xx.internal.cloudapp.net",
+            "dash",
+            3445689,
+            "env LC_ALL=C.UTF-8 unattended-upgrade --help"
+        ],
+        [
+            "2025-05-07 16:11:27.104767+00:00",
+            "flurin-monitoring.xv2g1ire1j0ehkxrurr1ew43qg.xx.internal.cloudapp.net",
+            "dash",
+            3336833,
+            "env LC_ALL=C.UTF-8 unattended-upgrade --help"
+        ],
+        [
+            "2025-05-07 16:17:49.477120+00:00",
+            "wirpo-test",
+            "dash",
+            3974,
+            "/usr/bin/env bash /var/lib/waagent/Microsoft.Azure.AzureDefenderForServers.MDE.Linux-1.0.5.2/PythonRunner.sh src/MdeExtensionHandler.py enable"
+        ],
+        [
+            "2025-05-07 16:17:49.687730+00:00",
+            "wirpo-test",
+            "dash",
+            4027,
+            "/usr/bin/env bash ./PythonRunner.sh src/MdeInstallerWrapper.py --workspaceId c74ba1a7-7efe-4a1f-bf8a-c264b336f37e --azureResourceId /subscriptions/c74ba1a7-7efe-4a1f-bf8a-c264b336f37e/resourceGroups/wipro/providers/Microsoft.Compute/virtualMachines/wirpo-test --logFolder /var/log/azure/Microsoft.Azure.AzureDefenderForServers.MDE.Linux --statusFolder /var/lib/waagent/Microsoft.Azure.AzureDefenderForServers.MDE.Linux-1.0.5.2/status --configFolder /var/lib/waagent/Microsoft.Azure.AzureDefenderForServers.MDE.Linux-1.0.5.2/config --autoUpdate TRUE --avMode noAction --onboardingBase64Script CgoKCgojIS91c3IvYmluL2VudiBweXRob24KCmltcG9ydCBzeXMsIGdldG9wdCwgb3MsIGVycm5vLCBqc29uLCBzdWJwcm9jZXNzLCB0ZW1wZmlsZQoKZGVmIHVzYWdlKCk6CiAgICBwcmludCAoIiIiVXNhZ2U6ICVzCiAgICBQZXJmb3JtcyBvbmJvYXJkaW5nXG9mZmJvYXJkaW5nIHRvIFdEQVRQIGxvY2FsbHkKIiIiICUgc3lzLmFyZ3ZbMF0pCiAgICBwYXNzCgp0cnk6CiAgICBvcHRzLCBhcmdzID0gZ2V0b3B0LmdldG9wdChzeXMuYXJndlsxOl0sICdoYycsIFsnaGVscCcsICdjb25maWc9J10pCgogICAgZm9yIGssIHYgaW4gb3B0czoKICAgICAgICBpZiBrID09ICctaCcgb3IgayA9PSAnLS1oZWxwJzoKICAgICAgICAgICAgdXNhZ2UoKQogICAgICAgICAgICBzeXMuZXhpdCgwKQoKZXhjZXB0IGdldG9wdC5HZXRvcHRFcnJvciBhcyBlOgogICAgcHJpbnQgKGUpCiAgICBwcmludCAoJycpCiAgICB1c2FnZSgpCiAgICBzeXMuZXhpdCgyKQoKdHJ5OgogICAgZGVzdGZpbGUgPSAnL2V0Yy9vcHQvbWljcm9zb2Z0L21kYXRwL21kYXRwX29uYm9hcmQuanNvbicKCiAgICBpZiBvcy5nZXRldWlkKCkgIT0gMDoKICAgICAgICBwcmludCgnUmUtcnVubmluZyBhcyBzdWRvICh5b3UgbWF5IGJlIHJlcXVpcmVkIHRvIGVudGVyIHN1ZG8nJ3MgcGFzc3dvcmQpJykKICAgICAgICBvcy5leGVjdnAoJ3N1ZG8nLCBbJ3N1ZG8nLCAncHl0aG9uJ10gKyBzeXMuYXJndikgICMgZmluYWwgdmVyc2lvbgoKICAgIHByaW50KCdHZW5lcmF0aW5nICVzIC4uLicgJSBkZXN0ZmlsZSkKCiAgICBjbWQgPSAic3VkbyBta2RpciAtcCAnJXMnIiAlIChvcy5wYXRoLmRpcm5hbWUoZGVzdGZpbGUpKQogICAgc3VicHJvY2Vzcy5jaGVja19jYWxsKGNtZCwgc2hlbGwgPSBUcnVlKQoKICAgIHdpdGggb3BlbihkZXN0ZmlsZSwgInciKSBhcyBqc29uOgogICAgICAgIGpzb24ud3JpdGUoJycnewogICJvbmJvYXJkaW5nSW5mbyI6ICJ7XFxcImJvZHlcXFwiOlxcXCJ7XFxcXFxcXCJwcmV2aW91c09yZ0lkc1xcXFxcXFwiOltdLFxcXFxcXFwib3JnSWRcXFxcXFxcIjpcXFxcXFxcIjY4YTliNmNmLTJlMjEtNGVmNS1iMWQyLWZiMzhhODJiOTVhM1xcXFxcXFwiLFxcXFxcXFwiZ2VvTG9jYXRpb25VcmxcXFxcXFxcIjpcXFxcXFxcImh0dHBzOi8vZWRyLXN3dzBhLnN3YS5lbmRwb2ludC5zZWN1cml0eS5taWNyb3NvZnQuY29tL2Vkci9cXFxcXFxcIixcXFxcXFxcImRhdGFjZW50ZXJcXFxcXFxcIjpcXFxcXFxcIlN3aXR6ZXJsYW5kV2VzdDBhXFxcXFxcXCIsXFxcXFxcXCJ2b3J0ZXhHZW9Mb2NhdGlvblxcXFxcXFwiOlxcXFxcXFwiZGVmYXVsdFxcXFxcXFwiLFxcXFxcXFwidm9ydGV4U2VydmVyVXJsXFxcXFxcXCI6XFxcXFxcXCJodHRwczovL2NoLXYyMC5ldmVudHMuZW5kcG9pbnQuc2VjdXJpdHkubWljcm9zb2Z0LmNvbS9PbmVDb2xsZWN0b3IvMS4wXFxcXFxcXCIsXFxcXFxcXCJ2b3J0ZXhUaWNrZXRVcmxcXFxcXFxcIjpcXFxcXFxcImh0dHBzOi8vZXZlbnRzLmRhdGEubWljcm9zb2Z0LmNvbVxcXFxcXFwiLFxcXFxcXFwicGFydG5lckdlb0xvY2F0aW9uXFxcXFxcXCI6XFxcXFxcXCJHV19DSFxcXFxcXFwiLFxcXFxcXFwidmVyc2lvblxcXFxcXFwiOlxcXFxcXFwiMS45XFxcXFxcXCIsXFxcXFxcXCJkZXZpY2VUeXBlXFxcXFxcXCI6XFxcXFxcXCJTZXJ2ZXJcXFxcXFxcIixcXFxcXFxcInBhY2thZ2VHdWlkXFxcXFxcXCI6XFxcXFxcXCI4MzE1ZGIzNC0xMTNhLTQ3NmYtOTI4MS00NjVlMTM4NDRjMGVcXFxcXFxcIn1cXFwiLFxcXCJzaWdcXFwiOlxcXCJSSkthYlNFbVhBK0MyeENNWThxd1lCYTNHSk9YQ1ordWlEcXdRZTk0aDVqTlpRbEEwNWFWWUlDZFpSMjltQ05MLzVBb3paSjVJRUdrUjNVa2tvSTg4eCtnbnlVcmhFdEdaWnNYTjV2QVQ2MWN6S211ZmRPQjc1K0ZHSGdlV3ZzdzJobU0wRmk2SmdOcTBoeWw2UThtVG9pbFRvTTBqclV4bE1YdVRuODA1Yjh2VnlUSGxqTElNR0RuSHpJcEhwcks2MExDakNQTmJ1dHhqbUltLzI5QjMwbWxtL0h1MGFhRWRLWnA1Tjd2Nnd0MjByU2hIOTFRaWhDWVVyRXFCOUpueDVwc2VRTXVwU2J2TmxMcWI3bTVKaFo0eitLU2svckh2MWlYcGVjR3I2dlpiTmpYWEVNcDRRVmV1blJlZG4zRHVQUVl1L0JrWDZlVEVwbEVmeWVoQmc9PVxcXCIsXFxcInNoYTI1NnNpZ1xcXCI6XFxcIlJKS2FiU0VtWEErQzJ4Q01ZOHF3WUJhM0dKT1hDWit1aURxd1FlOTRoNWpOWlFsQTA1YVZZSUNkWlIyOW1DTkwvNUFvelpKNUlFR2tSM1Vra29JODh4K2dueVVyaEV0R1pac1hONXZBVDYxY3pLbXVmZE9CNzUrRkdIZ2VXdnN3MmhtTTBGaTZKZ05xMGh5bDZROG1Ub2lsVG9NMGpyVXhsTVh1VG44MDViOHZWeVRIbGpMSU1HRG5IeklwSHBySzYwTENqQ1BOYnV0eGptSW0vMjlCMzBtbG0vSHUwYWFFZEtacDVON3Y2d3QyMHJTaEg5MVFpaENZVXJFcUI5Sm54NXBzZVFNdXBTYnZObExxYjdtNUpoWjR6K0tTay9ySHYxaVhwZWNHcjZ2WmJOalhYRU1wNFFWZXVuUmVkbjNEdVBRWXUvQmtYNmVURXBsRWZ5ZWhCZz09XFxcIixcXFwiY2VydFxcXCI6XFxcIk1JSUZnekNDQTJ1Z0F3SUJBZ0lUTXdBQUF3aXVIOUFrMVpiMVVBQUFBQUFEQ0RBTkJna3Foa2lHOXcwQkFRc0ZBREIrTVFzd0NRWURWUVFHRXdKVlV6RVRNQkVHQTFVRUNCTUtWMkZ6YUdsdVozUnZiakVRTUE0R0ExVUVCeE1IVW1Wa2JXOXVaREVlTUJ3R0ExVUVDaE1WVFdsamNtOXpiMlowSUVOdmNuQnZjbUYwYVc5dU1TZ3dKZ1lEVlFRREV4OU5hV055YjNOdlpuUWdVMlZqZFhKbElGTmxjblpsY2lCRFFTQXlNREV4TUI0WERUSTBNRGd5TWpJd01EWXdPVm9YRFRJMU1EZ3lNakl3TURZd09Wb3dIakVjTUJvR0ExVUVBeE1UVTJWMmFXeHNaUzVYYVc1a2IzZHpMbU52YlRDQ0FTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVBBRENDQVFvQ2dnRUJBSzVHU25Ob0JXQlV5YkROL05PWStqK1g0anBXRlU4NFpLS2hvTEQzSlgxdmNEQktJZC9vMHhPb0tWTUlxY0RHbWRzWDZGaml0Mlhzc0k5d0hYdktpSmRrL3Y5U1FoSlloRzN0Rm9pcDkrUm1LK0RQbjNsTUtESng2S0hoZC9BSWxNbXArNE1hNDMzK0JtRGdNQUl2YlpEbTF4Ukg0dDlTd0tsdkJCd29RRXM0elIwTmJ6L2FFa0w3ckQxQ0hJakl0KytoR1VRNFZSTG5TNFJVVlh3SXVGenZLaUJuQVIzV1NiVzB2VnI1blU2YWwvV1NpbnhKK3NMZ2xDMWFXV0xPM0VBR0hyTjRPaG5tNUpLN2xxRW1iTnl2N1c2S095RnFuS2ZpRHJrL0RzVUQwU0p5Y29QTmxlUm5KUlRmYmI2UmZtcGJ5citiT3Q4eUwyN1lGK2NyQy8wQ0F3RUFBYU9DQVZnd2dnRlVNQTRHQTFVZER3RUIvd1FFQXdJRklEQWRCZ05WSFNVRUZqQVVCZ2dyQmdFRkJRY0RBUVlJS3dZQkJRVUhBd0l3REFZRFZSMFRBUUgvQkFJd0FEQWVCZ05WSFJFRUZ6QVZnaE5UWlhacGJHeGxMbGRwYm1SdmQzTXVZMjl0TUIwR0ExVWREZ1FXQkJRQy9qNGtWQU5qVjZwRi9SSXhlQ3lDZm5FS25EQWZCZ05WSFNNRUdEQVdnQlEyVm9sbFNjdGJteTg4ckVJV1VFMlJ1VFBYa1RCVEJnTlZIUjhFVERCS01FaWdScUJFaGtKb2RIUndPaTh2ZDNkM0xtMXBZM0p2YzI5bWRDNWpiMjB2Y0d0cGIzQnpMMk55YkM5TmFXTlRaV05UWlhKRFFUSXdNVEZmTWpBeE1TMHhNQzB4T0M1amNtd3dZQVlJS3dZQkJRVUhBUUVFVkRCU01GQUdDQ3NHQVFVRkJ6QUNoa1JvZEhSd09pOHZkM2QzTG0xcFkzSnZjMjltZEM1amIyMHZjR3RwYjNCekwyTmxjblJ6TDAxcFkxTmxZMU5sY2tOQk1qQXhNVjh5TURFeExURXdMVEU0TG1OeWREQU5CZ2txaGtpRzl3MEJBUXNGQUFPQ0FnRUFReTZlancwMzdod1h2RFBaRjFXekhwL0swWHhTSHFyMldwaXhLM1gzREhMdXZjV2FaSlI4UGhyc1FHbmp0KzRlcHhyUGFHZFlnYmo3VFJMa0ZlS3RVS2lRSVZmRzd3YkFYYWhIY2tucWhSa3JJMEx2V1RmbUxadGM0STJZWGRFdUtPblJvUkljYk9UOU5LQnZjN04xanF3ZUZQWDcvNks0aXp0UDlmeVBocndJSGw1NDR1T1NSY3JUYWhwTzgwQm1wejhuL1dFVk5RRGMraWUrTEk3OGFkSmgrZW9pR3pDZ1hTTmhjOFFiVEtNWlhJaHpSSUlmMWZSS2tBUXhiZHNqYi82a1ExaFEwdTVSQ2QvZUZDV09EdUNmcE9BZXZKa24wckhtRXp1dGJiRnBzL1FkV3dMeUlqMUhFK3FUdjVkTnBZVXgwb0VHWXRjODNFSWJHRlpaeWZyQjZpRFF2YWlubVZwODJMYStBaHR3NCtndVZCTFRTRTdIS3Vkb2I3OFdIWDRXS0J6SkJLV1VCbEhNL2xtNjdRdXMyOG9VMTQ0cUZNdHNPZy9yZk4zSjFKMXlkVDBHZnVsR0o4TVIwK3FKOXBrNm9qdjBXK0Y0bXd1cWtNV1F1TkFIOUJMKzVOa2dodHdCTDBCd0hwTnlGdFh6WGlOZjZzK2NZdUtHUXNTNC9rdTRlY3prL05SV3J5ZlhHakdNMjN6cnBJc0xrcjVEQ2VyMzRnamRUd24yVG1RYld0KzY1cFl5Q3BGYzUzdjNlakN5VEx6MTNPNkpPRnVYa0w0SzlRUnFhazl4dGlHWmlrNkVnVHpLRTRWZTZTSVJGbHV4bGVWNFVRM1hkekxiKzkwM1lEMktlNTdQQ3BCSHEveDM1eGNuK0R6SFZVM1MyQy9pNDN3VWVLbz1cXFwiLFxcXCJjaGFpblxcXCI6W1xcXCJNSUlHMkRDQ0JNQ2dBd0lCQWdJS1lUKzNHQUFBQUFBQUJEQU5CZ2txaGtpRzl3MEJBUXNGQURDQmlERUxNQWtHQTFVRUJoTUNWVk14RXpBUkJnTlZCQWdUQ2xkaGMyaHBibWQwYjI0eEVEQU9CZ05WQkFjVEIxSmxaRzF2Ym1ReEhqQWNCZ05WQkFvVEZVMXBZM0p2YzI5bWRDQkRiM0p3YjNKaGRHbHZiakV5TURBR0ExVUVBeE1wVFdsamNtOXpiMlowSUZKdmIzUWdRMlZ5ZEdsbWFXTmhkR1VnUVhWMGFHOXlhWFI1SURJd01URXdIaGNOTVRFeE1ERTRNakkxTlRFNVdoY05Nall4TURFNE1qTXdOVEU1V2pCK01Rc3dDUVlEVlFRR0V3SlZVekVUTUJFR0ExVUVDQk1LVjJGemFHbHVaM1J2YmpFUU1BNEdBMVVFQnhNSFVtVmtiVzl1WkRFZU1Cd0dBMVVFQ2hNVlRXbGpjbTl6YjJaMElFTnZjbkJ2Y21GMGFXOXVNU2d3SmdZRFZRUURFeDlOYVdOeWIzTnZablFnVTJWamRYSmxJRk5sY25abGNpQkRRU0F5TURFeE1JSUNJakFOQmdrcWhraUc5dzBCQVFFRkFBT0NBZzhBTUlJQ0NnS0NBZ0VBMEF2QXBLZ1pnZUkyNWVLcTVmT3lGVmgxdnJUbFNmSGdoUG03RFdUdmhjR0JWYmp6NS9GdFFGVTl6b3RxMFlTVDlYVjhXNlRVZEJES012TWowNjd1ejU0RVdNTFpSOHZSZkFCQlNIRWJBV2NYR0svRy9uTURmdVR2UTV6dkFYRXFINEVtUTNlWVZGZHpuVlVyOEo2T2ZRWU9yQnRVOHliMytDTUlJb3VlQmgwM09QMXkwc3JsWThHYVduMnliYk5TcVc3cHJyWDhpemI1bnZyMkhGZ2JsMWFsRWVXM1V0dTc2ZkJVdjdUL0xHeTRYU2JPb0FyWDM1UHRmOTJzOFN4ekd0a1pOMVc2M1NKNGpxSFVtd240QnlJeGNiQ1VydUN3NXlaRVY1Q0JseFhPWWV4bDRrdnhoVklXTXZpMWVLcCt6VTNzZ3lHa3FKdSttbW9FNEtNY3pWWVliUDFyTDBJKzRqZnljcXZRZUhOeWU5N3NBRmpsSVRDakNEcVo3NS9EOTNvV2xtVzF3NEd2OURsd1NhLzJxZlpxQURqNXRBZ1o0Qm8xcFZaMklsOXE4bW11UHExWVJrMjRWUGFKUVVRZWNyRzhFaWRUMHNIL3NzMVFtQjYxOUx1MndvSTUyYXdiOGpzbmhHcXd4aVlMMXpvUTU3UGJmTk5XckZOTUMvbzdNVGQwMkZrcitRQjVHUVo3L1J3ZFF0UkJEUzhGRHRWclNTUC96ODM0ZW9MUDJqd3QzK2pZRWdRWXVoNklkN2lZSHhBSHU4Z0ZmZ3NKdjJ2ZDQwNWJzUG5IaEtZN3lreWZXMklwOThlaXFKV0ljQ3psd1Q4OFVpTlBRSnJETVlXREw3OHA4UjFRanlHV0I4N3Y4b0RDUkgyYll1OHZ3M2VKcTBWTlV6NENlZE1DQXdFQUFhT0NBVXN3Z2dGSE1CQUdDU3NHQVFRQmdqY1ZBUVFEQWdFQU1CMEdBMVVkRGdRV0JCUTJWb2xsU2N0Ym15ODhyRUlXVUUyUnVUUFhrVEFaQmdrckJnRUVBWUkzRkFJRURCNEtBRk1BZFFCaUFFTUFRVEFMQmdOVkhROEVCQU1DQVlZd0R3WURWUjBUQVFIL0JBVXdBd0VCL3pBZkJnTlZIU01FR0RBV2dCUnlMVG9DTVpCRHVSUUZUdUhxcDhjeDBTT0pOREJhQmdOVkhSOEVVekJSTUUrZ1RhQkxoa2xvZEhSd09pOHZZM0pzTG0xcFkzSnZjMjltZEM1amIyMHZjR3RwTDJOeWJDOXdjbTlrZFdOMGN5OU5hV05TYjI5RFpYSkJkWFF5TURFeFh6SXdNVEZmTUROZk1qSXVZM0pzTUY0R0NDc0dBUVVGQndFQkJGSXdVREJPQmdnckJnRUZCUWN3QW9aQ2FIUjBjRG92TDNkM2R5NXRhV055YjNOdlpuUXVZMjl0TDNCcmFTOWpaWEowY3k5TmFXTlNiMjlEWlhKQmRYUXlNREV4WHpJd01URmZNRE5mTWpJdVkzSjBNQTBHQ1NxR1NJYjNEUUVCQ3dVQUE0SUNBUUJCeUdIQjlWdWVQcEV4OGJER3Z3a0J0SjIya0hUWENkdW1MZzJmeU9kMk5FYXZCMkNKVElHelBOWDBFalYxd25PbDlVMkVqTXVrWGErL2t2WVhDRmRDbFhKbEJYWjVyZTdSdXJndVZLTlJCNnhvNnlFTTR5V0J3czBxOHNQL3o4SzlTUmlheC9DRXhma1V2R3VWNVpidnMwTFNVOVZLb0JMRXJoSjJVd2xXRHAzMzA2WkppRkR5aWl5WElLSytUbmp2QldXM1M2RVdpTjR4eHdoQ0pIeWtlNTZkdkdBQVhtS1g0NVA4cC81YmV5WGY1Rk4vUzc3bVB2RGJBWGxDSEc2RmJIMjJSREQ3cFRlU2s3S2w3aUN0UDFQVnlmUW9hMWZCK0IxcXQxWXF0aWVCSEtZdG4rZjAwREdEbDZncXRxeStHMEgxNUlsZlZ2dmFXdE5lZlZXVUVINVRWL1JLUFVBcXlMMW5uNFRoRU83OTJtc1Zna244UmgzL1JRWjBuRUlVN2NVNTA3UE5DNE1ua0VOUmt2SkVncTV1bWhVWHNobjZ4MFZzbUFGN3Z6ZXBzSWlra3J3NE9PQWQ1SHlYbUJvdVgrODRaYmMxTDcxL1R5SDZ4SXpTYndiNVNUWHEzeUFQSmFycVlLc3NIMHVKL0xmNlhGU1FTejZpS0U5czVGSmx3ZjJRSElXQ2lHN3BwbFhkSVNoNVJiQVU1UXJNNWwvRXU5dGhOR21mckNZNDk4RXBRUWdWTGt5Zzkva01QdDVmcXdnSkxZT3NyRFNEWXZUSlNVS0pKYlZ1c2tmRnN6bWdzU0FiTExHT0JHK2xNRWtjMEVicFFGdjByVzY2MjRKS2h4SktnQWxOMjk5MnVRVmJHK0M3SUhCZkFDWEgwdzc2RnExN0lwNXhDQT09XFxcIixcXFwiTUlJRjdUQ0NBOVdnQXdJQkFnSVFQNHZJdGZ5ZnNwWkR0V25XYkVMaFJEQU5CZ2txaGtpRzl3MEJBUXNGQURDQmlERUxNQWtHQTFVRUJoTUNWVk14RXpBUkJnTlZCQWdUQ2xkaGMyaHBibWQwYjI0eEVEQU9CZ05WQkFjVEIxSmxaRzF2Ym1ReEhqQWNCZ05WQkFvVEZVMXBZM0p2YzI5bWRDQkRiM0p3YjNKaGRHbHZiakV5TURBR0ExVUVBeE1wVFdsamNtOXpiMlowSUZKdmIzUWdRMlZ5ZEdsbWFXTmhkR1VnUVhWMGFHOXlhWFI1SURJd01URXdIaGNOTVRFd016SXlNakl3TlRJNFdoY05Nell3TXpJeU1qSXhNekEwV2pDQmlERUxNQWtHQTFVRUJoTUNWVk14RXpBUkJnTlZCQWdUQ2xkaGMyaHBibWQwYjI0eEVEQU9CZ05WQkFjVEIxSmxaRzF2Ym1ReEhqQWNCZ05WQkFvVEZVMXBZM0p2YzI5bWRDQkRiM0p3YjNKaGRHbHZiakV5TURBR0ExVUVBeE1wVFdsamNtOXpiMlowSUZKdmIzUWdRMlZ5ZEdsbWFXTmhkR1VnUVhWMGFHOXlhWFI1SURJd01URXdnZ0lpTUEwR0NTcUdTSWIzRFFFQkFRVUFBNElDRHdBd2dnSUtBb0lDQVFDeWdFR3FOVGhORTNJeWFDSk51TEx4LzlWU3ZHekg5ZEpLakRidTBjSmNmb3lLcnE4VEtHL0FjK002enRBbHFGbzZiZStvdUZtckV5Tm96UXdwaDlGdmdGeVBSSDlka0FGU1dLeFJ4VjhxaDl6YzJBb2R3UU81ZTdCVzZLUGVaR0hDbnZqemZMbnNEYlZVL2t5MlpVK0k4SnhJbVF4Q0N3bDhNVmtYZVFaNEtJMkpPa3dESmI1eGFsd0w1NFJncEpraTQ5S3ZoS1NuKzlHWTdReXAzcFNKNFE2ZzNNRE9tVDNxQ0ZLN1ZubmtINFM2SHJpMHhFbGNUekZMaDkzZEJXY21tWURnY1JHanVLVkI0cVJUdWZjeUtZTU1FNzgyWGdTelMwTkhMMnZpa1I3VG1FL2RRZ2ZJNkIwUy9KbXBhejZTZnNqV2FUcjhaTDIyQ1ozSy9Rd0xvcHQzWUVzRGxLUXdhUkxXUWkzQlFVekszS3I5ajF1RFJwclovTEhSNDdQSmYwaDZ6U1R3UVk5Y2ROQ3NzQkFnQmttM3h5MGh5RmZqMEliekEyajcwTTV4d1ltWlNtUUJiUDNzTUpIUFFUeVN4K1c2aGgxaGhNZGZnemxpcnJTU0wwZnpDL2hWNjZBZldkQzdkSnNlMEhibTh1a0cxeERvK21UZWFjWTFsb2dDOEVhNFB5ZVpiOHR4aVNrMTkwZ1dBaldQMVhsOFRRTFBYK3VLZzA5RmNZajVxUTFPY3VuQ25BZlBTUnRPQkE1alVZeGUyQURCVlN5Mnh1RENaVTdKTkRuMW5MUEVmdWhoYmhOZkZjUmYyWDd0SGM3dVJPekxMb2F4N0RqMmNPMnJYQlBCMlE4Tng0Q3lWZTAwOTZ5YjVNUGE1MGM4cHJXUE1kL0ZTNi9yOFFJREFRQUJvMUV3VHpBTEJnTlZIUThFQkFNQ0FZWXdEd1lEVlIwVEFRSC9CQVV3QXdFQi96QWRCZ05WSFE0RUZnUVVjaTA2QWpHUVE3a1VCVTdoNnFmSE1kRWppVFF3RUFZSkt3WUJCQUdDTnhVQkJBTUNBUUF3RFFZSktvWklodmNOQVFFTEJRQURnZ0lCQUg5eXp3KzN4UlhibThCSnlpWmIvcDRUNXRQdzB0dVhYL0pMUDAyenJobXU3ZGVYb0t6dnFUcWp3a0d3NWJpUm5oT0JKQVBtQ2YwL1YwQTVJU1JXMFJBdlMwQ3BOb1pMdEZOWG12dnhmb21QRWY0WWJGR3E2TzBKbGJYbGNjbWg2WWQxcGhWL3lYNDNWRjUwazhYRFo4d05UMnVvRnd4dENKSitpOTJCcWkxd0ljTTlCaFM3dnlSZXA0VFhQdzhoSXIxTEFBYmJseHpZWHRURkMxeUhibENrNk1NNHBQdkxMTVdTWnB1RlhzdDZiSk44Z0NsWVcxZTFRR202Q0htbVpHSVZuWWVXUmJWbUl5QURpeHh6b05PaWVUUGdVRm1HMnkvbEFpWHFjeXFmQUJUSU5zZVNPK2xPQU96WVZnbTVNMGtTMGxRTEFhdXNSN2FSS1gxTXRIV0FVZ0hveW9MMm44eXNuSThYNmk4bXNLdHlyQXYrbmxFZXgwTlZaMDlSczFmV3R1enVVcmM2NlU3aDE0R0l2RStPZGJ0THFQQTFxaWJVWjJkSnNuQk1PNVBjSGQ5NGtJWnlzamlrMGR5U1RjbFk2eXNTWE5RN3JveHJzSVBsQVQvNENUTDJrelUwSXEvZE53MTNDWUFyelVnQThZeVpHVWNGQWVuUnY5Rk8wT1lvUXplWnBBcEtDTm1hY1hQU3FzMHhFMk4yb1RkdmtqZ2VmUkk4WmpMbnkyM2gvRktKM2NyV1pnV2FsbUcrb2lqSEhLT25ObEE4T3FUZlNtN21oenZPNi9EZ2dUZWRFenhTanIyNUhUVEdIZFVLYWoyWUtYQ01pU3JScTRJUVNCL2M5TytseGJ0VkdqaGpoRTYzYksyVlZPeGxJaEJKRjdqQUhzY1ByRlJIXFxcIl19Igp9JycnKQoKICAgIGNtZCA9ICJsb2dnZXIgLXAgd2FybmluZyBNaWNyb3NvZnQgQVRQOiBzdWNjZWVkZWQgdG8gc2F2ZSBqc29uIGZpbGUgJXMuIiAlIChkZXN0ZmlsZSkKICAgIHN1YnByb2Nlc3MuY2hlY2tfY2FsbChjbWQsIHNoZWxsID0gVHJ1ZSkKCmV4Y2VwdCBFeGNlcHRpb24gYXMgZToKICAgIHByaW50KHN0cihlKSkKICAgIGNtZCA9ICJsb2dnZXIgLXAgZXJyb3IgTWljcm9zb2Z0IEFUUDogZmFpbGVkIHRvIHNhdmUganNvbiBmaWxlICVzLiBFeGNlcHRpb24gb2NjdXJlZDogJXMuICIgJSAoZGVzdGZpbGUsIHN0cihlKSkKICAgIHN1YnByb2Nlc3MuY2FsbChjbWQsIHNoZWxsID0gVHJ1ZSkKICAgIHN5cy5leGl0KDEp"
+        ],
+        [
+            "2025-05-07 16:17:51.564256+00:00",
+            "wirpo-test",
+            "dash",
+            4562,
+            "/usr/bin/env bash /var/lib/waagent/Microsoft.CPlat.Core.RunCommandLinux-1.0.5/bin/run-command-shim enable"
+        ],
+        [
+            "2025-05-07 16:17:53.665807+00:00",
+            "wirpo-test",
+            "dash",
+            5329,
+            "/usr/bin/env sh /var/lib/waagent/Microsoft.Azure.RecoveryServices.VMSnapshotLinux-1.0.9225.0/main/handle.sh enable"
+        ],
+        [
+            "2025-05-07 16:19:27.318980+00:00",
+            "wirpo-test",
+            "dash",
+            5833,
+            "/usr/bin/env -i PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin run-parts --lsbsysinit /etc/update-motd.d"
+        ],
+        [
+            "2025-05-07 16:20:04.198705+00:00",
+            "wirpo-test",
+            "dash",
+            6032,
+            "/usr/bin/env -i PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin run-parts --lsbsysinit /etc/update-motd.d"
+        ],
+        [
+            "2025-05-07 16:21:30.877356+00:00",
+            "wirpo-test",
+            "dash",
+            6362,
+            "/usr/bin/env -i PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin run-parts --lsbsysinit /etc/update-motd.d"
+        ],
+        [
+            "2025-05-07 16:29:16.788238+00:00",
+            "wirpo-test",
+            "dash",
+            8123,
+            "/usr/bin/env -i PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin run-parts --lsbsysinit /etc/update-motd.d"
+        ],
+        [
+            "2025-05-07 16:30:34.384386+00:00",
+            "wirpo-test",
+            "dash",
+            8356,
+            "/usr/bin/env -i PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin run-parts --lsbsysinit /etc/update-motd.d"
+        ],
+        [
+            "2025-05-07 16:31:09.656525+00:00",
+            "wirpo-test",
+            "dash",
+            8548,
+            "/usr/bin/env -i PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin run-parts --lsbsysinit /etc/update-motd.d"
+        ],
+        [
+            "2025-05-07 16:32:14.988240+00:00",
+            "wirpo-test",
+            "dash",
+            8982,
+            "/usr/bin/env -i PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin run-parts --lsbsysinit /etc/update-motd.d"
+        ],
+        [
+            "2025-05-07 16:58:05.121420+00:00",
+            "wirpo-test",
+            "dash",
+            15281,
+            "env"
+        ],
+        [
+            "2025-05-07 17:02:40.806460+00:00",
+            "wirpo-test",
+            "bash",
+            18219,
+            "env"
+        ],
+        [
+            "2025-05-07 17:03:43.196627+00:00",
+            "wirpo-test",
+            "dash",
+            20529,
+            "env"
+        ],
+        [
+            "2025-05-07 17:24:17.325469+00:00",
+            "wirpo-test",
+            "dash",
+            27962,
+            "env LC_ALL=C.UTF-8 unattended-upgrade --help"
+        ],
+        [
+            "2025-05-07 17:33:04.221334+00:00",
+            "wirpo-test.kwmmtajk0tqubd0oengdi0zqgf.gvxx.internal.cloudapp.net",
+            "dash",
+            5398,
+            "/usr/bin/env sh /var/lib/waagent/Microsoft.Azure.RecoveryServices.VMSnapshotLinux-1.0.9225.0/main/handle.sh enable"
+        ],
+        [
+            "2025-05-07 17:34:39.082304+00:00",
+            "wirpo-test.kwmmtajk0tqubd0oengdi0zqgf.gvxx.internal.cloudapp.net",
+            "dash",
+            7790,
+            "/usr/bin/env -i PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin run-parts --lsbsysinit /etc/update-motd.d"
+        ]
+    ]
+}

@@ -1,0 +1,34 @@
+{
+    "technique_id": "T1070.004",
+    "question_id": "edd779e4-a509-4cba-8dfa-a112543dbfb1",
+    "context": "On a Windows endpoint, a PowerShell command was executed that removed a directory and its contents from the temporary folder.",
+    "objective": "Determine which process or tool was responsible for performing a recursive deletion of a folder in the temp directory.",
+    "technical_details": {
+        "command_analysis": "The test uses the PowerShell Remove-Item cmdlet with a -Recurse flag against a specified folder under %TEMP%, deleting that folder and all its contents.",
+        "detection_approach": "Query DeviceProcessEvents for entries where the process command line contains Remove-Item and -Recurse targeting the temp path; extract the initiating process file name to identify the tool used."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question to ask for the name of the process that carried out the deletion. The answer should be the exact process name as seen in the logs.",
+    "prompt": "While reviewing Windows process events, you observe a command that recursively deleted a folder under the temporary directory. Use the process event data to identify which process or tool executed this recursive delete.",
+    "answer": [
+        "powershell"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "DeviceProcessEvents\n| where TimeGenerated >= ago(7d)\n// look for PowerShell Remove-Item with recursive flag against a temp path\n| where ProcessCommandLine has \"Remove-Item\"  \n  and ProcessCommandLine has \"-Recurse\"\n  and (\n      tolower(ProcessCommandLine) contains \"\\\\temp\\\\\"  \n      or tolower(ProcessCommandLine) contains \"%temp%\"\n      or tolower(ProcessCommandLine) contains \"$env:temp\"\n  )\n// count by the initiating tool/process\n| summarize Count = count(), FirstSeen = min(TimeGenerated), LastSeen = max(TimeGenerated) by InitiatingProcessFileName, DeviceName  \n| order by Count desc",
+    "KQL_validation_message": "KQL query validation successful: The results include a row with 'InitiatingProcessFileName' equal to 'powershell.exe', which directly corresponds to the expected answer 'powershell'. The other columns provide supporting context (device name, count, timestamps), and the presence of 'powershell.exe' is clear evidence of the activity described in the expected answer.",
+    "KQL_query_results": [
+        [
+            "InitiatingProcessFileName",
+            "DeviceName",
+            "Count",
+            "FirstSeen",
+            "LastSeen"
+        ],
+        [
+            "powershell.exe",
+            "windows-vm",
+            1,
+            "2025-05-07 16:32:49.510275+00:00",
+            "2025-05-07 16:32:49.510275+00:00"
+        ]
+    ]
+}

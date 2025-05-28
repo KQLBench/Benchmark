@@ -1,0 +1,55 @@
+{
+    "technique_id": "T1059.004",
+    "question_id": "bf23c7dc-1004-4949-8262-4c1d1ef87702",
+    "context": "On Linux systems, adversaries may enumerate available shells by reading the shell configuration file to identify possible interpreters for follow-on activity.",
+    "objective": "Detect when a process has read the shell list to discover available shells.",
+    "technical_details": {
+        "command_analysis": "The test runs a simple shell command to output the contents of the system file that lists valid shells.",
+        "detection_approach": "Search process execution or syslog records for reads targeting the shell list file path and identify the exact command line used."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Focus on how an analyst would question process logs for file accesses to /etc/shells and the exact command that performed the read.",
+    "prompt": "An attacker on a Linux host may try to enumerate installed shells by reading the system file that lists valid shells. Using process or syslog data, determine which command was executed to perform this enumeration.",
+    "answer": [
+        "cat /etc/shells"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "// Detect enumeration of available shells on Linux (/etc/shells)\nlet Path = \"/etc/shells\";\n\n// 1. Process executions that read /etc/shells (e.g., “cat /etc/shells”)\nlet proc = DeviceProcessEvents\n  | where ProcessCommandLine has Path\n  | project TimeGenerated, DeviceName, InitiatingProcessAccountName, ProcessCommandLine, Source = \"DeviceProcessEvents\";\n\n// 2. File‐read operations against /etc/shells\nlet fileRead = DeviceFileEvents\n  | where FolderPath == \"/etc\" and FileName == \"shells\" and ActionType has \"FileRead\"\n  | project TimeGenerated, DeviceName, InitiatingProcessAccountName, ProcessCommandLine = InitiatingProcessCommandLine, Source = \"DeviceFileEvents\";\n\n// 3. Syslog entries that include a read of /etc/shells\nlet sys = Syslog\n  | where SyslogMessage has Path\n  | project TimeGenerated, DeviceName = HostName, InitiatingProcessAccountName = \"\", ProcessCommandLine = SyslogMessage, Source = \"Syslog\";\n\n// Combine and sort by time\nproc\n| union fileRead\n| union sys\n| sort by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: The ProcessCommandLine field in the result has exact 'cat /etc/shells' executions, as well as executions via 'sh -c'. This covers the expected answer verbatim and relevant variants, proving the detection was successful and the evidence required is present.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "ProcessCommandLine",
+            "Source"
+        ],
+        [
+            "2025-05-07 17:02:40.844507+00:00",
+            "wirpo-test",
+            "root",
+            "cat /etc/shells",
+            "DeviceProcessEvents"
+        ],
+        [
+            "2025-05-07 17:02:08.176231+00:00",
+            "wirpo-test",
+            "root",
+            "cat /etc/shells",
+            "DeviceProcessEvents"
+        ],
+        [
+            "2025-05-07 17:02:08.171924+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c \"cat /etc/shells\"",
+            "DeviceProcessEvents"
+        ],
+        [
+            "2025-05-07 17:02:08.171337+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c \"cat /etc/shells\"",
+            "DeviceProcessEvents"
+        ]
+    ]
+}

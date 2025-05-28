@@ -1,0 +1,34 @@
+{
+    "technique_id": "T1059.007",
+    "question_id": "0709945e-4fec-4c49-9faf-c3c292a74484",
+    "context": "A Windows host executed a JScript through the Windows Script Host utility. The action surfaced in process creation logs.",
+    "objective": "Detect instances where wscript.exe is used to run a JScript and discover which script file was invoked.",
+    "technical_details": {
+        "command_analysis": "wscript is invoked with a .js file path argument, causing the JScript to run under the Windows Script Host.",
+        "detection_approach": "Query process creation events for FileName equal to 'wscript.exe' and examine the ProcessCommandLine to extract the .js script path."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question to ask which JScript file path appeared in the wscript invocation. The answer must match the script path found in the logs.",
+    "prompt": "On a Windows endpoint, wscript.exe was used to run a JScript. Identify the exact script path passed to wscript.",
+    "answer": [
+        "PathToAtomicsFolder\\T1059.007\\src\\sys_info.js"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where FileName == \"wscript.exe\"\n| where ProcessCommandLine contains \".js\"\n| extend ScriptPath = extract(@\"(?i)(\\S+?\\.js)\", 1, ProcessCommandLine)\n| where isnotempty(ScriptPath)\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, ProcessCommandLine, ScriptPath",
+    "KQL_validation_message": "KQL query validation successful: The expected answer is 'PathToAtomicsFolder\\T1059.007\\src\\sys_info.js'. In the query results, the ScriptPath field contains '\"C:\\AtomicRedTeam\\atomics\\T1059.007\\src\\sys_info.js\"', which aligns with the expected answer when replacing the placeholder with the actual path. This is a direct 1:1 match, and the results provide the required evidence.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "ProcessCommandLine",
+            "ScriptPath"
+        ],
+        [
+            "2025-05-07 17:11:30.933726+00:00",
+            "windows-vm",
+            "wipro",
+            "wscript  \"C:\\AtomicRedTeam\\atomics\\T1059.007\\src\\sys_info.js\"",
+            "\"C:\\AtomicRedTeam\\atomics\\T1059.007\\src\\sys_info.js"
+        ]
+    ]
+}

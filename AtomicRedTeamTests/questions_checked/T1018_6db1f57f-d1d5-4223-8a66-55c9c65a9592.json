@@ -1,0 +1,34 @@
+{
+    "technique_id": "T1018",
+    "question_id": "6db1f57f-d1d5-4223-8a66-55c9c65a9592",
+    "context": "On a Windows system, an attacker used the built-in command prompt to perform network reconnaissance by issuing a series of ICMP pings in a loop against a contiguous block of IP addresses.",
+    "objective": "Determine the exact command line that was executed to conduct the ping sweep on the 192.168.1.x network.",
+    "technical_details": {
+        "command_analysis": "We expect to see a cmd.exe process invoking a FOR /L loop combined with ping flags (-n and -w) to iterate through host addresses.",
+        "detection_approach": "Query DeviceProcessEvents for entries where ProcessCommandLine contains 'for /l' and 'ping -n 1', then examine the full command to extract the loop parameters and target subnet."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Ask which full command was used so that the analyst hunts for the specific ProcessCommandLine and reports it exactly as seen in the logs.",
+    "prompt": "A Windows host executed an ICMP-based network reconnaissance using a looping instruction in cmd.exe. Identify the exact command line that was used to perform the ping sweep.",
+    "answer": [
+        "for /l %i in (1,1,254) do ping -n 1 -w 100 192.168.1.%i"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where FileName == \"cmd.exe\"\n| where ProcessCommandLine has \"for /l\" and ProcessCommandLine has \"ping -n 1\" and ProcessCommandLine has \"-w\" and ProcessCommandLine has \"192.168.1.\"\n| project TimeGenerated, DeviceName, AccountName, ProcessId, ProcessCommandLine\n| order by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: The returned results include a 'ProcessCommandLine' value that exactly matches the expected command: 'for /l %i in (1,1,254) do ping -n 1 -w 100 192.168.1.%i'. This means the query captured process execution for the specified network scanning activity, directly matching the detection question's requirements. Additionally, relevant context such as TimeGenerated, DeviceName, AccountName, and ProcessId are included, providing further evidence around the event.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "AccountName",
+            "ProcessId",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 16:49:41.533650+00:00",
+            "windows-vm",
+            "wipro",
+            14192,
+            "\"cmd.exe\" /c for /l %i in (1,1,254) do ping -n 1 -w 100 192.168.1.%i"
+        ]
+    ]
+}

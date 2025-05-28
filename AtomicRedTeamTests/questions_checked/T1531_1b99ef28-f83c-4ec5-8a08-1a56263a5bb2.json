@@ -1,0 +1,52 @@
+{
+    "technique_id": "T1531",
+    "question_id": "1b99ef28-f83c-4ec5-8a08-1a56263a5bb2",
+    "context": "A suspected LockerGoga-style operation on a Windows host leverages the native net.exe utility to change a local account password, potentially disrupting legitimate access.",
+    "objective": "Detect when net.exe is used to modify a user’s password and extract the exact password value applied.",
+    "technical_details": {
+        "command_analysis": "Analyze the ProcessCommandLine field in Windows process events for patterns matching 'net.exe user <Account> <NewPassword>'.",
+        "detection_approach": "Use DeviceProcessEvents to flag net.exe invocations where the command line includes the 'user' subcommand and a password parameter, indicating a password change."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the inquiry around finding net.exe executions in process telemetry that alter account credentials, then ask specifically for the password argument supplied.",
+    "prompt": "Within Windows process event logs, identify instances where the built-in net.exe utility is used to change a user account password. What was the new password argument passed in?",
+    "answer": [
+        "HuHuHUHoHo283283@dJD"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where ActionType == \"ProcessCreated\"\n| where FileName == \"net.exe\"\n| where ProcessCommandLine has \" user \"\n| extend TargetAccount = extract(@\"user\\s+(\\S+)\\s+(\\S+)\", 1, ProcessCommandLine),\n         NewPassword   = extract(@\"user\\s+(\\S+)\\s+(\\S+)\", 2, ProcessCommandLine)\n| where isnotempty(NewPassword)\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, TargetAccount, NewPassword, ProcessCommandLine",
+    "KQL_validation_message": "KQL query validation successful: The expected answer 'HuHuHUHoHo283283@dJD' appears in the column 'NewPassword' in one of the result rows. Specifically, on the row with 'DeviceName' = 'windows-vm', 'InitiatingProcessAccountName' = 'wipro', and 'ProcessCommandLine' = 'net.exe  user AtomicAdministrator HuHuHUHoHo283283@dJD', the password change action recorded matches the expected value. Therefore, this query returns the necessary evidence for the detection question regarding this particular password operation.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "TargetAccount",
+            "NewPassword",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 17:08:15.038216+00:00",
+            "windows-vm",
+            "wipro",
+            "AtomicAdministrator",
+            "User2ChangePW!",
+            "net  user AtomicAdministrator User2ChangePW! /add "
+        ],
+        [
+            "2025-05-07 17:08:15.194353+00:00",
+            "windows-vm",
+            "wipro",
+            "AtomicAdministrator",
+            "HuHuHUHoHo283283@dJD",
+            "net.exe  user AtomicAdministrator HuHuHUHoHo283283@dJD"
+        ],
+        [
+            "2025-05-07 17:08:18.707051+00:00",
+            "windows-vm",
+            "wipro",
+            "AtomicAdministrator",
+            "/delete",
+            "net.exe  user AtomicAdministrator /delete "
+        ]
+    ]
+}

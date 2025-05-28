@@ -1,0 +1,26 @@
+{
+    "technique_id": "T1070.004",
+    "question_id": "562d737f-2fc6-4b09-8c2a-7f8ff0828480",
+    "context": "A Linux host executed a shell command that removed a file from its temporary directory.",
+    "objective": "Determine which file under /tmp/victim-files was deleted.",
+    "technical_details": {
+        "command_analysis": "The executor ran an 'rm -f' command against a specific file path under /tmp/victim-files.",
+        "detection_approach": "Query file deletion events in logs (e.g., Syslog or DeviceFileEvents), filtering on ActionType for deletions and the FolderPath matching /tmp/victim-files."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Ask the analyst to pinpoint the exact file name that was deleted and ensure the response matches the test file name precisely.",
+    "prompt": "On a Linux device, a file was silently removed from the /tmp/victim-files directory. Search through file event or syslog records to identify the exact file name that was deleted.",
+    "answer": [
+        "T1070.004-test.txt"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "let deletedFileEvents = DeviceFileEvents\n| where ActionType == \"FileDeleted\"\n| where FolderPath startswith \"/tmp/victim-files\"\n| project FileName;\n\nlet processRmEvents = DeviceProcessEvents\n| where FileName == \"rm\" and ProcessCommandLine has \"/tmp/victim-files/\"\n| extend fullPath = extract(@\"rm\\s+-[^\\s]*\\s+(/tmp/victim-files/[^;\\s]+)\", 1, ProcessCommandLine)\n| where isnotempty(fullPath)\n| extend FileName = extract(@\"/tmp/victim-files/([^/\\s]+)$\", 1, fullPath)\n| project FileName;\n\nlet syslogRmEvents = Syslog\n| where SyslogMessage has \"rm -f\" and SyslogMessage has \"/tmp/victim-files/\"\n| extend fullPath = extract(@\"rm\\s+-[^\\s]*\\s+(/tmp/victim-files/[^;\\s]+)\", 1, SyslogMessage)\n| where isnotempty(fullPath)\n| extend FileName = extract(@\"/tmp/victim-files/([^/\\s]+)$\", 1, fullPath)\n| project FileName;\n\ndeletedFileEvents\n| union processRmEvents\n| union syslogRmEvents\n| distinct FileName",
+    "KQL_validation_message": "KQL query validation successful: The query results are structured as a header row ['FileName'] and a data row ['T1070.004-test.txt']. This format means the result set contains the file name expected per the detection question. Therefore, the evidence is present and the query successfully identifies the relevant activity.",
+    "KQL_query_results": [
+        [
+            "FileName"
+        ],
+        [
+            "T1070.004-test.txt"
+        ]
+    ]
+}

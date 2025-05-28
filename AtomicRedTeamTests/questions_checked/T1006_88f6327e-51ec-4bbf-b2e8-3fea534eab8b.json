@@ -1,0 +1,47 @@
+{
+    "technique_id": "T1006",
+    "question_id": "88f6327e-51ec-4bbf-b2e8-3fea534eab8b",
+    "context": "On a Windows system, an adversary used PowerShell to access a volume boot sector directly via a DOS device path (\\\\.\\C:) and then displayed a hex dump of the first bytes.",
+    "objective": "Detect when a process opens a raw volume handle via a DOS device path and determine which PowerShell cmdlet produced the hex dump output.",
+    "technical_details": {
+        "command_analysis": "The attacker’s command stream creates a byte buffer, opens a FileStream on \"\\\\.\\C:\", reads raw bytes, closes the handle, and finally pipes the buffer into a hex-formatting cmdlet.",
+        "detection_approach": "Search PowerShell process creation events for command lines referencing the DOS device path specifier (\\\\.\\) and subsequent invocation of a hex dump cmdlet."
+    },
+    "thinking_how_to_phrase_question_and_answer": "We want to guide the analyst toward isolating an unusual PowerShell invocation that reads raw volume bytes and formats them, then ask specifically for the formatting cmdlet name.",
+    "prompt": "Identify the PowerShell cmdlet used on Windows to format and display the raw volume bytes after an attacker read the boot sector via a DOS device path.",
+    "answer": [
+        "Format-Hex"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "let lookback = ago(7d);\nlet ps = DeviceProcessEvents\n  | where TimeGenerated >= lookback\n  | where FileName in (\"powershell.exe\",\"pwsh.exe\");\n\nlet rawAccess = ps\n  // look for DOS‐device style path access (e.g. \\\\.\\C:)\n  | where ProcessCommandLine contains @\"\\\\.\\C:\"\n  | project DeviceId, DeviceName, ProcessId, InitiatingProcessAccountName, RawTime = TimeGenerated, RawCommand = ProcessCommandLine;\n\nlet hexDump = ps\n  // detect the hex‐dump cmdlet\n  | where ProcessCommandLine has \"Format-Hex\"\n  | project DeviceId, ProcessId, HexTime = TimeGenerated, HexCommand = ProcessCommandLine;\n\nrawAccess\n  | join kind=inner hexDump on DeviceId, ProcessId\n  | where HexTime >= RawTime\n  | project\n      DeviceName,\n      InitiatingProcessAccountName,\n      ProcessId,\n      RawTime,\n      RawCommand,\n      HexTime,\n      HexCommand\n  | order by RawTime desc",
+    "KQL_validation_message": "KQL query validation successful: Both returned rows show the PowerShell command line including 'Format-Hex -InputObject $buffer', which means the activity specified ('Format-Hex') is directly present. This meets the requirement for evidence of that activity.",
+    "KQL_query_results": [
+        [
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "ProcessId",
+            "RawTime",
+            "RawCommand",
+            "HexTime",
+            "HexCommand"
+        ],
+        [
+            "windows-vm",
+            "wipro",
+            10428,
+            "2025-05-07 16:38:34.962540+00:00",
+            "\"powershell.exe\" & {$buffer = New-Object byte[] 11\n$handle = New-Object IO.FileStream \\\"\"\\\\.\\C:\\\"\", 'Open', 'Read', 'ReadWrite'\n$handle.Read($buffer, 0, $buffer.Length)\n$handle.Close()\nFormat-Hex -InputObject $buffer}",
+            "2025-05-07 16:38:34.962540+00:00",
+            "\"powershell.exe\" & {$buffer = New-Object byte[] 11\n$handle = New-Object IO.FileStream \\\"\"\\\\.\\C:\\\"\", 'Open', 'Read', 'ReadWrite'\n$handle.Read($buffer, 0, $buffer.Length)\n$handle.Close()\nFormat-Hex -InputObject $buffer}"
+        ],
+        [
+            "windows-vm",
+            "wipro",
+            11060,
+            "2025-05-07 16:28:02.786478+00:00",
+            "\"powershell.exe\" & {$buffer = New-Object byte[] 11\n$handle = New-Object IO.FileStream \\\"\"\\\\.\\C:\\\"\", 'Open', 'Read', 'ReadWrite'\n$handle.Read($buffer, 0, $buffer.Length)\n$handle.Close()\nFormat-Hex -InputObject $buffer}",
+            "2025-05-07 16:28:02.786478+00:00",
+            "\"powershell.exe\" & {$buffer = New-Object byte[] 11\n$handle = New-Object IO.FileStream \\\"\"\\\\.\\C:\\\"\", 'Open', 'Read', 'ReadWrite'\n$handle.Read($buffer, 0, $buffer.Length)\n$handle.Close()\nFormat-Hex -InputObject $buffer}"
+        ]
+    ]
+}

@@ -1,0 +1,41 @@
+{
+    "technique_id": "T1614.001",
+    "question_id": "69f625ba-938f-4900-bdff-82ada3df5d9c",
+    "context": "On Windows systems, DISM (Deployment Image Servicing and Management) can be invoked with elevated privileges to enumerate international settings. Adversaries may abuse this legitimate tool to fingerprint system locales.",
+    "objective": "Identify when DISM was executed to query system language settings and surface the exact command used.",
+    "technical_details": {
+        "command_analysis": "The dism.exe binary is launched with the /online and /Get-Intl flags to list locale information.",
+        "detection_approach": "Search the DeviceProcessEvents table for dism.exe process creations with a command line containing both \"/online\" and \"/Get-Intl\"."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Phrase the question to ask specifically what full command invocation was used to retrieve language information, and expect the answer to match the exact dism.exe invocation recorded in the logs.",
+    "prompt": "In a Windows environment, locate any occurrences where an elevated DISM utility was run to enumerate the system’s international (locale) settings. What was the exact command line used?",
+    "answer": [
+        "dism.exe /online /Get-Intl"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "DeviceProcessEvents\n| where ActionType == \"ProcessCreated\"\n| where isnotempty(ProcessCommandLine)\n| where ProcessCommandLine has \"dism.exe\" and ProcessCommandLine has \"/Online\" and ProcessCommandLine has \"/Get-Intl\"\n| extend DetectedCommand = extract(@\"(?i)(dism\\.exe\\s+/online\\s+/get-intl)\", 1, ProcessCommandLine)\n| where isnotempty(DetectedCommand)\n| project TimeGenerated, DeviceName, AccountName, ProcessId, DetectedCommand\n| order by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: The expected answer was the command 'dism.exe /online /Get-Intl'. The results include two rows where 'DetectedCommand' is 'dism.exe  /online /Get-Intl' (with a double space) and 'dism.exe /online /Get-Intl' (single space). Both strings indicate that this command was executed, confirming the presence of this activity. The evidence in the results matches the detection question fully.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "AccountName",
+            "ProcessId",
+            "DetectedCommand"
+        ],
+        [
+            "2025-05-07 17:03:40.140408+00:00",
+            "windows-vm",
+            "wipro",
+            11972,
+            "dism.exe  /online /Get-Intl"
+        ],
+        [
+            "2025-05-07 17:03:40.104521+00:00",
+            "windows-vm",
+            "wipro",
+            11808,
+            "dism.exe /online /Get-Intl"
+        ]
+    ]
+}

@@ -1,0 +1,38 @@
+{
+    "technique_id": "T1016.001",
+    "question_id": "be8f4019-d8b6-434c-a814-53123cdcc11e",
+    "context": "A Linux system executed a network utility to verify external connectivity.",
+    "objective": "Identify when a ping command was used to check internet access and determine the destination address used.",
+    "technical_details": {
+        "command_analysis": "Analyze process creation logs to locate executions of the 'ping' utility and inspect its command-line arguments for target addresses.",
+        "detection_approach": "Query the DeviceProcessEvents table, filter for FileName equal to 'ping', and parse the ProcessCommandLine to extract the IP argument following '-c'. The destination IP indicates the connectivity test target."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Phrase the question to ask specifically which external IP was pinged for connectivity verification.",
+    "prompt": "On a Linux host, a ping command was executed to test internet connectivity. Determine which IP address was used as the ping target.",
+    "answer": [
+        "8.8.8.8"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "DeviceProcessEvents\n| where FileName == \"ping\"\n| extend TargetAddress = extract(@\"-c\\s+\\d+\\s+(\\d{1,3}(?:\\.\\d{1,3}){3})\", 1, ProcessCommandLine)\n| where isnotempty(TargetAddress)\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, TargetAddress",
+    "KQL_validation_message": "KQL query validation successful: The results include records where the 'TargetAddress' field is '8.8.8.8', which directly matches the expected answers. The information provided in the results (timestamps, device name, account name, and target address) is sufficient to identify the activity involving '8.8.8.8'. Each occurrence matches the expected answer, satisfying the requirements of the detection question.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "TargetAddress"
+        ],
+        [
+            "2025-05-07 17:01:35.797610+00:00",
+            "wirpo-test",
+            "root",
+            "8.8.8.8"
+        ],
+        [
+            "2025-05-07 17:07:57.566082+00:00",
+            "wirpo-test",
+            "root",
+            "8.8.8.8"
+        ]
+    ]
+}

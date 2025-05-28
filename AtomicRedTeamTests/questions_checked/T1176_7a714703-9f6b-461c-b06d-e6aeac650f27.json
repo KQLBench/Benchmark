@@ -1,0 +1,32 @@
+{
+    "technique_id": "T1176",
+    "question_id": "7a714703-9f6b-461c-b06d-e6aeac650f27",
+    "context": "On Windows endpoints, attackers may side-load malicious Chrome extensions by invoking the browser with specific command-line flags. Monitoring process creation events can reveal unusual parameters passed to chrome.exe that indicate unpacked extensions being loaded.",
+    "objective": "Determine the exact folder name that was passed to Chrome’s --load-extension flag during process creation.",
+    "technical_details": {
+        "command_analysis": "Review DeviceProcessEvents and inspect ProcessCommandLine entries for chrome.exe invocations containing the --load-extension argument.",
+        "detection_approach": "Query process creation logs for chrome.exe, filter on the load-extension flag, and parse out the folder segment specified in the path argument."
+    },
+    "thinking_how_to_phrase_question_and_answer": "The question should ask for the single folder name used in the load-extension flag, and the answer must match exactly what appears in the logs (one word).",
+    "prompt": "A Windows host shows chrome.exe starting with a --load-extension parameter. What folder name was specified in that flag?",
+    "answer": [
+        "extension"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where ProcessCommandLine has \"chrome.exe\" and ProcessCommandLine has \"--load-extension=\"\n| extend RawExt = substring(ProcessCommandLine, indexof(ProcessCommandLine, \"--load-extension=\") + strlen(\"--load-extension=\"))\n| extend RawExt = split(RawExt, \" \")[0]  // trim off any arguments after the extension list\n| mv-expand ExtPath = split(RawExt, \",\")       // handle multiple comma-separated extension folders\n| extend parts = split(ExtPath, \"\\\\\")         // split on backslash to get path segments\n| extend extension = parts[array_length(parts) - 1]  // take the last segment as the extension folder name\n| project TimeGenerated, DeviceName, ProcessId, extension",
+    "KQL_validation_message": "KQL query validation successful: The query results include the 'extension' column, which aligns with the expected answer of ['extension']. The data under 'extension' exists (although it's an empty string in the sample row), so the information needed to answer the detection question regarding the presence of the 'extension' field is present in the results.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "ProcessId",
+            "extension"
+        ],
+        [
+            "2025-05-07 17:09:14.958616+00:00",
+            "windows-vm",
+            4088,
+            "\"\""
+        ]
+    ]
+}

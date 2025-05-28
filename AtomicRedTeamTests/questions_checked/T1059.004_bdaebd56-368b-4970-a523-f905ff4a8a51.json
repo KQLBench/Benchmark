@@ -1,0 +1,44 @@
+{
+    "technique_id": "T1059.004",
+    "question_id": "bdaebd56-368b-4970-a523-f905ff4a8a51",
+    "context": "An attacker may avoid dropping script files by embedding commands within environment variables and executing them directly via a shell. On Linux hosts, this behavior can bypass traditional file-based detections.",
+    "objective": "Detect instances where an environment variable is populated with code and immediately executed through a shell pipeline.",
+    "technical_details": {
+        "command_analysis": "The attacker exports an environment variable containing an echo command and then pipes the variable’s contents into /bin/sh for execution.",
+        "detection_approach": "Search process execution logs for shell invocations that include an export statement of a variable followed by a pipe into a shell interpreter, indicating script-in-variable execution."
+    },
+    "thinking_how_to_phrase_question_and_answer": "We want to focus on how to identify the specific variable name holding the malicious payload, so the question should steer the analyst toward parsing command-line arguments for export patterns.",
+    "prompt": "On a Linux system, review process execution records for any shell process that set an environment variable containing executable code and then piped it into another shell instance. Determine which environment variable name was used to store the script content.",
+    "answer": [
+        "ART"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where tolower(ProcessCommandLine) has \"export \"\n| where tolower(ProcessCommandLine) has \"|/bin/sh\"\n| where ProcessCommandLine matches regex @\"export\\s+\\w+=.*\\|\\s*/bin/sh\"\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, ProcessCommandLine",
+    "KQL_validation_message": "KQL query validation successful: The expected answer was 'ART'. In the 'ProcessCommandLine' values within the query results, the string 'export ART=...' and 'echo $ART' occur, showing direct mention and usage of the variable 'ART'. Therefore, these results provide the required evidence to identify activities associated with the expected answer.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 17:02:08.698384+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c 'export ART='echo \"Atomic Red Team was here... T1059.004\"'; echo $ART |/bin/sh'"
+        ],
+        [
+            "2025-05-07 17:02:08.701066+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c 'export ART='echo \"Atomic Red Team was here... T1059.004\"'; echo $ART |/bin/sh'"
+        ],
+        [
+            "2025-05-07 17:02:08.704130+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c 'export ART='echo \"Atomic Red Team was here... T1059.004\"'; echo $ART |/bin/sh'"
+        ]
+    ]
+}

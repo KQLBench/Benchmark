@@ -1,0 +1,34 @@
+{
+    "technique_id": "T1547.014",
+    "question_id": "39e417dd-4fed-4d9c-ae3a-ba433b4d0e9a",
+    "context": "On a Windows host, an attacker modified the Active Setup registry branch for Internet Explorer Core Fonts by adding a new StubPath value to establish persistence.",
+    "objective": "Determine which payload was configured in the newly added StubPath registry entry under the Active Setup key.",
+    "technical_details": {
+        "command_analysis": "A PowerShell Set-ItemProperty command targeted HKLM:\\SOFTWARE\\Microsoft\\Active Setup\\Installed Components\\{C9E9A340-D1F1-11D0-821E-444553540600} to add a StubPath value.",
+        "detection_approach": "Query DeviceRegistryEvents for registry write actions where RegistryKey matches the Active Setup component path and RegistryValueName equals 'StubPath', then inspect RegistryValueData for the payload."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question to ask specifically for the payload file name that was set in the StubPath value, expecting a single file name as the answer.",
+    "prompt": "A Windows endpoint shows an Active Setup entry under Internet Explorer Core Fonts being altered with a StubPath value. Investigate the registry events and identify the payload that was set.",
+    "answer": [
+        "calc.exe"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceRegistryEvents\n| where ActionType == \"RegistryValueSet\"\n| where RegistryValueName == \"StubPath\"\n| where RegistryKey has \"\\\\SOFTWARE\\\\Microsoft\\\\Active Setup\\\\Installed Components\\\\{C9E9A340-D1F1-11D0-821E-444553540600}\"\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, InitiatingProcessCommandLine, RegistryValueData",
+    "KQL_validation_message": "KQL query validation successful: The detection question asks for evidence of 'calc.exe'. The query results include a field, 'RegistryValueData', with this exact value. Additionally, the 'InitiatingProcessCommandLine' includes the string 'Set-ItemProperty' that sets a registry property to 'C:\\Windows\\System32\\calc.exe', which matches the expected answer. Thus, the results directly contain the information needed to confirm the detection question.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "InitiatingProcessCommandLine",
+            "RegistryValueData"
+        ],
+        [
+            "2025-05-07 16:52:24.855865+00:00",
+            "windows-vm",
+            "wipro",
+            "\"powershell.exe\" & {Set-ItemProperty \\\"\"HKLM:\\SOFTWARE\\Microsoft\\Active Setup\\Installed Components\\{C9E9A340-D1F1-11D0-821E-444553540600}\\\"\" \\\"\"StubPath\\\"\" \\\"\"C:\\Windows\\System32\\calc.exe\\\"\" -Force\n& $env:SYSTEMROOT\\system32\\runonce.exe /AlternateShellStartup}",
+            "C:\\Windows\\System32\\calc.exe"
+        ]
+    ]
+}

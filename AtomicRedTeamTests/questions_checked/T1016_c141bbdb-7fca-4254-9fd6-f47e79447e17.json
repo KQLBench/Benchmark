@@ -1,0 +1,38 @@
+{
+    "technique_id": "T1016",
+    "question_id": "c141bbdb-7fca-4254-9fd6-f47e79447e17",
+    "context": "An attacker ran a shell script on a Linux host to enumerate network configuration, invoking multiple utilities (netstat, arp, ifconfig, ip) and emitting output to stdout, which was captured in Syslog process execution logs.",
+    "objective": "Detect the execution of network reconnaissance commands and pinpoint the specific utility used to list active TCP connections.",
+    "technical_details": {
+        "command_analysis": "The script determines the appropriate netstat variant (‘‘netstat -ant’’ on Linux or ‘‘netstat -Sp tcp’’ on FreeBSD) and invokes it along with arp, ifconfig, and ip to gather network details.",
+        "detection_approach": "Query the Syslog (or DeviceProcessEvents) logs for process execution entries where the ProcessName matches known network utilities, then isolate the record for listing TCP connections."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Phrase the question to require the analyst to search execution logs and extract the single command name used for listing connections, ensuring the answer is exactly the utility name.",
+    "prompt": "A Linux host’s Syslog shows a shell-based network discovery script ran multiple commands. One of them listed current TCP connections. Which utility was invoked?",
+    "answer": [
+        "netstat"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "let ReconSyslog = Syslog\n| where ProcessName in (\"netstat\",\"arp\",\"ifconfig\",\"ip\")\n| extend Host=HostName, CommandName=ProcessName, CommandLine=SyslogMessage\n| project TimeGenerated, Host, CommandName, CommandLine;\nlet ReconProc = DeviceProcessEvents\n| where FileName in (\"netstat\",\"arp\",\"ifconfig\",\"ip\")\n| extend Host=DeviceName, CommandName=FileName, CommandLine=ProcessCommandLine\n| project TimeGenerated, Host, CommandName, CommandLine;\nReconSyslog\n| union ReconProc\n| where CommandLine has \"-ant\" or CommandLine has \"-Sp tcp\"\n| where CommandName == \"netstat\"\n| order by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: The expected answer is 'netstat', and the query results include two rows where the 'CommandName' column is 'netstat' and the 'CommandLine' field shows the full command executed. The results are structured with clear timestamp, host, command name, and command line, directly matching the expected reference to 'netstat' activity. Therefore, these results provide the necessary evidence to answer the detection question.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "Host",
+            "CommandName",
+            "CommandLine"
+        ],
+        [
+            "2025-05-07 16:31:22.677483+00:00",
+            "wirpo-test",
+            "netstat",
+            "netstat -ant"
+        ],
+        [
+            "2025-05-07 16:20:16.811250+00:00",
+            "wirpo-test",
+            "netstat",
+            "netstat -ant"
+        ]
+    ]
+}

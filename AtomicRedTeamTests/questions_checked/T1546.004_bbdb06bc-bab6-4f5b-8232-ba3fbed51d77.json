@@ -1,0 +1,41 @@
+{
+    "technique_id": "T1546.004",
+    "question_id": "bbdb06bc-bab6-4f5b-8232-ba3fbed51d77",
+    "context": "On Linux systems, attackers may modify shell startup scripts like ~/.profile to achieve persistence by automatically executing malicious commands at user login.",
+    "objective": "Detect unauthorized append operations to user shell profiles and identify the exact command injected into ~/.profile.",
+    "technical_details": {
+        "command_analysis": "Look for file modification events or syslog entries indicating a shell process used output redirection (>>) to append content into a .profile file.",
+        "detection_approach": "Query the Syslog or DeviceFileEvents table for entries where the process name is a shell (e.g., sh or bash) and the message or command line includes both 'echo' and '>>' targeting a '.profile' file."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question to require extracting the appended command from log entries, ensuring the answer matches the exact injected line.",
+    "prompt": "Investigate recent file modification events on Linux that could reveal an adversary appending commands to a user’s ~/.profile for persistence. Determine the exact command that was added.",
+    "answer": [
+        "echo '# Atomic Red Team was here... T1546.004' >> ~/.profile"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "(\n    DeviceFileEvents\n    | where TimeGenerated > ago(7d)\n    | where FileName endswith \".profile\"\n    | where InitiatingProcessFileName in (\"bash\", \"sh\", \"dash\", \"zsh\", \"ksh\")\n    | where InitiatingProcessCommandLine has \"echo\" and InitiatingProcessCommandLine has \">>\"\n    | extend InjectedCommand = InitiatingProcessCommandLine\n    | project TimeGenerated, Device = DeviceName, Account = InitiatingProcessAccountName, Process = InitiatingProcessFileName, InjectedCommand\n)\n| union (\n    DeviceProcessEvents\n    | where TimeGenerated > ago(7d)\n    | where FileName in (\"bash\", \"sh\", \"dash\", \"zsh\", \"ksh\")\n    | where ProcessCommandLine has \"echo\" and ProcessCommandLine has \">>\" and ProcessCommandLine has \".profile\"\n    | extend InjectedCommand = ProcessCommandLine\n    | project TimeGenerated, Device = DeviceName, Account = InitiatingProcessAccountName, Process = FileName, InjectedCommand\n)\n| sort by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: The 'InjectedCommand' field in the results includes the command 'echo '# Atomic Red Team was here... T1546.004' >> ~/.profile' (wrapped inside a shell invocation), which matches the intent and content of the expected answer. Therefore, the results provide clear evidence of the activity sought by the detection question.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "Device",
+            "Account",
+            "Process",
+            "InjectedCommand"
+        ],
+        [
+            "2025-05-07 17:01:15.817743+00:00",
+            "wirpo-test",
+            "root",
+            "dash",
+            "sh -c \"echo '# Atomic Red Team was here... T1546.004' >> ~/.profile\""
+        ],
+        [
+            "2025-05-07 17:01:15.494403+00:00",
+            "wirpo-test",
+            "root",
+            "dash",
+            "sh -c \"echo '# Atomic Red Team was here... T1546.004' >> ~/.profile\""
+        ]
+    ]
+}

@@ -1,0 +1,38 @@
+{
+    "technique_id": "T1564.002",
+    "question_id": "173126b7-afe4-45eb-8680-fa9f6400431c",
+    "context": "In a Windows environment, attackers may conceal user accounts by manipulating registry entries under the Winlogon SpecialAccounts UserList key.",
+    "objective": "Detect when an adversary adds or modifies a registry value to hide a user from the logon screen and determine which account was hidden.",
+    "technical_details": {
+        "command_analysis": "The attack sequence uses NET USER to create a new account (suffixing the name with a dollar sign) and then issues REG ADD against HKLM\\Software\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon\\SpecialAccounts\\UserList, setting the value of the new account to 0.",
+        "detection_approach": "Inspect DeviceRegistryEvents for registry additions or modifications where RegistryKey ends with SpecialAccounts\\\\UserList and RegistryValueData equals 0 to pinpoint hidden accounts."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question to ask specifically which registry value name (the account name) was set to hide an account.",
+    "prompt": "On Windows systems, identify any user account that was hidden by setting its value to 0 under the SpecialAccounts\\\\UserList registry key. What was the name of the hidden account?",
+    "answer": [
+        "AtomicOperator$"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceRegistryEvents\n| where RegistryKey endswith \"Microsoft\\\\Windows NT\\\\CurrentVersion\\\\Winlogon\\\\SpecialAccounts\\\\UserList\"\n| where RegistryValueData == \"0\"\n| where ActionType in (\"RegistryValueSet\",\"RegistryValueModified\",\"RegistryValueAdded\")\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, InitiatingProcessFileName, InitiatingProcessCommandLine, RegistryValueName, RegistryValueData",
+    "KQL_validation_message": "KQL query validation successful: The expected answer is 'AtomicOperator$'. In the query results, the field 'RegistryValueName' in the only row present exactly matches 'AtomicOperator$', which satisfies the requirement. The associated fields (process name, command line, etc.) provide context, but for the specific expected answer, the presence of 'AtomicOperator$' in the results is sufficient to confirm that the detection is covered.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "InitiatingProcessFileName",
+            "InitiatingProcessCommandLine",
+            "RegistryValueName",
+            "RegistryValueData"
+        ],
+        [
+            "2025-05-07 16:58:25.516886+00:00",
+            "windows-vm",
+            "wipro",
+            "reg.exe",
+            "REG  ADD \"HKLM\\Software\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon\\SpecialAccounts\\Userlist\" /v AtomicOperator$ /t REG_DWORD /d 0",
+            "AtomicOperator$",
+            "0"
+        ]
+    ]
+}

@@ -1,0 +1,47 @@
+{
+    "technique_id": "T1548.002",
+    "question_id": "85f3a526-4cfa-4fe7-98c1-dea99be025c7",
+    "context": "A security team is reviewing Windows registry change logs to ensure User Account Control (UAC) settings haven’t been tampered with. The secure desktop prompt behavior should only be altered by authorized administrators.",
+    "objective": "Determine which registry property was modified when an attacker disabled the secure desktop elevation prompt.",
+    "technical_details": {
+        "command_analysis": "A PowerShell Set-ItemProperty command changes the registry value under HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System, setting a DWORD to disable secure desktop prompts.",
+        "detection_approach": "Search the DeviceRegistryEvents table for entries where the RegistryKey path ends with Policies\\System, then look for RegistryValueName and RegistryValueData changes indicating a disable operation."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question to focus on the registry change event and ask specifically for the name of the altered registry value.",
+    "prompt": "On a Windows endpoint, someone may have disabled the secure desktop for elevation prompts by modifying a registry setting. Review the registry event logs to identify which registry value name was changed to 0.",
+    "answer": [
+        "PromptOnSecureDesktop"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceRegistryEvents\n| where RegistryKey endswith @\"\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\"\n| where RegistryValueName == \"PromptOnSecureDesktop\"\n| where RegistryValueData == \"0\"\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, InitiatingProcessCommandLine, RegistryKey, RegistryValueName, RegistryValueData",
+    "KQL_validation_message": "KQL query validation successful: The expected answer asks for 'PromptOnSecureDesktop'. In the query results, the 'RegistryValueName' column includes 'PromptOnSecureDesktop', and the registry key path also matches, with relevant context showing modification attempts by 'powershell.exe'. This provides clear evidence of activity relating to the 'PromptOnSecureDesktop' registry value.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "InitiatingProcessCommandLine",
+            "RegistryKey",
+            "RegistryValueName",
+            "RegistryValueData"
+        ],
+        [
+            "2025-05-07 16:26:02.851084+00:00",
+            "windows-vm",
+            "wipro",
+            "\"powershell.exe\" & {Set-ItemProperty HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System -Name PromptOnSecureDesktop -Value 0 -Type Dword -Force}",
+            "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+            "PromptOnSecureDesktop",
+            "0"
+        ],
+        [
+            "2025-05-07 16:36:42.296988+00:00",
+            "windows-vm",
+            "wipro",
+            "\"powershell.exe\" & {Set-ItemProperty HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System -Name PromptOnSecureDesktop -Value 0 -Type Dword -Force}",
+            "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+            "PromptOnSecureDesktop",
+            "0"
+        ]
+    ]
+}

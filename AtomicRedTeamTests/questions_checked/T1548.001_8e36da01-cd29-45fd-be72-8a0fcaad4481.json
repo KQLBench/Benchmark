@@ -1,0 +1,36 @@
+{
+    "technique_id": "T1548.001",
+    "question_id": "8e36da01-cd29-45fd-be72-8a0fcaad4481",
+    "context": "On a Linux host, adversaries may enumerate setuid binaries to find potential privilege escalation vectors by scanning directories for files with the setuid bit set.",
+    "objective": "Detect when a user runs a reconnaissance command to list files in /usr/bin with the setuid permission bit.",
+    "technical_details": {
+        "command_analysis": "The attacker uses the 'find' utility with the permission filter '-perm -4000' targeting /usr/bin to list all setuid files. This will appear in process execution logs or syslog entries.",
+        "detection_approach": "Search DeviceProcessEvents or Syslog for entries where ProcessCommandLine or SyslogMessage contains the pattern 'find /usr/bin -perm -4000'. Correlate with FileName or ProcessName equal to 'find'."
+    },
+    "thinking_how_to_phrase_question_and_answer": "We want to ask which exact command invocation was used to enumerate setuid files, so the analyst must look for process events or syslog entries containing the find command with the specific permission filter.",
+    "prompt": "Investigate Linux process or syslog records to find any invocation of the 'find' utility used to scan /usr/bin for files with the setuid bit. What was the full command executed?",
+    "answer": [
+        "find /usr/bin -perm -4000"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "union\n(\n    DeviceProcessEvents\n    | where FileName == \"find\"\n      and ProcessCommandLine contains \"/usr/bin\"\n      and ProcessCommandLine contains \"-perm -4000\"\n    | project TimeGenerated, Host=DeviceName, AccountName, FileName, CommandLine=ProcessCommandLine, SourceTable=\"DeviceProcessEvents\"\n),\n(\n    Syslog\n    | where ProcessName == \"find\"\n      and SyslogMessage contains \"/usr/bin\"\n      and SyslogMessage contains \"-perm -4000\"\n    | project TimeGenerated, Host=HostName, AccountName=\"\", FileName=ProcessName, CommandLine=SyslogMessage, SourceTable=\"Syslog\"\n)\n| sort by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: Within the query results, the 'CommandLine' field includes 'find /usr/bin -perm -4000', which exactly matches the expected answer. This demonstrates that the evidence needed to identify the described activity is present in the results and can be used to answer the detection question.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "Host",
+            "AccountName",
+            "FileName",
+            "CommandLine",
+            "SourceTable"
+        ],
+        [
+            "2025-05-07 17:16:33.332085+00:00",
+            "wirpo-test",
+            "root",
+            "find",
+            "find /usr/bin -perm -4000",
+            "DeviceProcessEvents"
+        ]
+    ]
+}

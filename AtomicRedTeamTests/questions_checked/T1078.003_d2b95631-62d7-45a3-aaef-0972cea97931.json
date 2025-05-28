@@ -1,0 +1,174 @@
+{
+    "technique_id": "T1078.003",
+    "question_id": "d2b95631-62d7-45a3-aaef-0972cea97931",
+    "context": "On a Linux system, an administrator account ‘art’ was created, locked, and expired, then later unlocked and renewed before use and deletion. The process execution logs capture each command invoked during this sequence.",
+    "objective": "Detect when the inactive user account was reactivated by identifying the account management tool used for unlocking.",
+    "technical_details": {
+        "command_analysis": "Reactivation involves a process creation event where the command-line includes an unlock or expiry modification flag.",
+        "detection_approach": "Search process events (e.g., Syslog or DeviceProcessEvents) for invocations of user account management utilities with unlock parameters."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question to ask which utility was invoked to perform the unlock action, leading to the answer “usermod.”",
+    "prompt": "Review the Linux process creation records to find which user account management utility was used to reactivate the previously locked and expired account.",
+    "answer": [
+        "usermod"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where FileName == \"usermod\"\n    and ProcessCommandLine has_any(\"-U\",\"--unlock\",\"-e\",\"--expiredate\")\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, FileName, ProcessCommandLine\n| sort by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: The results include detailed records where the 'FileName' is 'usermod' and the 'ProcessCommandLine' fields show various ways 'usermod' was executed (with arguments like --expiredate, --unlock, etc). This matches precisely with the expected answer of identifying 'usermod' activity. The data structure is comprehensive: each record logs process, user, device, and command line, allowing you to pinpoint the 'usermod' usage as required by the detection question.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "FileName",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 17:15:59.954586+00:00",
+            "wirpo-test",
+            "root",
+            "usermod",
+            "usermod --expiredate 99999 art"
+        ],
+        [
+            "2025-05-07 17:15:59.952792+00:00",
+            "wirpo-test",
+            "root",
+            "usermod",
+            "usermod --expiredate 99999 art"
+        ],
+        [
+            "2025-05-07 17:15:59.951979+00:00",
+            "wirpo-test",
+            "root",
+            "usermod",
+            "usermod --expiredate 99999 art"
+        ],
+        [
+            "2025-05-07 17:15:59.951198+00:00",
+            "wirpo-test",
+            "root",
+            "usermod",
+            "usermod --expiredate 99999 art"
+        ],
+        [
+            "2025-05-07 17:15:59.948860+00:00",
+            "wirpo-test",
+            "root",
+            "usermod",
+            "usermod --expiredate 99999 art"
+        ],
+        [
+            "2025-05-07 17:15:59.947468+00:00",
+            "wirpo-test",
+            "root",
+            "usermod",
+            "usermod --expiredate 99999 art"
+        ],
+        [
+            "2025-05-07 17:15:59.919409+00:00",
+            "wirpo-test",
+            "root",
+            "usermod",
+            "usermod --expiredate 99999 art"
+        ],
+        [
+            "2025-05-07 17:15:59.917195+00:00",
+            "wirpo-test",
+            "root",
+            "usermod",
+            "usermod --unlock art"
+        ],
+        [
+            "2025-05-07 17:15:59.915807+00:00",
+            "wirpo-test",
+            "root",
+            "usermod",
+            "usermod --unlock art"
+        ],
+        [
+            "2025-05-07 17:15:59.914492+00:00",
+            "wirpo-test",
+            "root",
+            "usermod",
+            "usermod --unlock art"
+        ],
+        [
+            "2025-05-07 17:15:59.913591+00:00",
+            "wirpo-test",
+            "root",
+            "usermod",
+            "usermod --unlock art"
+        ],
+        [
+            "2025-05-07 17:15:59.912561+00:00",
+            "wirpo-test",
+            "root",
+            "usermod",
+            "usermod --unlock art"
+        ],
+        [
+            "2025-05-07 17:15:59.911208+00:00",
+            "wirpo-test",
+            "root",
+            "usermod",
+            "usermod --unlock art"
+        ],
+        [
+            "2025-05-07 17:15:59.879239+00:00",
+            "wirpo-test",
+            "root",
+            "usermod",
+            "usermod --unlock art"
+        ],
+        [
+            "2025-05-07 17:15:59.876964+00:00",
+            "wirpo-test",
+            "root",
+            "usermod",
+            "usermod --expiredate 1 art"
+        ],
+        [
+            "2025-05-07 17:15:59.876035+00:00",
+            "wirpo-test",
+            "root",
+            "usermod",
+            "usermod --expiredate 1 art"
+        ],
+        [
+            "2025-05-07 17:15:59.874711+00:00",
+            "wirpo-test",
+            "root",
+            "usermod",
+            "usermod --expiredate 1 art"
+        ],
+        [
+            "2025-05-07 17:15:59.873273+00:00",
+            "wirpo-test",
+            "root",
+            "usermod",
+            "usermod --expiredate 1 art"
+        ],
+        [
+            "2025-05-07 17:15:59.872137+00:00",
+            "wirpo-test",
+            "root",
+            "usermod",
+            "usermod --expiredate 1 art"
+        ],
+        [
+            "2025-05-07 17:15:59.869839+00:00",
+            "wirpo-test",
+            "root",
+            "usermod",
+            "usermod --expiredate 1 art"
+        ],
+        [
+            "2025-05-07 17:15:59.839279+00:00",
+            "wirpo-test",
+            "root",
+            "usermod",
+            "usermod --expiredate 1 art"
+        ]
+    ]
+}

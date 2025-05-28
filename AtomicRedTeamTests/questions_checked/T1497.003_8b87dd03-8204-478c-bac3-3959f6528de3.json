@@ -1,0 +1,209 @@
+{
+    "technique_id": "T1497.003",
+    "question_id": "8b87dd03-8204-478c-bac3-3959f6528de3",
+    "context": "Adversaries on Linux sometimes use standard utilities to introduce execution delays, for example leveraging ping with a high packet count before running their payload.",
+    "objective": "Detect instances where a ping command was used to delay execution and then identify which command followed the delay.",
+    "technical_details": {
+        "command_analysis": "Look for a process event invoking 'ping -c <high_count> 8.8.8.8' followed by a second process event spawned by the same session or parent that runs an unexpected command.",
+        "detection_approach": "Correlate consecutive DeviceProcessEvents for the same session or parent: first a ping with a large '-c' argument, then another process soon after. Extract the second command's full invocation."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Formulate a question that points to chained process events (delay via ping then payload) and asks specifically for the follow-up command string.",
+    "prompt": "On a Linux host, identify any processes that used ping with a large count value to introduce a delay before launching another process. What was the command executed immediately after the ping delay?",
+    "answer": [
+        "whoami"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "let PingDelays = DeviceProcessEvents\n| where FileName == \"ping\" and ProcessCommandLine matches regex \"-c\\\\s*\\\\d+\"\n| extend PacketCount = toint(extract(\"-c\\\\s*(\\\\d+)\", 1, ProcessCommandLine))\n| where PacketCount > 20\n| project DeviceName, Session = CreatedProcessSessionId, PingTime = TimeGenerated, PingPid = ProcessId;\n\nlet ProcEvents = DeviceProcessEvents\n| project DeviceName, Session = CreatedProcessSessionId, EventTime = TimeGenerated, ProcId = ProcessId, CommandLine = ProcessCommandLine;\n\nPingDelays\n| join kind=inner ProcEvents on DeviceName, Session\n| where EventTime > PingTime and EventTime <= PingTime + 5m and ProcId != PingPid\n| where CommandLine contains \"whoami\"\n| project DeviceName, Session, PingTime, FollowUpTime = EventTime, FollowUpCommandLine = CommandLine",
+    "KQL_validation_message": "KQL query validation successful: The expected answer is to see evidence of the command 'whoami'. Reviewing the query results, the 'FollowUpCommandLine' column contains numerous instances of both '/usr/bin/whoami' and 'whoami', as well as 'sh -c \"ping -c 250 8.8.8.8 > /dev/null; whoami\"', which all demonstrate execution of the expected 'whoami' command. The structure indicates exact command lines that were run, matching the detection question requirements.",
+    "KQL_query_results": [
+        [
+            "DeviceName",
+            "Session",
+            "PingTime",
+            "FollowUpTime",
+            "FollowUpCommandLine"
+        ],
+        [
+            "wirpo-test",
+            null,
+            "2025-05-07 17:07:57.566082+00:00",
+            "2025-05-07 17:08:31.536308+00:00",
+            "/usr/bin/whoami"
+        ],
+        [
+            "wirpo-test",
+            null,
+            "2025-05-07 17:07:57.566082+00:00",
+            "2025-05-07 17:08:32.980339+00:00",
+            "/usr/bin/whoami"
+        ],
+        [
+            "wirpo-test",
+            null,
+            "2025-05-07 17:07:57.566082+00:00",
+            "2025-05-07 17:08:44.614327+00:00",
+            "/usr/bin/whoami"
+        ],
+        [
+            "wirpo-test",
+            null,
+            "2025-05-07 17:07:57.566082+00:00",
+            "2025-05-07 17:09:18.254559+00:00",
+            "/usr/bin/whoami"
+        ],
+        [
+            "wirpo-test",
+            null,
+            "2025-05-07 17:07:57.566082+00:00",
+            "2025-05-07 17:09:19.799879+00:00",
+            "/usr/bin/whoami"
+        ],
+        [
+            "wirpo-test",
+            null,
+            "2025-05-07 17:07:57.566082+00:00",
+            "2025-05-07 17:09:21.584552+00:00",
+            "/usr/bin/whoami"
+        ],
+        [
+            "wirpo-test",
+            null,
+            "2025-05-07 17:07:57.566082+00:00",
+            "2025-05-07 17:09:57.600362+00:00",
+            "sh -c \"ping -c 250 8.8.8.8 > /dev/null; whoami\""
+        ],
+        [
+            "wirpo-test",
+            null,
+            "2025-05-07 17:07:57.566082+00:00",
+            "2025-05-07 17:09:57.601174+00:00",
+            "whoami"
+        ],
+        [
+            "wirpo-test",
+            null,
+            "2025-05-07 17:07:57.566082+00:00",
+            "2025-05-07 17:09:58.569796+00:00",
+            "/usr/bin/whoami"
+        ],
+        [
+            "wirpo-test",
+            null,
+            "2025-05-07 17:07:57.566082+00:00",
+            "2025-05-07 17:10:01.502171+00:00",
+            "/usr/bin/whoami"
+        ],
+        [
+            "wirpo-test",
+            null,
+            "2025-05-07 17:07:57.566082+00:00",
+            "2025-05-07 17:10:03.408757+00:00",
+            "/usr/bin/whoami"
+        ],
+        [
+            "wirpo-test",
+            null,
+            "2025-05-07 17:07:57.566082+00:00",
+            "2025-05-07 17:10:05.281740+00:00",
+            "/usr/bin/whoami"
+        ],
+        [
+            "wirpo-test",
+            null,
+            "2025-05-07 17:07:57.566082+00:00",
+            "2025-05-07 17:10:06.818055+00:00",
+            "/usr/bin/whoami"
+        ],
+        [
+            "wirpo-test",
+            null,
+            "2025-05-07 17:07:57.566082+00:00",
+            "2025-05-07 17:10:08.704813+00:00",
+            "/usr/bin/whoami"
+        ],
+        [
+            "wirpo-test",
+            null,
+            "2025-05-07 17:07:57.566082+00:00",
+            "2025-05-07 17:10:10.430898+00:00",
+            "/usr/bin/whoami"
+        ],
+        [
+            "wirpo-test",
+            null,
+            "2025-05-07 17:07:57.566082+00:00",
+            "2025-05-07 17:10:11.974115+00:00",
+            "/usr/bin/whoami"
+        ],
+        [
+            "wirpo-test",
+            null,
+            "2025-05-07 17:07:57.566082+00:00",
+            "2025-05-07 17:10:13.889200+00:00",
+            "/usr/bin/whoami"
+        ],
+        [
+            "wirpo-test",
+            null,
+            "2025-05-07 17:07:57.566082+00:00",
+            "2025-05-07 17:10:15.618349+00:00",
+            "/usr/bin/whoami"
+        ],
+        [
+            "wirpo-test",
+            null,
+            "2025-05-07 17:07:57.566082+00:00",
+            "2025-05-07 17:10:17.141947+00:00",
+            "/usr/bin/whoami"
+        ],
+        [
+            "wirpo-test",
+            null,
+            "2025-05-07 17:07:57.566082+00:00",
+            "2025-05-07 17:10:18.949128+00:00",
+            "/usr/bin/whoami"
+        ],
+        [
+            "wirpo-test",
+            null,
+            "2025-05-07 17:07:57.566082+00:00",
+            "2025-05-07 17:10:33.710360+00:00",
+            "/usr/bin/whoami"
+        ],
+        [
+            "wirpo-test",
+            null,
+            "2025-05-07 17:07:57.566082+00:00",
+            "2025-05-07 17:10:35.291827+00:00",
+            "/usr/bin/whoami"
+        ],
+        [
+            "wirpo-test",
+            null,
+            "2025-05-07 17:07:57.566082+00:00",
+            "2025-05-07 17:12:37.100787+00:00",
+            "/usr/bin/whoami"
+        ],
+        [
+            "wirpo-test",
+            null,
+            "2025-05-07 17:07:57.566082+00:00",
+            "2025-05-07 17:12:40.463560+00:00",
+            "/usr/bin/whoami"
+        ],
+        [
+            "wirpo-test",
+            null,
+            "2025-05-07 17:07:57.566082+00:00",
+            "2025-05-07 17:12:41.906893+00:00",
+            "/usr/bin/whoami"
+        ],
+        [
+            "wirpo-test",
+            null,
+            "2025-05-07 17:07:57.566082+00:00",
+            "2025-05-07 17:12:44.714820+00:00",
+            "/usr/bin/whoami"
+        ]
+    ]
+}

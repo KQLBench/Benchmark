@@ -1,0 +1,41 @@
+{
+    "technique_id": "T1053.005",
+    "question_id": "fec27f65-db86-4c2d-b66c-61945aee87c2",
+    "context": "An adversary attempted persistence on a Windows host by registering tasks that execute an application at user logon and system startup.",
+    "objective": "Determine which native Windows utility was leveraged to create these scheduled tasks.",
+    "technical_details": {
+        "command_analysis": "The attacker ran a command-line tool with parameters to create tasks named T1053_005_OnLogon and T1053_005_OnStartup, pointing to cmd.exe.",
+        "detection_approach": "Search process execution logs for invocations of task-scheduling utilities to spot new task registrations."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Phrase the question to guide the analyst toward inspecting process creation events for a scheduling tool without revealing the exact query filters.",
+    "prompt": "You suspect malicious persistence via scheduled tasks on a Windows endpoint. Review the process execution logs to identify the built-in utility used to register tasks at logon or startup. What is the name of this utility?",
+    "answer": [
+        "schtasks"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where FileName == \"schtasks.exe\"\n| where ProcessCommandLine has \"/create\" and (ProcessCommandLine has \"T1053_005_OnLogon\" or ProcessCommandLine has \"T1053_005_OnStartup\")\n| project TimeGenerated, DeviceName, FileName, ProcessCommandLine, AccountName",
+    "KQL_validation_message": "KQL query validation successful: The results include entries where 'FileName' is 'schtasks.exe' and the 'ProcessCommandLine' contains usage of 'schtasks' for creating scheduled tasks. This directly relates to the expected answer 'schtasks' and provides sufficient evidence for detection.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "FileName",
+            "ProcessCommandLine",
+            "AccountName"
+        ],
+        [
+            "2025-05-07 17:12:20.312003+00:00",
+            "windows-vm",
+            "schtasks.exe",
+            "schtasks  /create /tn \"T1053_005_OnLogon\" /sc onlogon /tr \"cmd.exe /c calc.exe\" ",
+            "wipro"
+        ],
+        [
+            "2025-05-07 17:12:20.416102+00:00",
+            "windows-vm",
+            "schtasks.exe",
+            "schtasks  /create /tn \"T1053_005_OnStartup\" /sc onstart /ru system /tr \"cmd.exe /c calc.exe\"",
+            "wipro"
+        ]
+    ]
+}

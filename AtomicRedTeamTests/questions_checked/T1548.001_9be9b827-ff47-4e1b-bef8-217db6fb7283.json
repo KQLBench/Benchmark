@@ -1,0 +1,172 @@
+{
+    "technique_id": "T1548.001",
+    "question_id": "9be9b827-ff47-4e1b-bef8-217db6fb7283",
+    "context": "On a Linux device an elevated shell process created and modified a temporary file, including changing its ownership to root and adjusting its permission bits.",
+    "objective": "Detect the specific process invocation that added the SetUID flag to a file.",
+    "technical_details": {
+        "command_analysis": "Investigate process creation logs for 'chmod' commands that include the '+s' or 'u+s' option to set the SUID bit.",
+        "detection_approach": "Query DeviceProcessEvents for process command lines indicating a 'chmod' invocation with SUID-setting flags."
+    },
+    "thinking_how_to_phrase_question_and_answer": "We want to ask for the exact command line that was used to set the SetUID bit, ensuring the analyst looks in process events rather than file metadata.",
+    "prompt": "A suspicious elevated shell on Linux changed a file’s permissions for a user to include the SetUID bit. What was the exact command used to set that flag?",
+    "answer": [
+        "chmod u+xs /tmp/evilBinary"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where TimeGenerated >= ago(30d)\n| where ActionType == \"ProcessCreated\"\n| where tolower(ProcessCommandLine) contains \"chmod\"\n// look for SUID‐setting flags (+s, u+s, +xs, u+xs)\n| where tolower(ProcessCommandLine) contains \"+s\"\n    or tolower(ProcessCommandLine) contains \"u+s\"\n    or tolower(ProcessCommandLine) contains \"+xs\"\n    or tolower(ProcessCommandLine) contains \"u+xs\"\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, InitiatingProcessAccountDomain, ProcessCommandLine, ProcessId\n| order by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: In the 'ProcessCommandLine' field of several rows, the string 'chmod u+xs /tmp/evilBinary' appears, either as a lone command or as part of a compound shell command. This directly matches the expected answer. The results provide both the context and the evidence that this command was executed, allowing for identification of the described activity.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "InitiatingProcessAccountDomain",
+            "ProcessCommandLine",
+            "ProcessId"
+        ],
+        [
+            "2025-05-07 17:16:39.349482+00:00",
+            "wirpo-test",
+            "root",
+            "wirpo-test",
+            "sh -c \"touch /tmp/evilBinary; chown root /tmp/evilBinary; chmod u+xs /tmp/evilBinary\"",
+            24798
+        ],
+        [
+            "2025-05-07 17:16:39.342910+00:00",
+            "wirpo-test",
+            "root",
+            "wirpo-test",
+            "sh -c \"touch /tmp/evilBinary; chown root /tmp/evilBinary; chmod u+xs /tmp/evilBinary\"",
+            24796
+        ],
+        [
+            "2025-05-07 17:16:39.340614+00:00",
+            "wirpo-test",
+            "root",
+            "wirpo-test",
+            "sh -c \"touch /tmp/evilBinary; chown root /tmp/evilBinary; chmod u+xs /tmp/evilBinary\"",
+            24795
+        ],
+        [
+            "2025-05-07 17:16:39.338347+00:00",
+            "wirpo-test",
+            "root",
+            "wirpo-test",
+            "sh -c \"touch /tmp/evilBinary; chown root /tmp/evilBinary; chmod u+xs /tmp/evilBinary\"",
+            24793
+        ],
+        [
+            "2025-05-07 17:16:38.653428+00:00",
+            "wirpo-test",
+            "root",
+            "wirpo-test",
+            "sudo chmod g+xs /tmp/evilBinary",
+            24782
+        ],
+        [
+            "2025-05-07 17:16:38.652446+00:00",
+            "wirpo-test",
+            "root",
+            "wirpo-test",
+            "sh -c \"sudo touch /tmp/evilBinary; sudo chown root /tmp/evilBinary; sudo chmod g+xs /tmp/evilBinary\"",
+            24782
+        ],
+        [
+            "2025-05-07 17:16:38.644155+00:00",
+            "wirpo-test",
+            "root",
+            "wirpo-test",
+            "sh -c \"sudo touch /tmp/evilBinary; sudo chown root /tmp/evilBinary; sudo chmod g+xs /tmp/evilBinary\"",
+            24781
+        ],
+        [
+            "2025-05-07 17:16:38.614020+00:00",
+            "wirpo-test",
+            "root",
+            "wirpo-test",
+            "sh -c \"sudo touch /tmp/evilBinary; sudo chown root /tmp/evilBinary; sudo chmod g+xs /tmp/evilBinary\"",
+            24780
+        ],
+        [
+            "2025-05-07 17:16:38.542142+00:00",
+            "wirpo-test",
+            "root",
+            "wirpo-test",
+            "sh -c \"sudo touch /tmp/evilBinary; sudo chown root /tmp/evilBinary; sudo chmod g+xs /tmp/evilBinary\"",
+            24778
+        ],
+        [
+            "2025-05-07 17:16:38.536929+00:00",
+            "wirpo-test",
+            "root",
+            "wirpo-test",
+            "sh -c \"sudo touch /tmp/evilBinary; sudo chown root /tmp/evilBinary; sudo chmod g+xs /tmp/evilBinary\"",
+            24776
+        ],
+        [
+            "2025-05-07 17:16:25.344794+00:00",
+            "wirpo-test",
+            "root",
+            "wirpo-test",
+            "sh -c \"sudo touch /tmp/evilBinary; sudo chown root /tmp/evilBinary; sudo chmod u+xs /tmp/evilBinary\"",
+            24456
+        ],
+        [
+            "2025-05-07 17:16:25.318855+00:00",
+            "wirpo-test",
+            "root",
+            "wirpo-test",
+            "sh -c \"sudo touch /tmp/evilBinary; sudo chown root /tmp/evilBinary; sudo chmod u+xs /tmp/evilBinary\"",
+            24454
+        ],
+        [
+            "2025-05-07 17:16:25.314783+00:00",
+            "wirpo-test",
+            "root",
+            "wirpo-test",
+            "sh -c \"sudo touch /tmp/evilBinary; sudo chown root /tmp/evilBinary; sudo chmod u+xs /tmp/evilBinary\"",
+            24453
+        ],
+        [
+            "2025-05-07 17:16:25.289420+00:00",
+            "wirpo-test",
+            "root",
+            "wirpo-test",
+            "sh -c \"touch /tmp/evilBinary; chown root /tmp/evilBinary; chmod g+xs /tmp/evilBinary\"",
+            24451
+        ],
+        [
+            "2025-05-07 17:16:25.279545+00:00",
+            "wirpo-test",
+            "root",
+            "wirpo-test",
+            "sh -c \"sudo touch /tmp/evilBinary; sudo chown root /tmp/evilBinary; sudo chmod u+xs /tmp/evilBinary\"",
+            24449
+        ],
+        [
+            "2025-05-07 17:16:25.279471+00:00",
+            "wirpo-test",
+            "root",
+            "wirpo-test",
+            "sh -c \"touch /tmp/evilBinary; chown root /tmp/evilBinary; chmod g+xs /tmp/evilBinary\"",
+            24448
+        ],
+        [
+            "2025-05-07 17:16:25.278944+00:00",
+            "wirpo-test",
+            "root",
+            "wirpo-test",
+            "sh -c \"touch /tmp/evilBinary; chown root /tmp/evilBinary; chmod g+xs /tmp/evilBinary\"",
+            24446
+        ],
+        [
+            "2025-05-07 17:16:25.275154+00:00",
+            "wirpo-test",
+            "root",
+            "wirpo-test",
+            "sh -c \"sudo touch /tmp/evilBinary; sudo chown root /tmp/evilBinary; sudo chmod u+xs /tmp/evilBinary\"",
+            24444
+        ]
+    ]
+}

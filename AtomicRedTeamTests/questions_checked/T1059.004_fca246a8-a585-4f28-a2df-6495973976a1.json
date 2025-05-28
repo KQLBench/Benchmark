@@ -1,0 +1,17 @@
+{
+    "technique_id": "T1059.004",
+    "question_id": "fca246a8-a585-4f28-a2df-6495973976a1",
+    "context": "In a Linux environment, an adversary may execute a dangerous pipe-to-shell technique by downloading a script and directly executing it via a shell interpreter.",
+    "objective": "Identify the tool utilized in executing the piped command that directly interprets a downloaded script.",
+    "technical_details": {
+        "command_analysis": "Examine process events for command lines showing a change to /tmp followed by a curl download piped directly into a shell execution. Look for indicators such as the use of a pipe operator and references to a shell tool.",
+        "detection_approach": "Correlate events from Linux process logs where sequences include 'curl -s' and a piped shell command to pinpoint the specific utility that processed the downloaded script."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Consider comparing your investigation to a baseline query that inspects Linux DeviceProcessEvents for command lines containing both 'curl -s' and '|bash'. Your final answer should be a single word representing the tool that was responsible for processing the piped command.",
+    "prompt": "On a Linux system, analyze the process logs for suspicious command line activity that includes a sequence of commands indicating a pipe-to-shell operation. Identify the tool that was used to execute this piped command, paying special attention to its use in downloading and running script content.",
+    "answer": [
+        "bash"
+    ],
+    "KQL_query": "DeviceProcessEvents\n| where Timestamp > ago(1d)\n| where ProcessCommandLine has \"curl\" and (ProcessCommandLine has \"|bash\" or ProcessCommandLine has \"| bash\")\n| project\n    Timestamp,\n    DeviceName,\n    InitiatingProcessAccountName,\n    FileName,\n    ProcessCommandLine,\n    InitiatingProcessParentFileName\n| sort by Timestamp desc",
+    "difficulty": "unknown"
+}

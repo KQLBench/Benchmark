@@ -1,0 +1,482 @@
+{
+    "technique_id": "T1070.004",
+    "question_id": "a415f17e-ce8d-4ce2-a8b4-83b674e7017e",
+    "context": "In a Linux environment, a test was executed to recursively delete a temporary directory and all its contents.",
+    "objective": "Detect when an entire folder is removed via a recursive delete command and determine which folder was targeted.",
+    "technical_details": {
+        "command_analysis": "The process executed a shell command using 'rm -rf' against a specified directory.",
+        "detection_approach": "Search for process events or file events where the command line includes 'rm -rf' and identify the folder name in the arguments."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Framed the prompt to guide the analyst toward examining process command lines for evidence of recursive deletion without revealing the exact query syntax, and chose the folder name as the focal answer to keep it concise.",
+    "prompt": "An alert has surfaced on a Linux host indicating a potentially malicious recursive delete operation. Investigate process events to find out which directory name was completely removed.",
+    "answer": [
+        "victim-folder"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "DeviceProcessEvents\n| where ProcessCommandLine has \"rm -rf\"\n| extend targetFolder = extract(@\"\\b(?:rm\\s+-rf|rm\\s+-r)\\s+(?:-[^\\s]+\\s+)*([^\\s]+)\", 1, ProcessCommandLine)\n| where isnotempty(targetFolder)\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, ProcessCommandLine, targetFolder",
+    "KQL_validation_message": "KQL query validation successful: The results have a 'targetFolder' column that contains values such as '/tmp/victim-folder\"' and '/tmp/victim-folder'. These correspond directly to the expected answer 'victim-folder' (with path context). Multiple entries show commands and target folder values with this name, demonstrating that activity on 'victim-folder' can be confirmed and precisely matched from the given logs. The information is present in a 1:1 fashion.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "ProcessCommandLine",
+            "targetFolder"
+        ],
+        [
+            "2025-05-07 16:21:44.551490+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c \"rm -rf /tmp/victim-folder\"",
+            "/tmp/victim-folder\""
+        ],
+        [
+            "2025-05-07 16:21:44.552072+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c \"rm -rf /tmp/victim-folder\"",
+            "/tmp/victim-folder\""
+        ],
+        [
+            "2025-05-07 16:21:44.552715+00:00",
+            "wirpo-test",
+            "root",
+            "rm -rf /tmp/victim-folder",
+            "/tmp/victim-folder"
+        ],
+        [
+            "2025-05-07 16:22:20.646878+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c \"rm -rf /tmp/victim-files/\"",
+            "/tmp/victim-files/\""
+        ],
+        [
+            "2025-05-07 16:22:20.649123+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c \"rm -rf /tmp/victim-files/\"",
+            "/tmp/victim-files/\""
+        ],
+        [
+            "2025-05-07 16:22:20.649521+00:00",
+            "wirpo-test",
+            "root",
+            "rm -rf /tmp/victim-files/",
+            "/tmp/victim-files/"
+        ],
+        [
+            "2025-05-07 16:32:28.971513+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c \"rm -rf /tmp/victim-folder\"",
+            "/tmp/victim-folder\""
+        ],
+        [
+            "2025-05-07 16:32:28.972229+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c \"rm -rf /tmp/victim-folder\"",
+            "/tmp/victim-folder\""
+        ],
+        [
+            "2025-05-07 16:32:28.972528+00:00",
+            "wirpo-test",
+            "root",
+            "rm -rf /tmp/victim-folder",
+            "/tmp/victim-folder"
+        ],
+        [
+            "2025-05-07 16:33:06.227515+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c \"rm -rf /tmp/victim-files/\"",
+            "/tmp/victim-files/\""
+        ],
+        [
+            "2025-05-07 16:33:06.228485+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c \"rm -rf /tmp/victim-files/\"",
+            "/tmp/victim-files/\""
+        ],
+        [
+            "2025-05-07 16:33:06.228876+00:00",
+            "wirpo-test",
+            "root",
+            "rm -rf /tmp/victim-files/",
+            "/tmp/victim-files/"
+        ],
+        [
+            "2025-05-07 16:53:07.558956+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c \"systemctl stop art-systemd-service.service; systemctl disable art-systemd-service.service; rm -rf /etc/systemd/system/art-systemd-service.service; systemctl daemon-reload\"",
+            "/etc/systemd/system/art-systemd-service.service;"
+        ],
+        [
+            "2025-05-07 16:53:07.560521+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c \"systemctl stop art-systemd-service.service; systemctl disable art-systemd-service.service; rm -rf /etc/systemd/system/art-systemd-service.service; systemctl daemon-reload\"",
+            "/etc/systemd/system/art-systemd-service.service;"
+        ],
+        [
+            "2025-05-07 16:53:07.570787+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c \"systemctl stop art-systemd-service.service; systemctl disable art-systemd-service.service; rm -rf /etc/systemd/system/art-systemd-service.service; systemctl daemon-reload\"",
+            "/etc/systemd/system/art-systemd-service.service;"
+        ],
+        [
+            "2025-05-07 16:53:07.918843+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c \"systemctl stop art-systemd-service.service; systemctl disable art-systemd-service.service; rm -rf /etc/systemd/system/art-systemd-service.service; systemctl daemon-reload\"",
+            "/etc/systemd/system/art-systemd-service.service;"
+        ],
+        [
+            "2025-05-07 16:53:20.965972+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c \"systemctl stop T1543.002; systemctl disable T1543.002; rm -rf /etc/init.d/T1543.002; systemctl daemon-reload\"",
+            "/etc/init.d/T1543.002;"
+        ],
+        [
+            "2025-05-07 16:53:20.968682+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c \"systemctl stop T1543.002; systemctl disable T1543.002; rm -rf /etc/init.d/T1543.002; systemctl daemon-reload\"",
+            "/etc/init.d/T1543.002;"
+        ],
+        [
+            "2025-05-07 16:53:21.063286+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c \"systemctl stop T1543.002; systemctl disable T1543.002; rm -rf /etc/init.d/T1543.002; systemctl daemon-reload\"",
+            "/etc/init.d/T1543.002;"
+        ],
+        [
+            "2025-05-07 16:53:22.022609+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c \"systemctl stop T1543.002; systemctl disable T1543.002; rm -rf /etc/init.d/T1543.002; systemctl daemon-reload\"",
+            "/etc/init.d/T1543.002;"
+        ],
+        [
+            "2025-05-07 16:59:05.318661+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c \"if [ -f /tmp/T1030/safe_to_delete ]; then rm -rf /tmp/T1030; fi;\"",
+            "/tmp/T1030;"
+        ],
+        [
+            "2025-05-07 16:59:05.319242+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c \"if [ -f /tmp/T1030/safe_to_delete ]; then rm -rf /tmp/T1030; fi;\"",
+            "/tmp/T1030;"
+        ],
+        [
+            "2025-05-07 16:59:05.319524+00:00",
+            "wirpo-test",
+            "root",
+            "rm -rf /tmp/T1030",
+            "/tmp/T1030"
+        ],
+        [
+            "2025-05-07 17:00:41.465976+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c \"rm -rf /var/tmp/.hidden-directory/\"",
+            "/var/tmp/.hidden-directory/\""
+        ],
+        [
+            "2025-05-07 17:00:41.466865+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c \"rm -rf /var/tmp/.hidden-directory/\"",
+            "/var/tmp/.hidden-directory/\""
+        ],
+        [
+            "2025-05-07 17:00:41.468541+00:00",
+            "wirpo-test",
+            "root",
+            "rm -rf /var/tmp/.hidden-directory/",
+            "/var/tmp/.hidden-directory/"
+        ],
+        [
+            "2025-05-07 17:03:03.735474+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c \"rm -rf /root/AtomicRedTeam/atomics/T1059.004/src/AutoSUID.sh\"",
+            "/root/AtomicRedTeam/atomics/T1059.004/src/AutoSUID.sh\""
+        ],
+        [
+            "2025-05-07 17:03:03.739606+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c \"rm -rf /root/AtomicRedTeam/atomics/T1059.004/src/AutoSUID.sh\"",
+            "/root/AtomicRedTeam/atomics/T1059.004/src/AutoSUID.sh\""
+        ],
+        [
+            "2025-05-07 17:03:03.741051+00:00",
+            "wirpo-test",
+            "root",
+            "rm -rf /root/AtomicRedTeam/atomics/T1059.004/src/AutoSUID.sh",
+            "/root/AtomicRedTeam/atomics/T1059.004/src/AutoSUID.sh"
+        ],
+        [
+            "2025-05-07 17:03:16.720000+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c \"rm -rf /root/AtomicRedTeam/atomics/T1059.004/src/LinEnum.sh\"",
+            "/root/AtomicRedTeam/atomics/T1059.004/src/LinEnum.sh\""
+        ],
+        [
+            "2025-05-07 17:03:16.720579+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c \"rm -rf /root/AtomicRedTeam/atomics/T1059.004/src/LinEnum.sh\"",
+            "/root/AtomicRedTeam/atomics/T1059.004/src/LinEnum.sh\""
+        ],
+        [
+            "2025-05-07 17:03:16.723501+00:00",
+            "wirpo-test",
+            "root",
+            "rm -rf /root/AtomicRedTeam/atomics/T1059.004/src/LinEnum.sh",
+            "/root/AtomicRedTeam/atomics/T1059.004/src/LinEnum.sh"
+        ],
+        [
+            "2025-05-07 17:04:09.782810+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c \"rm -rf /tmp/atomic-test-T1036.006\"",
+            "/tmp/atomic-test-T1036.006\""
+        ],
+        [
+            "2025-05-07 17:04:09.783390+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c \"rm -rf /tmp/atomic-test-T1036.006\"",
+            "/tmp/atomic-test-T1036.006\""
+        ],
+        [
+            "2025-05-07 17:15:36.255577+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c 'rm -rf /var/spool/mail/copy; if [ -f \"$(ls -A /var/spool/mail/temp)\" ]; then rm /var/spool/mail/temp; fi'",
+            "/var/spool/mail/copy;"
+        ],
+        [
+            "2025-05-07 17:15:36.258250+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c 'rm -rf /var/spool/mail/copy; if [ -f \"$(ls -A /var/spool/mail/temp)\" ]; then rm /var/spool/mail/temp; fi'",
+            "/var/spool/mail/copy;"
+        ],
+        [
+            "2025-05-07 17:15:36.259480+00:00",
+            "wirpo-test",
+            "root",
+            "rm -rf /var/spool/mail/copy",
+            "/var/spool/mail/copy"
+        ],
+        [
+            "2025-05-07 17:15:36.262900+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c 'rm -rf /var/spool/mail/copy; if [ -f \"$(ls -A /var/spool/mail/temp)\" ]; then rm /var/spool/mail/temp; fi'",
+            "/var/spool/mail/copy;"
+        ],
+        [
+            "2025-05-07 17:15:41.308328+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c 'mkdir -p ********** && for file in /var/spool/mail/*; do if [ \"$(basename \"$file\")\" != \"copy\" ]; then cp -R \"$file\" /var/spool/mail/copy/; fi; done && rm -rf /var/spool/mail/copy/*'",
+            "/var/spool/mail/copy/*'"
+        ],
+        [
+            "2025-05-07 17:15:41.310443+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c 'mkdir -p ********** && for file in /var/spool/mail/*; do if [ \"$(basename \"$file\")\" != \"copy\" ]; then cp -R \"$file\" /var/spool/mail/copy/; fi; done && rm -rf /var/spool/mail/copy/*'",
+            "/var/spool/mail/copy/*'"
+        ],
+        [
+            "2025-05-07 17:15:41.312895+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c 'mkdir -p ********** && for file in /var/spool/mail/*; do if [ \"$(basename \"$file\")\" != \"copy\" ]; then cp -R \"$file\" /var/spool/mail/copy/; fi; done && rm -rf /var/spool/mail/copy/*'",
+            "/var/spool/mail/copy/*'"
+        ],
+        [
+            "2025-05-07 17:15:41.314907+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c 'mkdir -p ********** && for file in /var/spool/mail/*; do if [ \"$(basename \"$file\")\" != \"copy\" ]; then cp -R \"$file\" /var/spool/mail/copy/; fi; done && rm -rf /var/spool/mail/copy/*'",
+            "/var/spool/mail/copy/*'"
+        ],
+        [
+            "2025-05-07 17:15:41.318081+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c 'mkdir -p ********** && for file in /var/spool/mail/*; do if [ \"$(basename \"$file\")\" != \"copy\" ]; then cp -R \"$file\" /var/spool/mail/copy/; fi; done && rm -rf /var/spool/mail/copy/*'",
+            "/var/spool/mail/copy/*'"
+        ],
+        [
+            "2025-05-07 17:15:42.878366+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c 'rm -rf /var/spool/mail/copy; if [ -f \"$(ls -A /var/spool/mail/temp)\" ]; then rm /var/spool/mail/temp; fi'",
+            "/var/spool/mail/copy;"
+        ],
+        [
+            "2025-05-07 17:15:42.880673+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c 'rm -rf /var/spool/mail/copy; if [ -f \"$(ls -A /var/spool/mail/temp)\" ]; then rm /var/spool/mail/temp; fi'",
+            "/var/spool/mail/copy;"
+        ],
+        [
+            "2025-05-07 17:15:42.882092+00:00",
+            "wirpo-test",
+            "root",
+            "rm -rf /var/spool/mail/copy",
+            "/var/spool/mail/copy"
+        ],
+        [
+            "2025-05-07 17:15:42.883667+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c 'rm -rf /var/spool/mail/copy; if [ -f \"$(ls -A /var/spool/mail/temp)\" ]; then rm /var/spool/mail/temp; fi'",
+            "/var/spool/mail/copy;"
+        ],
+        [
+            "2025-05-07 17:20:33.290955+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c \"rm -rf /tmp/art-staging\"",
+            "/tmp/art-staging\""
+        ],
+        [
+            "2025-05-07 17:20:33.292992+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c \"rm -rf /tmp/art-staging\"",
+            "/tmp/art-staging\""
+        ],
+        [
+            "2025-05-07 17:20:33.293822+00:00",
+            "wirpo-test",
+            "root",
+            "rm -rf /tmp/art-staging",
+            "/tmp/art-staging"
+        ],
+        [
+            "2025-05-07 17:20:44.036199+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c \"rm -rf /tmp/GnuPG\"",
+            "/tmp/GnuPG\""
+        ],
+        [
+            "2025-05-07 17:20:44.037288+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c \"rm -rf /tmp/GnuPG\"",
+            "/tmp/GnuPG\""
+        ],
+        [
+            "2025-05-07 17:20:44.037506+00:00",
+            "wirpo-test",
+            "root",
+            "rm -rf /tmp/GnuPG",
+            "/tmp/GnuPG"
+        ],
+        [
+            "2025-05-07 17:20:45.787533+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c \"rm -rf /tmp/art-staging\"",
+            "/tmp/art-staging\""
+        ],
+        [
+            "2025-05-07 17:20:45.788532+00:00",
+            "wirpo-test",
+            "root",
+            "sh -c \"rm -rf /tmp/art-staging\"",
+            "/tmp/art-staging\""
+        ],
+        [
+            "2025-05-07 17:20:45.788727+00:00",
+            "wirpo-test",
+            "root",
+            "rm -rf /tmp/art-staging",
+            "/tmp/art-staging"
+        ],
+        [
+            "2025-05-08 06:13:43.105832+00:00",
+            "wirpo-test.kwmmtajk0tqubd0oengdi0zqgf.gvxx.internal.cloudapp.net",
+            "root",
+            "rm -rf -- /var/lib/dpkg/tmp.ci",
+            "/var/lib/dpkg/tmp.ci"
+        ],
+        [
+            "2025-05-08 06:54:51.733433+00:00",
+            "flurin-monitoring.xv2g1ire1j0ehkxrurr1ew43qg.xx.internal.cloudapp.net",
+            "root",
+            "rm -rf -- /var/lib/dpkg/tmp.ci",
+            "/var/lib/dpkg/tmp.ci"
+        ],
+        [
+            "2025-05-08 06:54:51.576367+00:00",
+            "flurin-monitoring.xv2g1ire1j0ehkxrurr1ew43qg.xx.internal.cloudapp.net",
+            "root",
+            "rm -rf -- /var/lib/dpkg/tmp.ci",
+            "/var/lib/dpkg/tmp.ci"
+        ],
+        [
+            "2025-05-08 06:54:51.432062+00:00",
+            "flurin-monitoring.xv2g1ire1j0ehkxrurr1ew43qg.xx.internal.cloudapp.net",
+            "root",
+            "rm -rf -- /var/lib/dpkg/tmp.ci",
+            "/var/lib/dpkg/tmp.ci"
+        ],
+        [
+            "2025-05-08 06:54:51.147383+00:00",
+            "flurin-monitoring.xv2g1ire1j0ehkxrurr1ew43qg.xx.internal.cloudapp.net",
+            "root",
+            "rm -rf -- /var/lib/dpkg/tmp.ci",
+            "/var/lib/dpkg/tmp.ci"
+        ],
+        [
+            "2025-05-08 06:55:28.680422+00:00",
+            "flurin-monitoring.xv2g1ire1j0ehkxrurr1ew43qg.xx.internal.cloudapp.net",
+            "root",
+            "rm -rf -- /var/lib/dpkg/tmp.ci",
+            "/var/lib/dpkg/tmp.ci"
+        ],
+        [
+            "2025-05-08 06:55:28.126172+00:00",
+            "flurin-monitoring.xv2g1ire1j0ehkxrurr1ew43qg.xx.internal.cloudapp.net",
+            "root",
+            "rm -rf -- /var/lib/dpkg/tmp.ci",
+            "/var/lib/dpkg/tmp.ci"
+        ],
+        [
+            "2025-05-08 06:55:28.297474+00:00",
+            "flurin-monitoring.xv2g1ire1j0ehkxrurr1ew43qg.xx.internal.cloudapp.net",
+            "root",
+            "rm -rf -- /var/lib/dpkg/tmp.ci",
+            "/var/lib/dpkg/tmp.ci"
+        ],
+        [
+            "2025-05-08 06:55:25.219257+00:00",
+            "flurin-monitoring.xv2g1ire1j0ehkxrurr1ew43qg.xx.internal.cloudapp.net",
+            "root",
+            "rm -rf -- /var/lib/dpkg/tmp.ci",
+            "/var/lib/dpkg/tmp.ci"
+        ]
+    ]
+}

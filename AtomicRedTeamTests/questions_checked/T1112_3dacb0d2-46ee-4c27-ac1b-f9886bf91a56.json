@@ -1,0 +1,50 @@
+{
+    "technique_id": "T1112",
+    "question_id": "3dacb0d2-46ee-4c27-ac1b-f9886bf91a56",
+    "context": "On Windows systems, threat actors sometimes use the built-in reg.exe tool in a command prompt session to alter user registry settings and disable security features such as the Lock Workstation option.",
+    "objective": "Detect unauthorized modifications to the HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\System registry path that disable the workstation lock functionality.",
+    "technical_details": {
+        "command_analysis": "Attackers invoke reg.exe via cmd.exe with arguments to add or modify a DWORD named DisableLockWorkstation and set it to 1.",
+        "detection_approach": "Search DeviceRegistryEvents for RegistryValueName events under the user Policies\\System key where the initiating process is cmd.exe or reg.exe and RegistryValueData equals 1."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Phrase the question to ask specifically which registry value name was set in this modification, and ensure the answer matches the exact value name used in the attack.",
+    "prompt": "A Windows user’s registry was altered via a command-line tool to disable the lock workstation feature by adding a DWORD entry under the current user Policies\\System key. Which registry value name was modified in this operation?",
+    "answer": [
+        "DisableLockWorkstation"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "DeviceRegistryEvents\n| where RegistryKey contains 'Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Policies\\\\System'\n| where RegistryValueName == 'DisableLockWorkstation'\n| where toint(RegistryValueData) == 1\n| where InitiatingProcessFileName in ('cmd.exe','reg.exe')\n| where ActionType == 'RegistryValueSet'\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, InitiatingProcessFileName, InitiatingProcessCommandLine, RegistryKey, RegistryValueName, RegistryValueData\n| order by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: Both returned rows have 'DisableLockWorkstation' as the RegistryValueName, which matches the key specifically asked for in the expected answers. Additionally, the supporting columns (such as command lines and file names) provide clear context that a registry change was attempted to set this value. Thus, the results contain the expected information for detection.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "InitiatingProcessFileName",
+            "InitiatingProcessCommandLine",
+            "RegistryKey",
+            "RegistryValueName",
+            "RegistryValueData"
+        ],
+        [
+            "2025-05-07 16:39:15.622934+00:00",
+            "windows-vm",
+            "wipro",
+            "reg.exe",
+            "reg  add \"HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\" /v DisableLockWorkstation /t REG_DWORD /d 1 /f",
+            "HKEY_CURRENT_USER\\S-1-5-21-4034913605-1276698442-3985778739-500\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+            "DisableLockWorkstation",
+            "1"
+        ],
+        [
+            "2025-05-07 16:28:49.350902+00:00",
+            "windows-vm",
+            "wipro",
+            "reg.exe",
+            "reg  add \"HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\" /v DisableLockWorkstation /t REG_DWORD /d 1 /f",
+            "HKEY_CURRENT_USER\\S-1-5-21-4034913605-1276698442-3985778739-500\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+            "DisableLockWorkstation",
+            "1"
+        ]
+    ]
+}

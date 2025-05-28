@@ -1,0 +1,34 @@
+{
+    "technique_id": "T1547.002",
+    "question_id": "be2590e8-4ac3-47ac-b4b5-945820f2fbe9",
+    "context": "Attackers can establish persistence on Windows by installing a custom authentication package for the Local Security Authority (LSA), causing lsass.exe to load a malicious DLL on system start.",
+    "objective": "Detect registry modifications to the LSA Authentication Packages setting and identify the custom DLL introduced by the attacker.",
+    "technical_details": {
+        "command_analysis": "The adversary used a PowerShell reg add command to append \"package.dll\" alongside the default msv1_0 value under HKLM\\SYSTEM\\CurrentControlSet\\Control\\Lsa\\Authentication Packages.",
+        "detection_approach": "Search the DeviceRegistryEvents table for changes where RegistryKey contains \"Control\\\\Lsa\" and RegistryValueName is \"Authentication Packages\", then inspect RegistryValueData for unexpected entries."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the inquiry to prompt analysts to look for registry events pointing to LSA persistence and extract the DLL name that was registered.",
+    "prompt": "A Windows host shows a suspicious registry change under the LSA hive. Review recent registry events to locate any new entries under Authentication Packages and determine the name of the DLL the attacker added.",
+    "answer": [
+        "package.dll"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceRegistryEvents\n| where RegistryKey contains \"Control\\\\Lsa\"\n| where RegistryValueName == \"Authentication Packages\"\n| where RegistryValueData contains \".dll\"\n| extend Packages = split(RegistryValueData, ' ')\n| mv-expand Packages\n| where Packages endswith \".dll\" and Packages != \"msv1_0\"\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, InitiatingProcessCommandLine, Packages",
+    "KQL_validation_message": "KQL query validation successful: The expected answer is 'package.dll'. In the query results, the 'Packages' column contains 'msv1_0\\x00package.dll', which explicitly includes the string 'package.dll' after the null separator. This directly provides the evidence required to answer the detection question regarding the presence of 'package.dll'.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "InitiatingProcessCommandLine",
+            "Packages"
+        ],
+        [
+            "2025-05-07 17:06:26.749226+00:00",
+            "windows-vm",
+            "wipro",
+            "\"reg.exe\" add HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Lsa /v \"Authentication Packages\" /t REG_MULTI_SZ /d msv1_0\\0package.dll /f",
+            "msv1_0\u0000package.dll"
+        ]
+    ]
+}

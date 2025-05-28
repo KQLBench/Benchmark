@@ -1,0 +1,125 @@
+{
+    "technique_id": "T1120",
+    "question_id": "2cb4dbf2-2dca-4597-8678-4d39d207a3a5",
+    "context": "A Windows host was suspected of running a PowerShell-based hardware inventory by querying WMI and exporting results to a temporary file.",
+    "objective": "Detect when an attacker uses a WMI cmdlet to enumerate peripheral devices.",
+    "technical_details": {
+        "command_analysis": "PowerShell invocation targeting the Win32_PnPEntity class, exporting Name/Description/Manufacturer to a file.",
+        "detection_approach": "Search process creation logs for PowerShell commands that include ‘Win32_PnPEntity’ or writing to a temp file with a ‘T1120’ identifier."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Ask for the specific cmdlet name used in the PowerShell command.",
+    "prompt": "Review Windows process and PowerShell activity for commands that enumerate PnP entities through WMI. Which PowerShell cmdlet was invoked to perform this hardware inventory?",
+    "answer": [
+        "Get-WMIObject"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "union DeviceProcessEvents\n| where TimeGenerated >= ago(1d)\n| where FileName in~ (\"powershell.exe\",\"pwsh.exe\")\n| where ProcessCommandLine has_any (\"Win32_PnPEntity\",\"Get-WmiObject\",\"Get-CimInstance\",\"T1120\") or (ProcessCommandLine has \"-OutFile\" and ProcessCommandLine has \"$env:TEMP\")\n| extend Account = strcat(InitiatingProcessAccountDomain,'\\\\',InitiatingProcessAccountName)\n| project TimeGenerated, DeviceName, FileName, ProcessCommandLine, Account",
+    "KQL_validation_message": "KQL query validation successful: The detection question looks for evidence of the use of 'Get-WMIObject'. Reviewing the query results, we see several rows where the 'ProcessCommandLine' field has commands like 'powershell.exe & {Get-WMIObject Win32_Group}' or 'powershell.exe & {get-wmiObject -class Win32_Process}', confirming that 'Get-WMIObject' has been executed. Therefore, the information needed to answer the detection question is present in these query results.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "FileName",
+            "ProcessCommandLine",
+            "Account"
+        ],
+        [
+            "2025-05-07 16:16:05.929643+00:00",
+            "windows-vm",
+            "powershell.exe",
+            "\"powershell.exe\" & {Get-WMIObject Win32_Group}",
+            "windows-vm\\wipro"
+        ],
+        [
+            "2025-05-07 16:18:25.733276+00:00",
+            "windows-vm",
+            "powershell.exe",
+            "\"powershell.exe\" & {Get-WMIObject Win32_Group}",
+            "windows-vm\\wipro"
+        ],
+        [
+            "2025-05-07 16:22:33.615590+00:00",
+            "windows-vm",
+            "powershell.exe",
+            "\"powershell.exe\" & {get-wmiObject -class Win32_Process}",
+            "windows-vm\\wipro"
+        ],
+        [
+            "2025-05-07 16:29:26.182169+00:00",
+            "windows-vm",
+            "powershell.exe",
+            "\"powershell.exe\" & {Get-WMIObject Win32_Group}",
+            "windows-vm\\wipro"
+        ],
+        [
+            "2025-05-07 16:33:16.250464+00:00",
+            "windows-vm",
+            "powershell.exe",
+            "\"powershell.exe\" & {get-wmiObject -class Win32_Process}",
+            "windows-vm\\wipro"
+        ],
+        [
+            "2025-05-07 17:09:14.958616+00:00",
+            "windows-vm",
+            "powershell.exe",
+            "\"powershell.exe\" & {# Chromium\n$chromium =  \\\"\"https://commondatastorage.googleapis.com/chromium-browser-snapshots/Win_x64/1153778/chrome-win.zip\\\"\"\n\n# uBlock Origin Lite to test side-loading\n$extension = \\\"\"https://github.com/uBlockOrigin/uBOL-home/releases/download/uBOLite_2024.11.25.1376/uBOLite_2024.11.25.1376.chromium.mv3.zip\\\"\"\n\nSet-Location \\\"\"$env:TEMP\\\"\"\n\nSet-Variable ProgressPreference SilentlyContinue\nInvoke-WebRequest -URI $chromium -OutFile \\\"\"$env:TEMP\\chrome.zip\\\"\"\nInvoke-WebRequest -URI $extension -OutFile \\\"\"$env:TEMP\\extension.zip\\\"\"\n\n\nExpand-Archive chrome.zip -DestinationPath \\\"\"$env:TEMP\\\"\" -Force\nExpand-Archive extension.zip -Force\n\nStart-Process .\\chrome-win\\chrome.exe --load-extension=\\\"\"$env:TEMP\\extension\\\\\"\" -PassThru}",
+            "windows-vm\\wipro"
+        ],
+        [
+            "2025-05-07 10:42:17.186328+00:00",
+            "windows-vm",
+            "powershell.exe",
+            "powershell.exe -ExecutionPolicy Restricted -Command \n                    $Res = 0\n                    [UInt64]$MinDiskSpaceThreshold = 20 * 1024 * 1024 * 1024\n\n                    try {\n                        $SystemDrive = (Get-CimInstance Win32_OperatingSystem).SystemDrive\n                        $SystemDriveLetter = $SystemDrive[0]\n                        $SystemDriveSpace = (Get-Volume -DriveLetter $SystemDriveLetter).SizeRemaining\n                        Write-Host 'Current system drive space:', $SystemDriveSpace.ToString('N0')\n                        if ($SystemDriveSpace -lt $MinDiskSpaceThreshold) {\n                            Write-Host 'System drive space is less than the threshold:', $MinDiskSpaceThreshold.ToString('N0'), 'Block Upgrade.'\n                            $Res = 1\n                        }\n                    } catch {\n                        # Do nothing\n                    }\n\n                    Write-Host 'Final result:', $Res\n                ",
+            "nt authority\\system"
+        ],
+        [
+            "2025-05-07 10:42:21.866287+00:00",
+            "windows-vm",
+            "powershell.exe",
+            "powershell.exe -ExecutionPolicy Restricted -Command \n                    $Res = 0\n                    [UInt64]$MinDiskSpaceThreshold = 25 * 1024 * 1024 * 1024\n\n                    try {\n                        $SystemDrive = (Get-CimInstance Win32_OperatingSystem).SystemDrive\n                        $SystemDriveLetter = $SystemDrive[0]\n                        $SystemDriveSpace = (Get-Volume -DriveLetter $SystemDriveLetter).SizeRemaining\n                        Write-Host 'Current system drive space:', $SystemDriveSpace.ToString('N0')\n                        if ($SystemDriveSpace -lt $MinDiskSpaceThreshold) {\n                            Write-Host 'System drive space is less than the threshold:', $MinDiskSpaceThreshold.ToString('N0'), 'Applying safeguard.'\n                            $Res = 1\n                        }\n                    } catch {\n                        # Do nothing\n                    }\n\n                    Write-Host 'Final result:', $Res\n                ",
+            "nt authority\\system"
+        ],
+        [
+            "2025-05-07 10:42:24.234881+00:00",
+            "windows-vm",
+            "powershell.exe",
+            "powershell.exe -ExecutionPolicy Restricted -Command \n                    $Res = 0\n                    [UInt64]$MinDiskSpaceThreshold = 20 * 1024 * 1024 * 1024\n\n                    try {\n                        $SystemDrive = (Get-CimInstance Win32_OperatingSystem).SystemDrive\n                        $SystemDriveLetter = $SystemDrive[0]\n                        $SystemDriveSpace = (Get-Volume -DriveLetter $SystemDriveLetter).SizeRemaining\n                        Write-Host 'Current system drive space:', $SystemDriveSpace.ToString('N0')\n                        if ($SystemDriveSpace -lt $MinDiskSpaceThreshold) {\n                            Write-Host 'System drive space is less than the threshold:', $MinDiskSpaceThreshold.ToString('N0'), 'Block Upgrade.'\n                            $Res = 1\n                        }\n                    } catch {\n                        # Do nothing\n                    }\n\n                    Write-Host 'Final result:', $Res\n                ",
+            "nt authority\\system"
+        ],
+        [
+            "2025-05-07 10:42:26.262396+00:00",
+            "windows-vm",
+            "powershell.exe",
+            "powershell.exe -ExecutionPolicy Restricted -Command \n                    $Res = 0\n                    [UInt64]$MinDiskSpaceThreshold = 25 * 1024 * 1024 * 1024\n\n                    try {\n                        $SystemDrive = (Get-CimInstance Win32_OperatingSystem).SystemDrive\n                        $SystemDriveLetter = $SystemDrive[0]\n                        $SystemDriveSpace = (Get-Volume -DriveLetter $SystemDriveLetter).SizeRemaining\n                        Write-Host 'Current system drive space:', $SystemDriveSpace.ToString('N0')\n                        if ($SystemDriveSpace -lt $MinDiskSpaceThreshold) {\n                            Write-Host 'System drive space is less than the threshold:', $MinDiskSpaceThreshold.ToString('N0'), 'Applying safeguard.'\n                            $Res = 1\n                        }\n                    } catch {\n                        # Do nothing\n                    }\n\n                    Write-Host 'Final result:', $Res\n                ",
+            "nt authority\\system"
+        ],
+        [
+            "2025-05-07 10:42:28.927712+00:00",
+            "windows-vm",
+            "powershell.exe",
+            "powershell.exe -ExecutionPolicy Restricted -Command \n                    $Res = 0\n                    [UInt64]$MinDiskSpaceThreshold = 20 * 1024 * 1024 * 1024\n\n                    try {\n                        $SystemDrive = (Get-CimInstance Win32_OperatingSystem).SystemDrive\n                        $SystemDriveLetter = $SystemDrive[0]\n                        $SystemDriveSpace = (Get-Volume -DriveLetter $SystemDriveLetter).SizeRemaining\n                        Write-Host 'Current system drive space:', $SystemDriveSpace.ToString('N0')\n                        if ($SystemDriveSpace -lt $MinDiskSpaceThreshold) {\n                            Write-Host 'System drive space is less than the threshold:', $MinDiskSpaceThreshold.ToString('N0'), 'Block Upgrade.'\n                            $Res = 1\n                        }\n                    } catch {\n                        # Do nothing\n                    }\n\n                    Write-Host 'Final result:', $Res\n                ",
+            "nt authority\\system"
+        ],
+        [
+            "2025-05-07 10:42:30.854042+00:00",
+            "windows-vm",
+            "powershell.exe",
+            "powershell.exe -ExecutionPolicy Restricted -Command \n                    $Res = 0\n                    [UInt64]$MinDiskSpaceThreshold = 25 * 1024 * 1024 * 1024\n\n                    try {\n                        $SystemDrive = (Get-CimInstance Win32_OperatingSystem).SystemDrive\n                        $SystemDriveLetter = $SystemDrive[0]\n                        $SystemDriveSpace = (Get-Volume -DriveLetter $SystemDriveLetter).SizeRemaining\n                        Write-Host 'Current system drive space:', $SystemDriveSpace.ToString('N0')\n                        if ($SystemDriveSpace -lt $MinDiskSpaceThreshold) {\n                            Write-Host 'System drive space is less than the threshold:', $MinDiskSpaceThreshold.ToString('N0'), 'Applying safeguard.'\n                            $Res = 1\n                        }\n                    } catch {\n                        # Do nothing\n                    }\n\n                    Write-Host 'Final result:', $Res\n                ",
+            "nt authority\\system"
+        ],
+        [
+            "2025-05-07 10:42:47.787706+00:00",
+            "windows-vm",
+            "powershell.exe",
+            "powershell.exe -ExecutionPolicy Restricted -Command \n                    $Res = 0\n                    [UInt64]$MinDiskSpaceThreshold = 20 * 1024 * 1024 * 1024\n\n                    try {\n                        $SystemDrive = (Get-CimInstance Win32_OperatingSystem).SystemDrive\n                        $SystemDriveLetter = $SystemDrive[0]\n                        $SystemDriveSpace = (Get-Volume -DriveLetter $SystemDriveLetter).SizeRemaining\n                        Write-Host 'Current system drive space:', $SystemDriveSpace.ToString('N0')\n                        if ($SystemDriveSpace -lt $MinDiskSpaceThreshold) {\n                            Write-Host 'System drive space is less than the threshold:', $MinDiskSpaceThreshold.ToString('N0'), 'Block Upgrade.'\n                            $Res = 1\n                        }\n                    } catch {\n                        # Do nothing\n                    }\n\n                    Write-Host 'Final result:', $Res\n                ",
+            "nt authority\\system"
+        ],
+        [
+            "2025-05-07 10:42:49.702458+00:00",
+            "windows-vm",
+            "powershell.exe",
+            "powershell.exe -ExecutionPolicy Restricted -Command \n                    $Res = 0\n                    [UInt64]$MinDiskSpaceThreshold = 25 * 1024 * 1024 * 1024\n\n                    try {\n                        $SystemDrive = (Get-CimInstance Win32_OperatingSystem).SystemDrive\n                        $SystemDriveLetter = $SystemDrive[0]\n                        $SystemDriveSpace = (Get-Volume -DriveLetter $SystemDriveLetter).SizeRemaining\n                        Write-Host 'Current system drive space:', $SystemDriveSpace.ToString('N0')\n                        if ($SystemDriveSpace -lt $MinDiskSpaceThreshold) {\n                            Write-Host 'System drive space is less than the threshold:', $MinDiskSpaceThreshold.ToString('N0'), 'Applying safeguard.'\n                            $Res = 1\n                        }\n                    } catch {\n                        # Do nothing\n                    }\n\n                    Write-Host 'Final result:', $Res\n                ",
+            "nt authority\\system"
+        ]
+    ]
+}

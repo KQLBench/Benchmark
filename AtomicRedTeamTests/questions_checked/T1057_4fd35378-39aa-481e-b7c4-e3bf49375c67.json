@@ -1,0 +1,32 @@
+{
+    "technique_id": "T1057",
+    "question_id": "4fd35378-39aa-481e-b7c4-e3bf49375c67",
+    "context": "Windows process creation logs in DeviceProcessEvents often capture detailed command lines for launched applications.",
+    "objective": "Detect when an adversary invokes Task Manager via the command prompt using a non-standard switch.",
+    "technical_details": {
+        "command_analysis": "The adversary executed taskmgr.exe with a \"/7\" switch to list running processes in a specific view.",
+        "detection_approach": "Query DeviceProcessEvents for entries where FileName equals 'taskmgr.exe' and ProcessCommandLine contains '/7' to isolate this behavior."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Craft the question to ask for the exact command line used to launch Task Manager, ensuring the analyst extracts the precise invocation including the switch.",
+    "prompt": "On a Windows host, investigate process events to find when Task Manager was launched via cmd with an unusual flag. What was the full command executed?",
+    "answer": [
+        "taskmgr.exe /7"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "DeviceProcessEvents\n| where tolower(FileName) == 'taskmgr.exe' and ProcessCommandLine contains '/7'\n| project TimeGenerated, DeviceName, AccountName, ProcessCommandLine",
+    "KQL_validation_message": "KQL query validation successful: The 'ProcessCommandLine' field in the returned result contains the string 'taskmgr.exe  /7', which matches the expected answer 'taskmgr.exe /7' (ignoring the extra whitespace). Therefore, the results would provide the necessary evidence to answer the detection question.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "AccountName",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 16:33:25.619479+00:00",
+            "windows-vm",
+            "wipro",
+            "taskmgr.exe  /7"
+        ]
+    ]
+}

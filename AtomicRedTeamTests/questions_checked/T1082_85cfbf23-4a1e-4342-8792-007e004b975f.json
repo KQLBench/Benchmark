@@ -1,0 +1,230 @@
+{
+    "technique_id": "T1082",
+    "question_id": "85cfbf23-4a1e-4342-8792-007e004b975f",
+    "context": "A Windows endpoint was observed executing a utility to enumerate its own network identity. This behavior often appears early in reconnaissance when an adversary tries to gather basic host information.",
+    "objective": "Identify the specific tool invoked on a Windows system to display the machine’s hostname using available process logs.",
+    "technical_details": {
+        "command_analysis": "The native Windows utility prints the device’s hostname to stdout when invoked with no arguments.",
+        "detection_approach": "Query process creation records for entries where the file name or command line corresponds to the hostname tool executed via the command prompt."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question to ask which built-in command was run and ensure the answer matches the exact command name used.",
+    "prompt": "Review Windows process logs to find which built-in command was executed to reveal the system’s hostname.",
+    "answer": [
+        "hostname"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "DeviceProcessEvents\n| where tolower(FileName) == \"hostname.exe\"\n| project TimeGenerated, DeviceName, AccountDomain, AccountName, FileName, ProcessCommandLine, InitiatingProcessFileName, InitiatingProcessCommandLine",
+    "KQL_validation_message": "KQL query validation successful: The expected answer is 'hostname'. The results table contains a 'DeviceName' column, whose value is 'windows-vm' in all rows. This column represents the hostname of the device. Therefore, the results include the expected information and can be used to answer the detection question about 'hostname' activities.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "AccountDomain",
+            "AccountName",
+            "FileName",
+            "ProcessCommandLine",
+            "InitiatingProcessFileName",
+            "InitiatingProcessCommandLine"
+        ],
+        [
+            "2025-05-07 16:08:21.469727+00:00",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            "HOSTNAME.EXE",
+            "\"HOSTNAME.EXE\"",
+            "powershell.exe",
+            "powershell  -Command \"Invoke-AtomicTest T1069.001 -TestGuids 69119e58-96db-4110-ad27-954e48f3bb13 -GetPrereqs -TimeoutSeconds 120 \""
+        ],
+        [
+            "2025-05-07 16:08:21.470368+00:00",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            "HOSTNAME.EXE",
+            "\"HOSTNAME.EXE\"",
+            "powershell.exe",
+            "powershell  -Command \"Invoke-AtomicTest T1069.001 -TestGuids 1f454dd6-e134-44df-bebb-67de70fb6cd8 -GetPrereqs -TimeoutSeconds 120 \""
+        ],
+        [
+            "2025-05-07 16:08:21.470380+00:00",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            "HOSTNAME.EXE",
+            "\"HOSTNAME.EXE\"",
+            "powershell.exe",
+            "powershell  -Command \"Invoke-AtomicTest T1069.001 -TestGuids a580462d-2c19-4bc7-8b9a-57a41b7d3ba4 -GetPrereqs -TimeoutSeconds 120 \""
+        ],
+        [
+            "2025-05-07 16:08:21.803716+00:00",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            "HOSTNAME.EXE",
+            "\"HOSTNAME.EXE\"",
+            "powershell.exe",
+            "powershell  -Command \"Invoke-AtomicTest T1069.001 -TestGuids 1f454dd6-e134-44df-bebb-67de70fb6cd8 -GetPrereqs -TimeoutSeconds 120 \""
+        ],
+        [
+            "2025-05-07 16:08:21.806706+00:00",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            "HOSTNAME.EXE",
+            "\"HOSTNAME.EXE\"",
+            "powershell.exe",
+            "powershell  -Command \"Invoke-AtomicTest T1069.001 -TestGuids 69119e58-96db-4110-ad27-954e48f3bb13 -GetPrereqs -TimeoutSeconds 120 \""
+        ],
+        [
+            "2025-05-07 16:08:21.807423+00:00",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            "HOSTNAME.EXE",
+            "\"HOSTNAME.EXE\"",
+            "powershell.exe",
+            "powershell  -Command \"Invoke-AtomicTest T1069.001 -TestGuids a580462d-2c19-4bc7-8b9a-57a41b7d3ba4 -GetPrereqs -TimeoutSeconds 120 \""
+        ],
+        [
+            "2025-05-07 16:08:22.928509+00:00",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            "HOSTNAME.EXE",
+            "\"HOSTNAME.EXE\"",
+            "powershell.exe",
+            "powershell  -Command \"Invoke-AtomicTest T1069.001 -TestGuids 1f454dd6-e134-44df-bebb-67de70fb6cd8 -GetPrereqs -TimeoutSeconds 120 \""
+        ],
+        [
+            "2025-05-07 16:08:22.943761+00:00",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            "HOSTNAME.EXE",
+            "\"HOSTNAME.EXE\"",
+            "powershell.exe",
+            "powershell  -Command \"Invoke-AtomicTest T1069.001 -TestGuids a580462d-2c19-4bc7-8b9a-57a41b7d3ba4 -GetPrereqs -TimeoutSeconds 120 \""
+        ],
+        [
+            "2025-05-07 16:08:22.952269+00:00",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            "HOSTNAME.EXE",
+            "\"HOSTNAME.EXE\"",
+            "powershell.exe",
+            "powershell  -Command \"Invoke-AtomicTest T1069.001 -TestGuids 69119e58-96db-4110-ad27-954e48f3bb13 -GetPrereqs -TimeoutSeconds 120 \""
+        ],
+        [
+            "2025-05-07 16:15:59.649330+00:00",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            "HOSTNAME.EXE",
+            "\"HOSTNAME.EXE\"",
+            "powershell.exe",
+            "powershell  -Command \"Invoke-AtomicTest T1069.001 -TestGuids a580462d-2c19-4bc7-8b9a-57a41b7d3ba4 -GetPrereqs -TimeoutSeconds 120 \""
+        ],
+        [
+            "2025-05-07 16:15:59.779631+00:00",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            "HOSTNAME.EXE",
+            "\"HOSTNAME.EXE\"",
+            "powershell.exe",
+            "powershell  -Command \"Invoke-AtomicTest T1069.001 -TestGuids 69119e58-96db-4110-ad27-954e48f3bb13 -GetPrereqs -TimeoutSeconds 120 \""
+        ],
+        [
+            "2025-05-07 16:15:59.783771+00:00",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            "HOSTNAME.EXE",
+            "\"HOSTNAME.EXE\"",
+            "powershell.exe",
+            "powershell  -Command \"Invoke-AtomicTest T1069.001 -TestGuids 1f454dd6-e134-44df-bebb-67de70fb6cd8 -GetPrereqs -TimeoutSeconds 120 \""
+        ],
+        [
+            "2025-05-07 16:15:59.866685+00:00",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            "HOSTNAME.EXE",
+            "\"HOSTNAME.EXE\"",
+            "powershell.exe",
+            "powershell  -Command \"Invoke-AtomicTest T1069.001 -TestGuids a580462d-2c19-4bc7-8b9a-57a41b7d3ba4 -GetPrereqs -TimeoutSeconds 120 \""
+        ],
+        [
+            "2025-05-07 16:15:59.993962+00:00",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            "HOSTNAME.EXE",
+            "\"HOSTNAME.EXE\"",
+            "powershell.exe",
+            "powershell  -Command \"Invoke-AtomicTest T1069.001 -TestGuids 69119e58-96db-4110-ad27-954e48f3bb13 -GetPrereqs -TimeoutSeconds 120 \""
+        ],
+        [
+            "2025-05-07 16:16:00.012540+00:00",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            "HOSTNAME.EXE",
+            "\"HOSTNAME.EXE\"",
+            "powershell.exe",
+            "powershell  -Command \"Invoke-AtomicTest T1069.001 -TestGuids 1f454dd6-e134-44df-bebb-67de70fb6cd8 -GetPrereqs -TimeoutSeconds 120 \""
+        ],
+        [
+            "2025-05-07 16:16:00.354079+00:00",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            "HOSTNAME.EXE",
+            "\"HOSTNAME.EXE\"",
+            "powershell.exe",
+            "powershell  -Command \"Invoke-AtomicTest T1069.001 -TestGuids a580462d-2c19-4bc7-8b9a-57a41b7d3ba4 -GetPrereqs -TimeoutSeconds 120 \""
+        ],
+        [
+            "2025-05-07 16:16:00.494765+00:00",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            "HOSTNAME.EXE",
+            "\"HOSTNAME.EXE\"",
+            "powershell.exe",
+            "powershell  -Command \"Invoke-AtomicTest T1069.001 -TestGuids 1f454dd6-e134-44df-bebb-67de70fb6cd8 -GetPrereqs -TimeoutSeconds 120 \""
+        ],
+        [
+            "2025-05-07 16:16:00.496286+00:00",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            "HOSTNAME.EXE",
+            "\"HOSTNAME.EXE\"",
+            "powershell.exe",
+            "powershell  -Command \"Invoke-AtomicTest T1069.001 -TestGuids 69119e58-96db-4110-ad27-954e48f3bb13 -GetPrereqs -TimeoutSeconds 120 \""
+        ],
+        [
+            "2025-05-07 16:16:03.348440+00:00",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            "HOSTNAME.EXE",
+            "\"HOSTNAME.EXE\"",
+            "powershell.exe",
+            "powershell  -Command \"Invoke-AtomicTest T1069.001 -TestGuids a580462d-2c19-4bc7-8b9a-57a41b7d3ba4  -TimeoutSeconds 120 \""
+        ],
+        [
+            "2025-05-07 16:16:03.380875+00:00",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            "HOSTNAME.EXE",
+            "\"HOSTNAME.EXE\"",
+            "powershell.exe",
+            "powershell  -Command \"Invoke-AtomicTest T1069.001 -TestGuids 69119e58-96db-4110-ad27-954e48f3bb13  -TimeoutSeconds 120 \""
+        ]
+    ]
+}

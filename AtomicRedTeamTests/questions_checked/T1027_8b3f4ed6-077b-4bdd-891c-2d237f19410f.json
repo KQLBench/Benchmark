@@ -1,0 +1,44 @@
+{
+    "technique_id": "T1027",
+    "question_id": "8b3f4ed6-077b-4bdd-891c-2d237f19410f",
+    "context": "On Windows systems, defenders may encounter PowerShell commands that are deliberately obfuscated to evade detection. In this scenario, an obfuscated script reconstructs and executes a simple payload.",
+    "objective": "Determine which tool or interpreter was invoked to execute the obfuscated payload.",
+    "technical_details": {
+        "command_analysis": "The payload uses dynamic .NET type resolution and encoded byte sequences to reconstruct and invoke a PowerShell expression.",
+        "detection_approach": "Query the DeviceProcessEvents table for unusual or heavily obfuscated command lines, looking for patterns of encoded or hex-encoded parameters."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question to ask what executable name appears in the process events for this obfuscated execution.",
+    "prompt": "A Windows host shows a process launch with an extremely obfuscated command line that dynamically builds and invokes code at runtime. Which process name was used to execute this payload?",
+    "answer": [
+        "powershell"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where TimeGenerated >= ago(7d)\n// Look for PowerShell encoded or hex-heavy command lines\n| where ProcessCommandLine has \"-EncodedCommand\"\n    or ProcessCommandLine has \"-enc\"\n    or ProcessCommandLine matches regex @\"[A-Za-z0-9+/]{100,}={0,2}\"\n// Identify the invoked interpreter/tool\n| distinct FileName",
+    "KQL_validation_message": "KQL query validation successful: The results contain a list of file names, and 'powershell.exe' is present as an entry. Although the expected answer is 'powershell', it is reasonable to match 'powershell.exe' to this term since it is the executable. Therefore, the results provide the evidence needed for the detection question.",
+    "KQL_query_results": [
+        [
+            "FileName"
+        ],
+        [
+            "MicrosoftEdgeUpdate.exe"
+        ],
+        [
+            "SenseIR.exe"
+        ],
+        [
+            "powershell.exe"
+        ],
+        [
+            "dash"
+        ],
+        [
+            "bash"
+        ],
+        [
+            "python3.12"
+        ],
+        [
+            "env"
+        ]
+    ]
+}

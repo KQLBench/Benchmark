@@ -1,0 +1,32 @@
+{
+    "technique_id": "T1039",
+    "question_id": "7762e120-5879-44ff-97f8-008b401b9a98",
+    "context": "An attacker used PowerShell on a Windows host to fetch a sensitive file from another machine’s C$ administrative share.",
+    "objective": "Detect unauthorized usage of the C$ share via PowerShell and identify the exact command line that performed the file copy.",
+    "technical_details": {
+        "command_analysis": "Inspect DeviceProcessEvents for PowerShell invocations where ProcessCommandLine includes 'copy-item' and references a UNC path to C$.",
+        "detection_approach": "Query the ProcessCommandLine field in DeviceProcessEvents for patterns matching a PowerShell copy-item call against \\\\<remote>\\C$ share."
+    },
+    "thinking_how_to_phrase_question_and_answer": "We need a query that surfaces the full PowerShell command used to pull a file over the C$ share. The answer will be that exact command string as captured in the logs.",
+    "prompt": "On a Windows system, someone ran PowerShell to copy a file from a remote machine’s C$ share to the local TEMP folder. Using process event logs, what full PowerShell command was executed to perform this action?",
+    "answer": [
+        "copy-item -Path \"\\\\127.0.0.1\\C$\\Windows\\temp\\Easter_Bunny.password\" -Destination \"$Env:TEMP\\Easter_egg.password\""
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where FileName in~ (\"powershell.exe\", \"pwsh.exe\")\n| where ProcessCommandLine has \"copy-item\" and ProcessCommandLine has \"\\\\C$\"\n| project TimeGenerated, DeviceName, AccountName, ProcessCommandLine\n| order by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: The expected answer is a PowerShell command copying a file from a network location into the TEMP directory. In the query results, the 'ProcessCommandLine' field contains a similar copy-item command with the same source and destination, captured as executed by the user 'wipro' on 'windows-vm'. The command uses minor variations in quotes due to escaping, but the substantive content, including the source and destination paths, is present. This confirms that the query results contain the needed evidence to answer the detection question.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "AccountName",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 17:07:56.724180+00:00",
+            "windows-vm",
+            "wipro",
+            "\"powershell.exe\" & {copy-item -Path \\\"\"\\\\127.0.0.1\\C$\\Windows\\temp\\Easter_Bunny.password\\\"\" -Destination \\\"\"$Env:TEMP\\Easter_egg.password\\\"\"}"
+        ]
+    ]
+}

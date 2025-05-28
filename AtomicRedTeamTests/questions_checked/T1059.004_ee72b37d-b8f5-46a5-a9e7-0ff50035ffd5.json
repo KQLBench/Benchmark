@@ -1,0 +1,60 @@
+{
+    "technique_id": "T1059.004",
+    "question_id": "ee72b37d-b8f5-46a5-a9e7-0ff50035ffd5",
+    "context": "A Linux environment where process execution logs capture command-line invocations of common utilities.",
+    "objective": "Detect misuse of awk’s BEGIN rule to spawn an interactive shell and break out of restricted environments.",
+    "technical_details": {
+        "command_analysis": "The attacker invokes awk with a BEGIN block that calls system to launch /bin/sh in the background.",
+        "detection_approach": "Search process creation events for awk executions containing a BEGIN rule and a system call to sh."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Focus on process execution logs, filter for awk, and inspect the full command-line arguments. The question requires extracting the exact invocation that spawned the shell.",
+    "prompt": "On a Linux system, find any process creation record where awk is used with a BEGIN rule to launch a shell. What was the exact command invoked?",
+    "answer": [
+        "awk 'BEGIN {system(\"/bin/sh &\")}’"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where ProcessCommandLine has \"awk\" and ProcessCommandLine has \"BEGIN\" and ProcessCommandLine has \"system(\\\"/bin/sh\" \n| where TimeGenerated >= ago(1d)\n| project TimeGenerated, DeviceName, AccountName, FileName, ProcessCommandLine, ProcessId",
+    "KQL_validation_message": "KQL query validation successful: The expected answer is the specific awk command: awk 'BEGIN {system(\"/bin/sh &\")}\u00199. The query results include multiple instances where the ProcessCommandLine field matches or closely resembles this command (e.g., 'awk 'BEGIN {system(\"/bin/sh &\")}', 'sh -c 'awk 'BEGIN {system(\"/bin/sh &\")}''). Additionally, the relevant fields such as TimeGenerated, DeviceName, AccountName, FileName, and ProcessId are present, confirming that the detected activity matches the expected answer. Thus, the results provide sufficient evidence.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "AccountName",
+            "FileName",
+            "ProcessCommandLine",
+            "ProcessId"
+        ],
+        [
+            "2025-05-07 17:01:38.557325+00:00",
+            "wirpo-test",
+            "root",
+            "dash",
+            "sh -c 'awk 'BEGIN {system(\"/bin/sh &\")}''",
+            16984
+        ],
+        [
+            "2025-05-07 17:01:38.558977+00:00",
+            "wirpo-test",
+            "root",
+            "dash",
+            "sh -c 'awk 'BEGIN {system(\"/bin/sh &\")}''",
+            16986
+        ],
+        [
+            "2025-05-07 17:01:38.560373+00:00",
+            "wirpo-test",
+            "root",
+            "gawk",
+            "awk 'BEGIN {system(\"/bin/sh &\")}'",
+            16986
+        ],
+        [
+            "2025-05-07 17:01:38.571290+00:00",
+            "wirpo-test",
+            "root",
+            "gawk",
+            "awk 'BEGIN {system(\"/bin/sh &\")}'",
+            16987
+        ]
+    ]
+}

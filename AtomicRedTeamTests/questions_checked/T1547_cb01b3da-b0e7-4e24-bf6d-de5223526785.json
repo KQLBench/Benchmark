@@ -1,0 +1,38 @@
+{
+    "technique_id": "T1547",
+    "question_id": "cb01b3da-b0e7-4e24-bf6d-de5223526785",
+    "context": "On Windows systems, adversaries can leverage native utilities to install malicious drivers without raising immediate suspicion.",
+    "objective": "Determine the specific INF file that was added by a pnputil.exe invocation.",
+    "technical_details": {
+        "command_analysis": "Monitor process creation logs for instances of pnputil.exe being executed with the add-driver option.",
+        "detection_approach": "Base KQL: DeviceProcessEvents\n| where FileName == \"pnputil.exe\" and ProcessCommandLine contains \"/add-driver\"\n| project TimeGenerated, ProcessCommandLine"
+    },
+    "thinking_how_to_phrase_question_and_answer": "We need to ask for the exact INF file name that followed the add-driver switch in the logged command line. The answer should be that file name, such as usbstor.inf.",
+    "prompt": "A Windows host shows evidence of a driver being installed using a built-in utility. Investigate process creation events to find the INF filename that was specified in the add-driver invocation.",
+    "answer": [
+        "usbstor.inf"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where FileName == \"pnputil.exe\"\n| where ProcessCommandLine contains \"/add-driver\"\n| extend InfFile = extract(\"(?:/add-driver)\\\\s+\\\"?([^\\\"\\\\s]+\\\\.inf)\\\"?\", 1, ProcessCommandLine)\n| where isnotempty(InfFile)\n| project TimeGenerated, DeviceName, AccountName, InfFile",
+    "KQL_validation_message": "KQL query validation successful: The 'InfFile' column in the results contains the value 'C:\\Windows\\INF\\usbstor.inf' for both entries. The detection question asked for evidence related to 'usbstor.inf', which is present in these results. Therefore, the KQL query results provide the required information to answer the detection question.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "AccountName",
+            "InfFile"
+        ],
+        [
+            "2025-05-07 16:22:22.853760+00:00",
+            "windows-vm",
+            "wipro",
+            "C:\\Windows\\INF\\usbstor.inf"
+        ],
+        [
+            "2025-05-07 16:33:07.152620+00:00",
+            "windows-vm",
+            "wipro",
+            "C:\\Windows\\INF\\usbstor.inf"
+        ]
+    ]
+}

@@ -1,0 +1,41 @@
+{
+    "technique_id": "T1057",
+    "question_id": "b51239b4-0129-474f-a2b4-70f855b9f2c2",
+    "context": "On a Windows host, security teams monitor process creation logs to spot instances where attackers misuse PowerShell to gather system information via WMI.",
+    "objective": "Detect when PowerShell invokes a WMI query to enumerate processes and identify the specific class being targeted.",
+    "technical_details": {
+        "command_analysis": "The suspicious command is a PowerShell invocation of get-wmiObject with a -class parameter, which reveals which WMI class was queried.",
+        "detection_approach": "Search DeviceProcessEvents for FileName equal to 'powershell.exe' and ProcessCommandLine containing 'get-wmiObject', then parse out the class name provided to the -class switch."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Ask directly for the WMI class name that was passed to the PowerShell cmdlet to ensure the analyst extracts that specific value from the logs.",
+    "prompt": "While reviewing Windows process events, you spot a PowerShell process executing a WMI enumeration cmdlet. What WMI class name did the attacker query?",
+    "answer": [
+        "Win32_Process"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "DeviceProcessEvents\n| where FileName =~ \"powershell.exe\"\n| where ProcessCommandLine contains \"get-wmiobject\"\n| extend classParts = split(ProcessCommandLine, \"-class \")\n| where array_length(classParts) > 1\n| extend WMIClass = tostring(split(classParts[1], \" \")[0])\n| project TimeGenerated, DeviceName, AccountName, ProcessCommandLine, WMIClass",
+    "KQL_validation_message": "KQL query validation successful: The expected answer is 'Win32_Process'. In the query results, the 'WMIClass' field contains 'Win32_Process}', which matches the expected value aside from a potential typographical '}' at the end, likely due to how the command was logged (the command line also displays get-wmiObject -class Win32_Process). Therefore, the results do contain the required information matching the expected answer and provide sufficient evidence for detection.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "AccountName",
+            "ProcessCommandLine",
+            "WMIClass"
+        ],
+        [
+            "2025-05-07 16:22:33.615590+00:00",
+            "windows-vm",
+            "wipro",
+            "\"powershell.exe\" & {get-wmiObject -class Win32_Process}",
+            "Win32_Process}"
+        ],
+        [
+            "2025-05-07 16:33:16.250464+00:00",
+            "windows-vm",
+            "wipro",
+            "\"powershell.exe\" & {get-wmiObject -class Win32_Process}",
+            "Win32_Process}"
+        ]
+    ]
+}

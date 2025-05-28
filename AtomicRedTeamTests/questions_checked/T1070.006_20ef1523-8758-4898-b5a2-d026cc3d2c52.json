@@ -1,0 +1,44 @@
+{
+    "technique_id": "T1070.006",
+    "question_id": "20ef1523-8758-4898-b5a2-d026cc3d2c52",
+    "context": "A Linux host is suspected of malicious activity where an attacker altered file metadata to cover tracks.",
+    "objective": "Detect unauthorized modification of file timestamps that could indicate timestomping activity.",
+    "technical_details": {
+        "command_analysis": "The attacker used a touch command with the -m and -t flags to set a file’s modification time to a past date.",
+        "detection_approach": "Search ingested Linux logs for file modification events or syslog entries that record execution of touch commands targeting specific filenames."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Craft a question that leads the analyst to query modification events in syslog or file event tables, then extract the exact filename altered by the touch command.",
+    "prompt": "On a Linux system, attackers may use timestamp manipulation to hide malicious changes. Investigate relevant logs to identify which file’s modification timestamp was altered by such a command.",
+    "answer": [
+        "T1070.006-modification.txt"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "// T1070.006 – Detect unauthorized file timestamp modification via touch -m -t on Linux hosts\nlet file_events = DeviceFileEvents\n| where ActionType == \"FileModified\" and InitiatingProcessFileName == \"touch\" and InitiatingProcessCommandLine contains \"-m\" and InitiatingProcessCommandLine contains \"-t\"\n| extend ModifiedTimestamp = extract(@\"-t\\s+(\\d{12})\", 1, InitiatingProcessCommandLine)\n| extend FilePath = extract(@\"-t\\s+\\d{12}\\s+(\\S+)\", 1, InitiatingProcessCommandLine)\n| project TimeGenerated, DeviceName, AccountName = InitiatingProcessAccountName, FilePath, ModifiedTimestamp, CommandLine = InitiatingProcessCommandLine;\nlet proc_events = DeviceProcessEvents\n| where FileName == \"touch\" and ProcessCommandLine contains \"-m\" and ProcessCommandLine contains \"-t\"\n| extend ModifiedTimestamp = extract(@\"-t\\s+(\\d{12})\", 1, ProcessCommandLine)\n| extend FilePath = extract(@\"-t\\s+\\d{12}\\s+(\\S+)\", 1, ProcessCommandLine)\n| project TimeGenerated, DeviceName, AccountName = InitiatingProcessAccountName, FilePath, ModifiedTimestamp, CommandLine = ProcessCommandLine;\nlet syslog_events = Syslog\n| where ProcessName == \"touch\" and SyslogMessage contains \"-m\" and SyslogMessage contains \"-t\"\n| extend ModifiedTimestamp = extract(@\"-t\\s+(\\d{12})\", 1, SyslogMessage)\n| extend FilePath = extract(@\"-t\\s+\\d{12}\\s+(\\S+)\", 1, SyslogMessage)\n| project TimeGenerated, DeviceName = Computer, AccountName = \"\", FilePath, ModifiedTimestamp, CommandLine = SyslogMessage;\nfile_events\n| union proc_events, syslog_events\n| sort by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: Among the query results is a record with the command line 'touch -m -t 197001010000.00 /tmp/T1070.006-modification.txt', with a FilePath implicitly referencing 'T1070.006-modification.txt'. This matches the expected answer of activity on 'T1070.006-modification.txt'. The necessary fields (such as CommandLine and FilePath) support detection and analysis of this activity.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "AccountName",
+            "FilePath",
+            "ModifiedTimestamp",
+            "CommandLine"
+        ],
+        [
+            "2025-05-07 17:24:05.096062+00:00",
+            "wirpo-test",
+            "root",
+            "",
+            "",
+            "/bin/touch /tmp/art-systemd-timer-marker"
+        ],
+        [
+            "2025-05-07 16:50:27.288105+00:00",
+            "wirpo-test",
+            "root",
+            "",
+            "197001010000",
+            "touch -m -t 197001010000.00 /tmp/T1070.006-modification.txt"
+        ]
+    ]
+}

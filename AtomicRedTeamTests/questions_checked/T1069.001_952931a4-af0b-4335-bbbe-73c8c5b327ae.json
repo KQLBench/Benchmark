@@ -1,0 +1,48 @@
+{
+    "technique_id": "T1069.001",
+    "question_id": "952931a4-af0b-4335-bbbe-73c8c5b327ae",
+    "context": "An attacker on a Linux host chained several local utilities to enumerate all permission groups and membership information, potentially to map user roles.",
+    "objective": "Detect which native utility was invoked to query the system’s group database entries.",
+    "technical_details": {
+        "command_analysis": "The adversary executed a series of commands including dscacheutil, dscl, groups, id, getent, and directly read /etc/group to enumerate local group information.",
+        "detection_approach": "Search DeviceProcessEvents for unusual execution of group enumeration commands and filter by command lines invoking group-related utilities."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Phrase the question to focus on identifying a specific utility used among many, and expect a single-word answer matching the command name.",
+    "prompt": "On a Linux endpoint, process events reveal a chain of group‐enumeration utilities executed by a single session. Which utility was used to query the system’s group database?",
+    "answer": [
+        "getent"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where TimeGenerated >= ago(7d)\n// filter for native group‐enumeration utilities or direct /etc/group reads\n| where FileName in~ (\"dscacheutil\",\"dscl\",\"groups\",\"id\",\"getent\") or ProcessCommandLine contains \"/etc/group\"\n// count invocations per utility\n| summarize InvocationCount = count() by Utility = FileName\n| where InvocationCount > 0\n| order by InvocationCount desc",
+    "KQL_validation_message": "KQL query validation successful: The results include a list of utilities and their invocation counts. 'getent' appears with a count of 3, which aligns with the expected answer. The presence of 'getent' in the results confirms that the query output contains the necessary information to answer the detection question regarding its usage.",
+    "KQL_query_results": [
+        [
+            "Utility",
+            "InvocationCount"
+        ],
+        [
+            "id",
+            559
+        ],
+        [
+            "dash",
+            12
+        ],
+        [
+            "groups",
+            7
+        ],
+        [
+            "getent",
+            3
+        ],
+        [
+            "cat",
+            2
+        ],
+        [
+            "ls",
+            1
+        ]
+    ]
+}

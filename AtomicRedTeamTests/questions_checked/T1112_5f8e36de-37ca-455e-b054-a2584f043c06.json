@@ -1,0 +1,26 @@
+{
+    "technique_id": "T1112",
+    "question_id": "5f8e36de-37ca-455e-b054-a2584f043c06",
+    "context": "A Windows host has been tested by an adversary simulation that disables Remote Desktop Protocol by making a registry change under the Terminal Server settings.",
+    "objective": "Detect and identify which registry value was modified to turn off RDP access.",
+    "technical_details": {
+        "command_analysis": "The test executes a command that adds or updates a REG_DWORD named fDenyTSConnections under the HKLM\\System\\CurrentControlSet\\Control\\Terminal Server key and sets its data to 1.",
+        "detection_approach": "Review DeviceRegistryEvents for ActionType indicating a registry write to the Terminal Server key path, filter on RegistryValueName and examine the associated events to find the modified value name."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Pose a question that directs the analyst to search registry write events for the specific value name that was changed, and the answer will be that exact registry value name.",
+    "prompt": "On Windows systems, disabling RDP via the registry generates registry write events. Investigate registry event logs for modifications under the Terminal Server configuration path. What is the name of the registry value that was changed to disable Remote Desktop Protocol?",
+    "answer": [
+        "fDenyTSConnections"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceRegistryEvents\n| where ActionType == 'RegistryValueSet'\n| where RegistryKey contains 'Terminal Server'\n| where RegistryValueData == '1'\n| distinct RegistryValueName",
+    "KQL_validation_message": "KQL query validation successful: The query results have a header ('RegistryValueName') and a row with the value 'fDenyTSConnections'. The expected answer is 'fDenyTSConnections', which is present in the results. The structure and content confirm the evidence needed is present.",
+    "KQL_query_results": [
+        [
+            "RegistryValueName"
+        ],
+        [
+            "fDenyTSConnections"
+        ]
+    ]
+}

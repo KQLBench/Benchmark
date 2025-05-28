@@ -1,0 +1,47 @@
+{
+    "technique_id": "T1542.001",
+    "question_id": "b8a49f03-e3c4-40f2-b7bb-9e8f8fdddbf1",
+    "context": "On a Windows host, a PowerShell command was used to place a new executable into the System32 directory, potentially signaling a UEFI persistence attempt by injecting a binary before OS boot.",
+    "objective": "Detect the unexpected creation of an executable under the Windows System32 folder that could be used for UEFI-based pre-OS persistence.",
+    "technical_details": {
+        "command_analysis": "A PowerShell New-Item command created a file named wpbbin.exe in the %SystemRoot%\\System32 path.",
+        "detection_approach": "Search file creation events for newly introduced executables under the System32 directory, then identify unusual or undocumented binaries placed there."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Ask for the filename of the newly created binary that appeared in System32, without presupposing its exact name.",
+    "prompt": "Investigate Windows file creation logs to uncover any new executable added directly to the System32 directory, which may indicate a UEFI persistence implant. What was the name of the file created?",
+    "answer": [
+        "wpbbin.exe"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceFileEvents\n| where ActionType == \"FileCreated\"\n| where FolderPath startswith @\"C:\\Windows\\System32\"\n| where FileName endswith \".exe\"\n| where TimeGenerated >= ago(1d)\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, InitiatingProcessFileName, InitiatingProcessCommandLine, FolderPath, FileName\n| sort by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: The expected answer is 'wpbbin.exe'. Upon review, one of the returned rows in the query results has the 'FileName' column set to 'wpbbin.exe' and shows an associated PowerShell command to create this file. This directly satisfies the requirement to identify evidence of activities involving 'wpbbin.exe', so the results do contain the necessary information to answer the detection question.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "InitiatingProcessFileName",
+            "InitiatingProcessCommandLine",
+            "FolderPath",
+            "FileName"
+        ],
+        [
+            "2025-05-07 17:21:28.358005+00:00",
+            "windows-vm",
+            "wipro",
+            "cmd.exe",
+            "\"cmd.exe\" /c IF NOT EXIST C:\\Windows\\System32\\sethc_backup.exe (copy C:\\Windows\\System32\\sethc.exe C:\\Windows\\System32\\sethc_backup.exe) ELSE ( pushd ) & takeown /F C:\\Windows\\System32\\sethc.exe /A & icacls C:\\Windows\\System32\\sethc.exe /grant Administrators:F /t & copy /Y C:\\Windows\\System32\\cmd.exe C:\\Windows\\System32\\sethc.exe",
+            "C:\\Windows\\System32\\sethc.exe",
+            "sethc.exe"
+        ],
+        [
+            "2025-05-07 16:26:44.249749+00:00",
+            "windows-vm",
+            "wipro",
+            "powershell.exe",
+            "\"powershell.exe\" & {echo \\\"\"Creating %systemroot%\\wpbbin.exe\\\"\"      \nNew-Item -ItemType File -Path \\\"\"$env:SystemRoot\\System32\\wpbbin.exe\\\"\"}",
+            "C:\\Windows\\System32\\wpbbin.exe",
+            "wpbbin.exe"
+        ]
+    ]
+}

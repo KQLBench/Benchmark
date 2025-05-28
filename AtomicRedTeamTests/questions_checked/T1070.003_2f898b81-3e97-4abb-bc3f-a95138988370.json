@@ -1,0 +1,32 @@
+{
+    "technique_id": "T1070.003",
+    "question_id": "2f898b81-3e97-4abb-bc3f-a95138988370",
+    "context": "An attacker has manipulated PowerShell's command history settings on a Windows system, preventing commands from being saved for later inspection.",
+    "objective": "Identify the command used to disable PowerShell history logging.",
+    "technical_details": {
+        "command_analysis": "Examine DeviceProcessEvents for powershell.exe invocations with a ProcessCommandLine that adjusts PSReadLine's HistorySaveStyle parameter.",
+        "detection_approach": "Filter DeviceProcessEvents by ProcessCommandLine containing 'Set-PSReadlineOption' and 'SaveNothing' to pinpoint the exact command."
+    },
+    "thinking_how_to_phrase_question_and_answer": "What was the complete PSReadLine configuration command executed?",
+    "prompt": "On a Windows endpoint, commands are no longer being logged to PowerShell history, suggesting PSReadLine settings were altered. Using process execution logs, determine the exact command that was run to set the history save style to 'SaveNothing'.",
+    "answer": [
+        "Set-PSReadlineOption -HistorySaveStyle SaveNothing"
+    ],
+    "difficulty": "easy",
+    "KQL_query": "DeviceProcessEvents\n| where FileName in (\"powershell.exe\",\"pwsh.exe\")\n| where ProcessCommandLine has \"Set-PSReadlineOption\" and ProcessCommandLine has \"SaveNothing\"\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, ProcessCommandLine",
+    "KQL_validation_message": "KQL query validation successful: The ProcessCommandLine field in the query results has the exact expected PowerShell command. The evidence is present in a 1:1 relationship and directly answers the detection question, confirming that the command was executed as required.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "ProcessCommandLine"
+        ],
+        [
+            "2025-05-07 17:05:59.705402+00:00",
+            "windows-vm",
+            "wipro",
+            "\"powershell.exe\" & {Set-PSReadlineOption -HistorySaveStyle SaveNothing}"
+        ]
+    ]
+}

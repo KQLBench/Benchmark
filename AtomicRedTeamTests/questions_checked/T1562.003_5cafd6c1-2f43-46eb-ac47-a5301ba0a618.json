@@ -1,0 +1,62 @@
+{
+    "technique_id": "T1562.003",
+    "question_id": "5cafd6c1-2f43-46eb-ac47-a5301ba0a618",
+    "context": "On a monitored Linux host, an adversary manipulated the shell environment to disable command logging by adjusting HISTFILESIZE. Logs capture process execution details but no direct indicators flag this change.",
+    "objective": "Detect when the HISTFILESIZE variable was reassigned to suppress bash history and determine the new value set.",
+    "technical_details": {
+        "command_analysis": "The attacker executed a bash export command to set HISTFILESIZE to zero.",
+        "detection_approach": "Search process execution logs for bash invocations where the environment variable HISTFILESIZE is exported and extract the assigned value."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Frame the question to lead the analyst to hunt for an export of HISTFILESIZE in the execution logs and identify the numeric value used.",
+    "prompt": "Within Linux process execution records, locate any bash commands where the HISTFILESIZE environment variable was exported. What value was assigned to HISTFILESIZE?",
+    "answer": [
+        "0"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceProcessEvents\n| where FileName == \"bash\" and ProcessCommandLine contains \"HISTFILESIZE\"\n| extend NewHistSize = extract(@\"HISTFILESIZE\\s*=\\s*([^\\s;]+)\", 1, ProcessCommandLine)\n| where isnotempty(NewHistSize)\n| project TimeGenerated, DeviceName, InitiatingProcessAccountName, ProcessCommandLine, NewHistSize",
+    "KQL_validation_message": "KQL query validation successful: All rows in the query results show 'NewHistSize' as '0', which is exactly what the expected answer specifies. The additional fields ('TimeGenerated', 'DeviceName', 'InitiatingProcessAccountName', 'ProcessCommandLine') provide context, but most importantly, the presence of '0' in the 'NewHistSize' field for each result directly answers the detection question as described in the expected answers.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingProcessAccountName",
+            "ProcessCommandLine",
+            "NewHistSize"
+        ],
+        [
+            "2025-05-07 17:03:06.720930+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c 'TEST=$(echo $HISTFILESIZE); echo $HISTFILESIZE; export HISTFILESIZE=0; echo \"runnning some commands to populate the history\"; whoami; groups; if [ $(echo $HISTFILESIZE) -eq 0 ]; then echo \"\\\\$HISTFILESIZE is zero\"; else HIST_LENGHT=$(wc -l $HISTFILE); echo \"\\\\$HISTFILESIZE is not zero, history lenght is $HIST_LENGHT\";  fi'",
+            "0"
+        ],
+        [
+            "2025-05-07 17:03:06.724744+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c 'TEST=$(echo $HISTFILESIZE); echo $HISTFILESIZE; export HISTFILESIZE=0; echo \"runnning some commands to populate the history\"; whoami; groups; if [ $(echo $HISTFILESIZE) -eq 0 ]; then echo \"\\\\$HISTFILESIZE is zero\"; else HIST_LENGHT=$(wc -l $HISTFILE); echo \"\\\\$HISTFILESIZE is not zero, history lenght is $HIST_LENGHT\";  fi'",
+            "0"
+        ],
+        [
+            "2025-05-07 17:03:06.730305+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c 'TEST=$(echo $HISTFILESIZE); echo $HISTFILESIZE; export HISTFILESIZE=0; echo \"runnning some commands to populate the history\"; whoami; groups; if [ $(echo $HISTFILESIZE) -eq 0 ]; then echo \"\\\\$HISTFILESIZE is zero\"; else HIST_LENGHT=$(wc -l $HISTFILE); echo \"\\\\$HISTFILESIZE is not zero, history lenght is $HIST_LENGHT\";  fi'",
+            "0"
+        ],
+        [
+            "2025-05-07 17:03:06.736396+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c 'TEST=$(echo $HISTFILESIZE); echo $HISTFILESIZE; export HISTFILESIZE=0; echo \"runnning some commands to populate the history\"; whoami; groups; if [ $(echo $HISTFILESIZE) -eq 0 ]; then echo \"\\\\$HISTFILESIZE is zero\"; else HIST_LENGHT=$(wc -l $HISTFILE); echo \"\\\\$HISTFILESIZE is not zero, history lenght is $HIST_LENGHT\";  fi'",
+            "0"
+        ],
+        [
+            "2025-05-07 17:03:06.742964+00:00",
+            "wirpo-test",
+            "root",
+            "bash -c 'TEST=$(echo $HISTFILESIZE); echo $HISTFILESIZE; export HISTFILESIZE=0; echo \"runnning some commands to populate the history\"; whoami; groups; if [ $(echo $HISTFILESIZE) -eq 0 ]; then echo \"\\\\$HISTFILESIZE is zero\"; else HIST_LENGHT=$(wc -l $HISTFILE); echo \"\\\\$HISTFILESIZE is not zero, history lenght is $HIST_LENGHT\";  fi'",
+            "0"
+        ]
+    ]
+}

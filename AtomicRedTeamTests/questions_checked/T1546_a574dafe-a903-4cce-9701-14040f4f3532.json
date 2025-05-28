@@ -1,0 +1,80 @@
+{
+    "technique_id": "T1546",
+    "question_id": "a574dafe-a903-4cce-9701-14040f4f3532",
+    "context": "On a Windows system, adversaries may abuse the CommandProcessor AutoRun registry key to achieve persistence by having cmd.exe automatically run a malicious command whenever a new shell is launched.",
+    "objective": "Detect modifications to the HKLM:\\Software\\Microsoft\\Command Processor AutoRun registry value and determine which command was set for persistence.",
+    "technical_details": {
+        "command_analysis": "A PowerShell command created or updated the registry property AutoRun under HKLM:\\Software\\Microsoft\\Command Processor, setting it to execute a specified program whenever cmd.exe starts. The default command used in the test is notepad.exe.",
+        "detection_approach": "Search DeviceRegistryEvents for entries where RegistryKey contains 'Microsoft\\\\Command Processor' and RegistryValueName equals 'AutoRun'. For reference, a base query might look like:\nDeviceRegistryEvents\n| where RegistryKey endswith 'Command Processor'\n| where RegistryValueName == 'AutoRun'"
+    },
+    "thinking_how_to_phrase_question_and_answer": "Focus on registry change logs to find the exact command value under AutoRun. The answer should be the string stored in that registry value.",
+    "prompt": "Investigate registry modifications on Windows that reveal when cmd.exe persistence was configured via the CommandProcessor AutoRun key. What command was configured under the AutoRun value?",
+    "answer": [
+        "notepad.exe"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "DeviceRegistryEvents\n| where RegistryKey has \"Microsoft\\\\Command Processor\"\n| where RegistryValueName == \"AutoRun\"\n| where isnotempty(RegistryValueData)\n| project TimeGenerated,\n          DeviceId,\n          DeviceName,\n          InitiatingProcessAccountDomain,\n          InitiatingProcessAccountName,\n          InitiatingProcessFileName,\n          InitiatingProcessCommandLine,\n          RegistryKey,\n          RegistryValueName,\n          RegistryValueData",
+    "KQL_validation_message": "KQL query validation successful: The expected answer is 'notepad.exe'. In the query results, the 'RegistryValueData' field for each returned row is 'notepad.exe'. This directly demonstrates that the query results contain the information required to detect when 'notepad.exe' is set as a registry value (likely for persistence via the 'AutoRun' key). Therefore, the results provide the necessary evidence to answer the detection question.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceId",
+            "DeviceName",
+            "InitiatingProcessAccountDomain",
+            "InitiatingProcessAccountName",
+            "InitiatingProcessFileName",
+            "InitiatingProcessCommandLine",
+            "RegistryKey",
+            "RegistryValueName",
+            "RegistryValueData"
+        ],
+        [
+            "2025-05-07 16:27:24.344510+00:00",
+            "51a5c6755c43d60b18a177bfa334701b37f9171e",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            "powershell.exe",
+            "\"powershell.exe\" & {$path = \\\"\"HKCU:\\Software\\Microsoft\\Command Processor\\\"\"\nif (!(Test-Path -path $path)){\n  New-Item -ItemType Key -Path $path\n}\nNew-ItemProperty -Path $path -Name \\\"\"AutoRun\\\"\" -Value \\\"\"notepad.exe\\\"\" -PropertyType \\\"\"String\\\"\"}",
+            "HKEY_CURRENT_USER\\S-1-5-21-4034913605-1276698442-3985778739-500\\Software\\Microsoft\\Command Processor",
+            "AutoRun",
+            "notepad.exe"
+        ],
+        [
+            "2025-05-07 16:27:36.172637+00:00",
+            "51a5c6755c43d60b18a177bfa334701b37f9171e",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            "powershell.exe",
+            "\"powershell.exe\" & {New-ItemProperty -Path \\\"\"HKLM:\\Software\\Microsoft\\Command Processor\\\"\" -Name \\\"\"AutoRun\\\"\" -Value \\\"\"notepad.exe\\\"\" -PropertyType \\\"\"String\\\"\"}",
+            "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Command Processor",
+            "AutoRun",
+            "notepad.exe"
+        ],
+        [
+            "2025-05-07 16:38:03.839730+00:00",
+            "51a5c6755c43d60b18a177bfa334701b37f9171e",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            "powershell.exe",
+            "\"powershell.exe\" & {$path = \\\"\"HKCU:\\Software\\Microsoft\\Command Processor\\\"\"\nif (!(Test-Path -path $path)){\n  New-Item -ItemType Key -Path $path\n}\nNew-ItemProperty -Path $path -Name \\\"\"AutoRun\\\"\" -Value \\\"\"notepad.exe\\\"\" -PropertyType \\\"\"String\\\"\"}",
+            "HKEY_CURRENT_USER\\S-1-5-21-4034913605-1276698442-3985778739-500\\Software\\Microsoft\\Command Processor",
+            "AutoRun",
+            "notepad.exe"
+        ],
+        [
+            "2025-05-07 16:38:14.839389+00:00",
+            "51a5c6755c43d60b18a177bfa334701b37f9171e",
+            "windows-vm",
+            "windows-vm",
+            "wipro",
+            "powershell.exe",
+            "\"powershell.exe\" & {New-ItemProperty -Path \\\"\"HKLM:\\Software\\Microsoft\\Command Processor\\\"\" -Name \\\"\"AutoRun\\\"\" -Value \\\"\"notepad.exe\\\"\" -PropertyType \\\"\"String\\\"\"}",
+            "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Command Processor",
+            "AutoRun",
+            "notepad.exe"
+        ]
+    ]
+}

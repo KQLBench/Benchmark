@@ -1,0 +1,44 @@
+{
+    "technique_id": "T1036.004",
+    "question_id": "b721c6ef-472c-4263-a0d9-37f1f4ecff66",
+    "context": "On a Windows host, an adversary registered a new service with a name crafted to resemble the legitimate W32Time service but pointing to a custom script.",
+    "objective": "Identify the built-in utility used to create the rogue service.",
+    "technical_details": {
+        "command_analysis": "The attacker ran a service creation command that specified a service name and a binPath, using the Windows service controller utility.",
+        "detection_approach": "Look for DeviceProcessEvents showing execution of the service controller tool with a 'create' operation or registry events indicating a new service key under HKLM\\SYSTEM\\CurrentControlSet\\Services."
+    },
+    "thinking_how_to_phrase_question_and_answer": "Ask which Windows utility was invoked to register the suspicious service, forcing analysis of process execution logs rather than relying on prior knowledge.",
+    "prompt": "A threat actor on a Windows system crafted and registered a service named almost identically to the standard time service, but redirecting execution to a custom script. Review the logging data to determine which native command-line tool was used to perform this action. What utility was invoked?",
+    "answer": [
+        "sc"
+    ],
+    "difficulty": "medium",
+    "KQL_query": "let ServiceControllerExecutions = DeviceProcessEvents\n| where FileName == \"sc.exe\"\n| where ProcessCommandLine has_cs \"create\"\n| extend DetectionSource = \"ProcessEvent\", ServiceControllerProcess = FileName, CommandLine = ProcessCommandLine\n| project TimeGenerated, DeviceName, InitiatingUser = AccountName, DetectionSource, ServiceControllerProcess, CommandLine;\nlet ServiceRegistryCreations = DeviceRegistryEvents\n| where ActionType == \"CreateKey\"\n| where RegistryKey startswith \"HKLM\\\\SYSTEM\\\\CurrentControlSet\\\\Services\"\n| extend DetectionSource = \"RegistryEvent\", ServiceControllerProcess = InitiatingProcessFileName, CommandLine = InitiatingProcessCommandLine\n| project TimeGenerated, DeviceName, InitiatingUser = InitiatingProcessAccountName, DetectionSource, ServiceControllerProcess, CommandLine;\nServiceControllerExecutions\n| union ServiceRegistryCreations\n| sort by TimeGenerated desc",
+    "KQL_validation_message": "KQL query validation successful: The 'ServiceControllerProcess' column shows 'sc.exe' for both events, and the 'CommandLine' column demonstrates service creation using 'sc'. This matches the expected answer of 'sc', confirming the activities were detected in the logs.",
+    "KQL_query_results": [
+        [
+            "TimeGenerated",
+            "DeviceName",
+            "InitiatingUser",
+            "DetectionSource",
+            "ServiceControllerProcess",
+            "CommandLine"
+        ],
+        [
+            "2025-05-07 16:53:27.530384+00:00",
+            "windows-vm",
+            "wipro",
+            "ProcessEvent",
+            "sc.exe",
+            "\"sc.exe\" create calcservice binpath= %windir%\\system32\\win32calc.exe"
+        ],
+        [
+            "2025-05-07 16:51:53.694899+00:00",
+            "windows-vm",
+            "wipro",
+            "ProcessEvent",
+            "sc.exe",
+            "sc  create win32times binPath= \"cmd /c start c:\\T1036.004_NonExistingScript.ps1\" "
+        ]
+    ]
+}
